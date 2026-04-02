@@ -1,77 +1,77 @@
-Here is a detailed example of an `open-next.config.ts` file. This file need to be at the same place as your `next.config.js` file
+这是一个 `open-next.config.ts` 文件的详细示例。此文件需要与你的 `next.config.js` 文件放在同一位置
 
-`server` in here could refer to a lambda function, a docker container, a node server or whatever that can support running nodejs code. Even Cloudflare workers (require to use `@opennextjs/cloudflare`).
+这里的 `server` 可以指 lambda 函数、docker 容器、node 服务器或任何支持运行 nodejs 代码的东西。甚至是 Cloudflare workers（需要使用 `@opennextjs/cloudflare`）。
 
-For more information about the options here, take a look at the [reference section](/aws/config/reference).
+有关此处选项的更多信息，请查看 [参考部分](/aws/config/reference)。
 
 ```ts
 import type { OpenNextConfig } from "@opennextjs/aws/types/open-next";
 const config = {
   default: {
-    // This is the default server, similar to the server-function in open-next v2
-    // You don't have to provide the below, by default it will generate an output
-    // for normal lambda as in open-next v2
+    // 这是默认服务器，类似于 open-next v2 中的 server-function
+    // 你不需要提供以下内容，默认情况下它会生成输出
+    // 用于像 open-next v2 中的普通 lambda
     override: {
-      // This is necessary to enable lambda streaming, defaults to aws-lambda
+      // 这是启用 lambda 流式传输所必需的，默认为 aws-lambda
       wrapper: "aws-lambda-streaming",
-      // Convert the input and output of the server, defaults to aws-apigw-v2
+      // 转换服务器的输入和输出，默认为 aws-apigw-v2
       converter: "aws-apigw-v2",
-      // Used for fetch cache and html/rsc/json cache, defaults to s3
+      // 用于 fetch 缓存和 html/rsc/json 缓存，默认为 s3
       incrementalCache: "s3",
-      // Used for external rewrites, defaults to node
+      // 用于外部重写，默认为 node
       proxyExternalRequest: "node",
-      tagCache: "dynamodb", // Used for revalidatePath and revalidateTag, defaults to dynamodb
-      // You can override any part that is a `LazyLoadedOverride` this way
+      tagCache: "dynamodb", // 用于 revalidatePath 和 revalidateTag，默认为 dynamodb
+      // 你可以通过这种方式覆盖任何属于 `LazyLoadedOverride` 的部分
       queue: () =>
         Promise.resolve({
           send: async (message) => {
-            //Your custom code here
+            // 你的自定义代码写在这里
           },
         }),
     },
-    // this will install sharp to your default server function
-    // only for example purposes, you most likely should not use this
-    // this can be used on every server to install additional packages
+    // 这将在你的默认服务器函数中安装 sharp
+    // 仅用于示例目的，你很可能不应该使用这个
+    // 这可以用于每个服务器以安装额外的包
     install: {
       packages: ["sharp@0.33.5"],
       arch: "arm64",
     },
-    minify: true, // This will minify the output
+    minify: true, // 这将最小化输出
   },
-  // Below we define the functions that we want to deploy in a different server
-  // This is only used if you want to split the server into multiple servers
+  // 下面我们要定义想要部署在不同服务器中的函数
+  // 仅当你想将服务器拆分为多个服务器时才使用此项
   functions: {
     ssr: {
       routes: [
         "app/api/isr/route",
         "app/api/sse/route",
-        "app/api/revalidateTag/route", // app dir Api routes
+        "app/api/revalidateTag/route", // app 目录 Api 路由
         "app/route1/page",
-        "app/route2/page", // app dir pages
-        "pages/route3", // page dir pages
-      ], // For app dir, you need to include route|page, no need to include layout or loading
-      // patterns needs to be in a cloudfront compatible format
-      // this will be used to generate the output
+        "app/route2/page", // app 目录页面
+        "pages/route3", // page 目录页面
+      ], // 对于 app 目录，你需要包含 route|page，无需包含 layout 或 loading
+      // patterns 需要是 cloudfront 兼容的格式
+      // 这将用于生成输出
       patterns: ["api/*", "route1", "route2", "route3"],
       override: {
         wrapper: "aws-lambda-streaming",
       },
-      // This enables the bundled next server which is faster and reduce the size of the server
-      // This is also experimental and might not work in all cases
-      experimentalBundledNextServer: true, // deprecated and not supported in next 14.2+
+      // 这启用了捆绑的 next 服务器，速度更快并减小服务器大小
+      // 这也是实验性的，可能并非在所有情况下都有效
+      experimentalBundledNextServer: true, // 已弃用且在 next 14.2+ 中不支持
     },
     pageSsr: {
-      // For page dir routes should be in the form `pages/${route}` without the extension
-      // It should match the filesystem
+      // 对于 page 目录，routes 应该是 `pages/${route}` 形式，不带扩展名
+      // 它应该匹配文件系统
       routes: ["pages/pageSsr"],
-      // BUILD_ID is a special case, it will be replaced with the actual build id
+      // BUILD_ID 是一个特殊情况，它将被替换为实际的构建 id
       patterns: ["pageSsr", "_next/data/BUILD_ID/pageSsr.json"],
       override: {
         wrapper: "node",
         converter: "node",
-        // This is necessary to generate the dockerfile and
-        // for the implementation to know that it needs to deploy on docker
-        // You can also provide a string here which will be used to create the dockerfile
+        // 这对于生成 dockerfile 是必要的
+        // 并且让实现知道它需要部署在 docker 上
+        // 你也可以在这里提供一个字符串，它将用于创建 dockerfile
         generateDockerfile: true,
       },
     },
@@ -82,22 +82,22 @@ const config = {
       override: {},
     },
   },
-  // By setting this, it will create another bundle for the middleware,
-  // and the middleware will be deployed in a separate server.
-  // If not set middleware will be bundled inside the servers
-  // It could be in lambda@edge, cloudflare workers, or anywhere else
-  // By default it uses lambda@edge
-  // This is not implemented in the reference construct implementation.
-  // This is optional, but might be necessary if you split your app into multiple servers
+  // 通过设置此项，它将为 middleware 创建另一个 bundle，
+  // 并且 middleware 将部署在单独的服务器中。
+  // 如果未设置，middleware 将捆绑在服务器内部
+  // 它可以在 lambda@edge、cloudflare workers 或其他任何地方
+  // 默认情况下它使用 lambda@edge
+  // 这在参考 construct 实现中尚未实现。
+  // 这是可选的，但如果你将应用拆分为多个服务器，则可能是必要的
   middleware: {
     external: true,
   },
-  // Optional
+  // 可选
   imageOptimization: {
-    loader: "s3-lite", // Can be overridden with a LazyLoadedOverride
-    // This is necessary to bundle the proper version of sharp
-    // You can customize this to your needs
-    // By default it will install with these options:
+    loader: "s3-lite", // 可以使用 LazyLoadedOverride 覆盖
+    // 这对于捆绑正确版本的 sharp 是必要的
+    // 你可以根据需要自定义此项
+    // 默认情况下它将使用这些选项安装：
     install: {
       packages: ["sharp@0.32.6"],
       arch: "arm64",
@@ -105,49 +105,49 @@ const config = {
       libc: "glibc",
     },
   },
-  // Initialization function is a special server that will run at build time to initialize the cache.
-  // By default, it only initializes the tag cache. Besides the common options, you can use the following options:
+  // 初始化函数是一个特殊的服务器，将在构建时运行以初始化缓存。
+  // 默认情况下，它只初始化标签缓存。除了常见选项外，你可以使用以下选项：
   initializationFunction: {
-    tagCache: "dynamodb-lite", // Can be overridden with a LazyLoadedOverride
+    tagCache: "dynamodb-lite", // 可以使用 LazyLoadedOverride 覆盖
   },
-  // Override the default revalidate function
-  // By default, works for lambda and on SQS event.
-  // Supports only node runtime
+  // 覆盖默认的 revalidate 函数
+  // 默认情况下，适用于 lambda 和 SQS 事件。
+  // 仅支持 node 运行时
   revalidate: {
     override: {
-      wrapper: "aws-lambda", // Can be overridden with a LazyLoadedOverride
-      converter: "aws-apigw-v2", // Can be overridden with a LazyLoadedOverride
+      wrapper: "aws-lambda", // 可以使用 LazyLoadedOverride 覆盖
+      converter: "aws-apigw-v2", // 可以使用 LazyLoadedOverride 覆盖
     },
   },
-  // Override the default warmer
-  // By default, works for lambda only.
-  // If you override this, you'll need to handle the warmer event in the wrapper
+  // 覆盖默认的 warmer
+  // 默认情况下，仅适用于 lambda。
+  // 如果你覆盖此项，你需要在 wrapper 中处理 warmer 事件
   warmer: {
-    invokeFunction: "aws-lambda", // Can be overridden with a LazyLoadedOverride
+    invokeFunction: "aws-lambda", // 可以使用 LazyLoadedOverride 覆盖
     override: {
-      wrapper: "aws-lambda", // Can be overridden with a LazyLoadedOverride
-      converter: "aws-apigw-v2", // Can be overridden with a LazyLoadedOverride
+      wrapper: "aws-lambda", // 可以使用 LazyLoadedOverride 覆盖
+      converter: "aws-apigw-v2", // 可以使用 LazyLoadedOverride 覆盖
     },
   },
-  // If you want to override the default build command, you can do it here
-  // By default it uses `npm run build`
+  // 如果你想覆盖默认构建命令，可以在此处进行
+  // 默认情况下它使用 `npm run build`
   buildCommand: "echo 'skipping build'",
 
   dangerous: {
-    // This will disable the tag cache
-    // You can use it safely on page router, on app router it will break revalidateTag and revalidatePath
+    // 这将禁用标签缓存
+    // 你可以在 page router 上安全使用，在 app router 上它会破坏 revalidateTag 和 revalidatePath
     disableTagCache: true,
-    // This will disable the incremental cache
-    // This is generally not recommended, as this is necessary for ISR AND SSG routes as well as the fetch cache
+    // 这将禁用增量缓存
+    // 通常不建议这样做，因为这对于 ISR 和 SSG 路由以及 fetch 缓存是必要的
     disableIncrementalCache: true,
-    // Enable the cache interception. Every request will go through the cache interceptor, if it is found in the cache,
-    // it will be returned without going through NextServer. Not every feature is covered by the cache interceptor and
-    // it should fallback to the NextServer if the cache is not found.
+    // 启用缓存拦截。每个请求都将经过缓存拦截器，如果在缓存中找到，
+    // 它将直接返回而不经过 NextServer。并非每个功能都被缓存拦截器覆盖，并且
+    // 如果未找到缓存，它应该回退到 NextServer。
     enableCacheInterception: true,
-    // Function to determine which headers or cookies takes precedence.
-    // By default, the middleware headers and cookies will override the handler headers and cookies.
-    // This is executed for every request and after next config headers and middleware has executed.
-    // Here is a very simple example of how you can use it:
+    // 用于确定哪个头或 cookie 优先的函数。
+    // 默认情况下，middleware 头和 cookie 将覆盖 handler 头和 cookie。
+    // 这对每个请求执行，且在 next config 头和 middleware 执行之后。
+    // 这是一个非常简单的如何使用它的示例：
     headersAndCookiesPriority: (event) => {
       if (event.rawPath.startsWith("/api")) {
         return "middleware";
@@ -155,21 +155,21 @@ const config = {
       return "handler";
     },
   },
-  // The path to the target folder of build output from the `buildCommand` option
-  // (the path which will contain the `.next` and `.open-next` folders).
-  // This path is relative from the current process.cwd() - Optional defaults to "."
+  // 来自 `buildCommand` 选项的构建输出目标文件夹的路径
+  // (包含 `.next` 和 `.open-next` 文件夹的路径)。
+  // 此路径相对于当前 process.cwd() - 可选，默认为 "."
   buildOutputPath: "build",
-  // The path to the root of the Next.js app's source code.
-  // This path is relative from the current process.cwd(). - Optional defaults to "."
+  // 到 Next.js 应用源代码根目录的路径。
+  // 此路径相对于当前 process.cwd()。- 可选，默认为 "."
   appPath: "app",
-  // The path to the package.json file of the Next.js app.
-  // This path is relative from the current process.cwd(). - Optional
+  // 到 Next.js 应用的 package.json 文件的路径。
+  // 此路径相对于当前 process.cwd()。- 可选
   packageJsonPath: "package.json",
-  // Advanced usage
-  // If you use the edge runtime somewhere (either with an external middleware or in the functions), we compile 2 versions of the open-next.config.ts file.
-  // One for the node runtime and one for the edge runtime.
-  // This option allows you to specify the externals for the edge runtime used in esbuild for the compilation of open-next.config.ts
-  // It is especially useful if you use some custom overrides only in node
+  // 高级用法
+  // 如果你在某个地方使用 edge 运行时（无论是外部 middleware 还是在 functions 中），我们会编译 2 个版本的 open-next.config.ts 文件。
+  // 一个用于 node 运行时，一个用于 edge 运行时。
+  // 此选项允许你指定用于 esbuild 编译 open-next.config.ts 的 edge 运行时的 externals
+  // 如果你仅在 node 中使用一些自定义覆盖，这尤其有用
   edgeExternals: [],
 } satisfies OpenNextConfig;
 

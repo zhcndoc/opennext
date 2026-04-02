@@ -1,16 +1,16 @@
 import { Callout } from "nextra/components";
 
-### Bindings
+### 绑定
 
-[Bindings](https://developers.cloudflare.com/workers/runtime-apis/bindings/) allow your Worker to interact with resources on the Cloudflare Developer Platform. When you declare a binding on your Worker, you grant it a specific capability, such as being able to read and write files to an [R2](https://developers.cloudflare.com/r2/) bucket.
+[绑定](https://developers.cloudflare.com/workers/runtime-apis/bindings/) 允许您的 Worker 与 Cloudflare 开发者平台上的资源进行交互。当您在 Worker 上声明绑定时，您授予其特定能力，例如能够读取和写入文件到 [R2](https://developers.cloudflare.com/r2/) 存储桶。
 
-#### How to configure your Next.js app so it can access bindings
+#### 如何配置您的 Next.js 应用以便访问绑定
 
-Install [@opennextjs/cloudflare](https://www.npmjs.com/package/@opennextjs/cloudflare), and then add a [wrangler configuration file](https://developers.cloudflare.com/workers/wrangler/configuration/) in the root directory of your Next.js app, as described in [Get Started](/cloudflare/get-started#3-create-a-wranglerjson-file).
+安装 [@opennextjs/cloudflare](https://www.npmjs.com/package/@opennextjs/cloudflare)，然后在您的 Next.js 应用的根目录中添加一个 [wrangler 配置文件](https://developers.cloudflare.com/workers/wrangler/configuration/)，如 [入门指南](/cloudflare/get-started#3-create-a-wranglerjson-file) 中所述。
 
-#### How to access bindings in your Next.js app
+#### 如何在您的 Next.js 应用中访问绑定
 
-You can access [bindings](https://developers.cloudflare.com/workers/runtime-apis/bindings/) from any route of your Next.js app via `getCloudflareContext`:
+您可以通过 `getCloudflareContext` 从 Next.js 应用的任何路由访问 [绑定](https://developers.cloudflare.com/workers/runtime-apis/bindings/)：
 
 ```js
 import { getCloudflareContext } from "@opennextjs/cloudflare";
@@ -27,41 +27,40 @@ export async function GET(request) {
 ```
 
 <Callout type='info'>
-	`getCloudflareContext` can only be used in SSG routes in "async mode" (making it return a promise), to run the function in such a way simply provide an options argument with `async` set to `true`:
+	`getCloudflareContext` 仅可在“异步模式”下的 SSG 路由中使用（使其返回一个 promise），要以这种方式运行函数，只需提供一个将 `async` 设置为 `true` 的选项参数：
 	```js
 	const context = await getCloudflareContext({ async: true });
 	```
 
-    **WARNING**: During SSG caution is advised since secrets (stored in `.dev.vars` files) and local development
-    values from bindings (like values saved in a local KV) will be used for the pages static generation.
+    **警告**：在 SSG 期间建议谨慎操作，因为秘密（存储在 `.dev.vars` 文件中）和来自绑定的本地开发值（如保存在本地 KV 中的值）将用于页面的静态生成。
 
 </Callout>
 
-#### How to add bindings to your Worker
+#### 如何向您的 Worker 添加绑定
 
-Add bindings to your Worker by adding them to your [wrangler configuration file](https://developers.cloudflare.com/workers/wrangler/configuration/).
+通过将绑定添加到您的 [wrangler 配置文件](https://developers.cloudflare.com/workers/wrangler/configuration/) 来向您的 Worker 添加绑定。
 
-## TypeScript type declarations for bindings
+## 绑定的 TypeScript 类型声明
 
-To ensure that the `env` object from `getCloudflareContext().env` above has accurate TypeScript types, run the following Wrangler command to [generate types that match your Worker's configuration](https://developers.cloudflare.com/workers/languages/typescript/#generate-types-that-match-your-workers-configuration-experimental):
+为了确保上述 `getCloudflareContext().env` 中的 `env` 对象具有准确的 TypeScript 类型，请运行以下 Wrangler 命令以 [生成与您的 Worker 配置匹配的类型](https://developers.cloudflare.com/workers/languages/typescript/#generate-types-that-match-your-workers-configuration-experimental)：
 
 ```
 npx wrangler types --experimental-include-runtime
 ```
 
-This will generate a `d.ts` file and (by default) save it to `.wrangler/types/runtime.d.ts`. You will be prompted in the command's output to add that file to your `tsconfig.json`'s `compilerOptions.types` array.
+这将生成一个 `d.ts` 文件并（默认情况下）将其保存到 `.wrangler/types/runtime.d.ts`。系统将在命令输出中提示您将该文件添加到 `tsconfig.json` 的 `compilerOptions.types` 数组中。
 
-If you would like to commit the file to git, you can provide a custom path. Here, for instance, the `runtime.d.ts` file will be saved to the root of your project:
+如果您希望将该文件提交到 git，您可以提供一个自定义路径。例如，此处 `runtime.d.ts` 文件将保存到项目的根目录：
 
 ```bash
 npx wrangler types --experimental-include-runtime="./runtime.d.ts"
 ```
 
-To ensure that your types are always up-to-date, make sure to run `wrangler types --experimental-include-runtime` after any changes to your config file.
+为了确保您的类型始终保持最新，请在配置文件发生任何更改后运行 `wrangler types --experimental-include-runtime`。
 
-## Other Cloudflare APIs (`cf`, `ctx`)
+## 其他 Cloudflare API（`cf`, `ctx`）
 
-You can access context about the incoming request from the [`cf` object](https://developers.cloudflare.com/workers/runtime-apis/request/#the-cf-property-requestinitcfproperties), as well as lifecycle methods from the [`ctx` object](https://developers.cloudflare.com/workers/runtime-apis/context) from the return value of [`getCloudflareContext()`](https://github.com/opennextjs/opennextjs-cloudflare/blob/main/packages/cloudflare/src/api/get-cloudflare-context.ts):
+您可以从 [`cf` 对象](https://developers.cloudflare.com/workers/runtime-apis/request/#the-cf-property-requestinitcfproperties) 访问有关传入请求的上下文，以及从 [`getCloudflareContext()`](https://github.com/opennextjs/opennextjs-cloudflare/blob/main/packages/cloudflare/src/api/get-cloudflare-context.ts) 的返回值中的 [`ctx` 对象](https://developers.cloudflare.com/workers/runtime-apis/context) 访问生命周期方法：
 
 ```js
 import { getCloudflareContext } from "@opennextjs/cloudflare";

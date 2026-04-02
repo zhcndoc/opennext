@@ -1,25 +1,25 @@
-#### Will my Next.js app behave the same as it does on Vercel?
+#### 我的 Next.js 应用表现会与在 Vercel 上一样吗？
 
-OpenNext aims to deploy your Next.js app to AWS using services like CloudFront, S3, and Lambda. While Vercel uses some AWS services, it also has proprietary infrastructures, resulting in a natural gap of feature parity. And OpenNext is filling that gap.
+OpenNext 旨在使用 CloudFront、S3 和 Lambda 等服务将您的 Next.js 应用部署到 AWS。虽然 Vercel 也使用一些 AWS 服务，但它还拥有专有基础设施，导致功能对等性上存在自然差距。而 OpenNext 正在填补这一差距。
 
-One architectural difference is how [middleware](https://nextjs.org/docs/advanced-features/middleware) is run, but this should not affect the behavior of most apps.
+一个架构差异在于 [中间件](https://nextjs.org/docs/advanced-features/middleware) 的运行方式，但这不应影响大多数应用的行为。
 
-On Vercel, the Next.js app is built in an undocumented way using the "[minimalMode](https://github.com/vercel/next.js/discussions/29801)". The middleware code is separated from the server code and deployed to edge locations, while the server code is deployed to a single region. When a user makes a request, the middleware code runs first. Then the request reaches the CDN. If the request is cached, the cached response is returned; otherwise, the request hits the server function. This means that the middleware is called even for cached requests.
+在 Vercel 上，Next.js 应用使用未文档化的 "[minimalMode](https://github.com/vercel/next.js/discussions/29801)" 方式进行构建。中间件代码与服务器代码分离并部署到边缘位置，而服务器代码部署到单个区域。当用户发出请求时，中间件代码首先运行。然后请求到达 CDN。如果请求被缓存，则返回缓存的响应；否则，请求会命中服务器函数。这意味着即使是缓存的请求也会调用中间件。
 
-On the other hand, OpenNext uses the standard `next build` command, which generates a server function that includes the middleware code. This means that for cached requests, the CDN (CloudFront) will send back the cached response, and the middleware code is not run.
+另一方面，OpenNext 使用标准的 `next build` 命令，生成一个包含中间件代码的服务器函数。这意味着对于缓存的请求，CDN (CloudFront) 将返回缓存的响应，并且不会运行中间件代码。
 
-We previously built the app using the "minimalMode" and having the same architecture as Vercel, where the middleware code would run in Lambda@Edge on Viewer Request. See the [`vercel-mode` branch](https://github.com/serverless-stack/open-next/tree/vercel-mode). However, we decided that this architecture was not a good fit on AWS for a few reasons:
+我们之前使用 "minimalMode" 构建应用，并采用与 Vercel 相同的架构，其中中间件代码将在 Lambda@Edge 的 Viewer Request 上运行。请参阅 [`vercel-mode` 分支](https://github.com/serverless-stack/open-next/tree/vercel-mode)。然而，我们出于以下几个原因决定该架构不适合 AWS：
 
-1. Cold start - Running middleware and server in two separate Lambda functions results in double the latency.
-1. Maintenance - Because the "minimalMode" is not documented, there will likely be unhandled edge cases, and triaging would require constant reverse engineering of Vercel's code base.
-1. Feature parity - Lambda@Edge functions triggered on Viewer Request do not have access to geolocation headers, which affects i18n support.
+1. 冷启动 - 在两个独立的 Lambda 函数中运行中间件和服务器会导致延迟加倍。
+1. 维护 - 由于 "minimalMode" 没有文档，可能会出现未处理的边缘情况，并且排查需要不断逆向工程 Vercel 的代码库。
+1. 功能对等性 - 在 Viewer Request 上触发的 Lambda@Edge 函数无法访问地理位置标头，这会影响 i18n 支持。
 
-#### How does OpenNext compared to AWS Amplify?
+#### OpenNext 与 AWS Amplify 相比如何？
 
-OpenNext is an open source initiative, and there are a couple of advantages when compared to Amplify:
+OpenNext 是一个开源项目，与 Amplify 相比有几个优势：
 
-1. The community contributions to OpenNext allows it to have better feature support. For example, Amplify does not currently support [on-demand revalidation](https://github.com/aws-amplify/amplify-hosting/issues/3116).
+1. 社区对 OpenNext 的贡献使其拥有更好的功能支持。例如，Amplify 目前不支持 [按需重新验证](https://github.com/aws-amplify/amplify-hosting/issues/3116)。
 
-1. Amplify's Next.js hosting is a black box. Resources are not deployed to your AWS account. All Amplify users share the same CloudFront CDN owned by the Amplify team. This prevents you from customizing the setup, and customization is important if you are looking for Vercel-like features.
+1. Amplify 的 Next.js 托管是一个黑盒。资源不会部署到您的 AWS 账户。所有 Amplify 用户共享 Amplify 团队拥有的同一个 CloudFront CDN。这阻止您自定义设置，并且如果您正在寻找类似 Vercel 的功能，自定义很重要。
 
-1. Amplify's implementation is closed-source. Bug fixes often take much longer to get fixed as you have to go through AWS support. And you are likely to encounter more quirks when hosting Next.js anywhere but Vercel.
+1. Amplify 的实现是闭源的。Bug 修复通常需要更长时间，因为您必须通过 AWS 支持。并且在除 Vercel 以外的任何地方托管 Next.js 时，您可能会遇到更多怪癖。

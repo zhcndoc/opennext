@@ -1,7 +1,7 @@
 {
-  "architecture": "Architecture",
-  "options": "Options",
-  "workaround": "Workaround",
-  "debugging": "Debugging",
-  "contribute": "Contribute"
+  "architecture": "架构",
+  "options": "选项",
+  "workaround": "变通方案",
+  "debugging": "调试",
+  "contribute": "贡献"
 }

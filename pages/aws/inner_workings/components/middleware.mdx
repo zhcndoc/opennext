@@ -1,14 +1,12 @@
 import { Callout } from "nextra/components";
 
 <Callout type="warning" emoji="⚠️">
-  When we talk about middleware in this docs, we are referring both to the next `middleware` as well as the
-  whole `routing` layer of next. For example, `next.config.js` headers, redirects, rewrites, etc. are all
-  considered `routing` in this context.
+  当我们在本文档中谈论中间件时，我们指的是 next 的 `middleware` 以及 next 的整个 `routing` 层。例如，在此上下文中，`next.config.js` 的 headers、redirects、rewrites 等都被视为 `routing`。
 </Callout>
 
-Since V3, you can decide to move the middleware outside of the server into it's own function that you can place in front of your others backend functions.
+自 V3 以来，您可以决定将中间件移出服务器，放入它自己的函数中，您可以将其放置在其他后端函数之前。
 
-By default, the middleware is inside the server, but you can move it outside by setting `middleware.external` to `true` in your `open-next.config.ts` file.
+默认情况下，中间件位于服务器内部，但您可以通过在 `open-next.config.ts` 文件中将 `middleware.external` 设置为 `true` 将其移出。
 
 ```ts
 {
@@ -18,20 +16,20 @@ By default, the middleware is inside the server, but you can move it outside by 
 }
 ```
 
-It uses the `aws-lambda` wrapper and the `aws-cloudfront` converter by default so that you can use it with AWS Lambda@edge and Cloudfront.
-You can also use it inside Cloudflare Workers by setting the wrapper to `cloudflare` and the converter to `edge`.
+默认情况下，它使用 `aws-lambda` 包装器和 `aws-cloudfront` 转换器，以便您可以将其与 AWS Lambda@edge 和 Cloudfront 一起使用。
+您也可以通过将包装器设置为 `cloudflare` 并将转换器设置为 `edge` 在 Cloudflare Workers 内部使用它。
 
-### Special overrides
+### 特殊覆盖
 
-#### Origin resolver
+#### 源解析器
 
-Since your app could be split into different origins, you need to be able to retrieve the right origin for the request. That's the purpose of the `originResolver` function.
+由于您的应用程序可能被拆分到不同的源站，您需要能够为请求检索正确的源站。这就是 `originResolver` 函数的目的。
 
-By default, it uses the `pattern-env` resolver which uses an `OPEN_NEXT_ORIGIN` environment variable to resolve the origin as well as the pattern defined in your `open-next.config.ts`. This env var should be a stringified version of an object of this shape:
+默认情况下，它使用 `pattern-env` 解析器，该解析器使用 `OPEN_NEXT_ORIGIN` 环境变量来解析源站以及您在 `open-next.config.ts` 中定义的模式。此环境变量应该是具有以下形状的对象的字符串化版本：
 
 ```ts
 {
-  // Key should be the same as the one used in `open-next.config.ts` for the functions
+  // 键应与 `open-next.config.ts` 中用于函数的键相同
   [origin: string]: {
     host: string;
     protocol: "http" | "https";
@@ -41,8 +39,8 @@ By default, it uses the `pattern-env` resolver which uses an `OPEN_NEXT_ORIGIN` 
 }
 ```
 
-You can of course override this behavior by providing your own `originResolver` function in your `open-next.config.ts` file.
-This is the type of the `originResolver` function:
+您当然可以通过在 `open-next.config.ts` 文件中提供自己的 `originResolver` 函数来覆盖此行为。
+这是 `originResolver` 函数的类型：
 
 ```ts
 type OriginResolver = BaseOverride & {

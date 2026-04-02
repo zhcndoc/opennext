@@ -1,26 +1,26 @@
-OpenNext doesn't use the default routing provided by Next.js. Instead, it uses its own routing system.
+OpenNext 不使用 Next.js 提供的默认路由。相反，它使用自己的路由系统。
 
-Historically, OpenNext used the same routing system as Next.js. But in Next 13.4.13, they moved the routing system outside of `NextServer` and separated every major part of the app (i.e. app router, page router and the routing) inside jest workers. This caused terrible cold start (around 8s for a default `create next-app` app) and made it impossible to serve ISR/SSG pages inside lambda. Since then, OpenNext has been using its own routing system for every app that uses Next 13.4.13 or higher. FYI Vercel use an undocumented `minimalMode` inside `NextServer` to bypass the routing and cache system so that it is done in their infra instead of the lambda.
+历史上，OpenNext 使用与 Next.js 相同的路由系统。但在 Next 13.4.13 中，他们将路由系统移出了 `NextServer`，并将应用的每个主要部分（即 app router、page router 和 routing）分离到 jest workers 中。这导致了严重的冷启动问题（默认的 `create next-app` 应用约为 8 秒），使得无法在 lambda 中提供 ISR/SSG 页面。从那以后，OpenNext 一直为使用 Next 13.4.13 或更高版本的每个应用使用自己的路由系统。供参考，Vercel 在 `NextServer` 内部使用了一个未文档化的 `minimalMode` 来绕过路由和缓存系统，以便在其基础设施中完成，而不是在 lambda 中。
 
-This move also allow OpenNext to have a more flexible routing system. With OpenNext you can put the routing layer in a function (lambda@edge or cloudflare workers) in front of your server. You can even serve ISR/SSG directly from the routing layer.
+这一举措还允许 OpenNext 拥有更灵活的路由系统。使用 OpenNext，你可以将路由层放在服务器前面的函数（lambda@edge 或 cloudflare workers）中。你甚至可以直接从路由层提供 ISR/SSG。
 
-Here is a list of features that OpenNext routing system handle:
+以下是 OpenNext 路由系统处理的功能列表：
 
-- From `next.config.js` (the rest is handled by `NextServer` itself):
+- 来自 `next.config.js`（其余部分由 `NextServer` 本身处理）：
   - Headers
   - Redirects
   - Rewrites
   - basePath
   - i18n
-- [Middleware](#next-middleware)
-- [Optional Cache Interception](/aws/inner_workings/cache_interception) (i.e. serve ISR/SSG directly from the routing layer)
-- Handle 404 in some cases (i.e. when the page does not correspond to any of the regex routes)
+- [中间件](#next-middleware)
+- [可选缓存拦截](/aws/inner_workings/cache_interception)（即直接从路由层提供 ISR/SSG）
+- 在某些情况下处理 404（即当页面不对应任何正则路由时）
 
-#### Next Middleware
+#### Next 中间件
 
-The Next middleware in OpenNext is not running in the same way as in Next.js. In Next.js, the middleware is running inside the `NextServer` inside a fake edge runtime. In OpenNext, we modify the middleware and run it fully inside the routing layer. So if you run the routing layer in Node, you can use Node api inside the middleware (it's a bit tricky because it won't work with `next dev` and involves some workaround because Next will remove Node api during bundling. Some example [here](/aws/config/custom_overrides#define-a-global-to-use-node-in-the-middleware)).
+OpenNext 中的 Next 中间件运行方式与 Next.js 中不同。在 Next.js 中，中间件在 `NextServer` 内部的模拟边缘运行时中运行。在 OpenNext 中，我们修改中间件并将其完全在路由层内运行。因此，如果你在 Node 中运行路由层，你可以在中间件中使用 Node API（这有点棘手，因为它不适用于 `next dev`，并且涉及一些变通方法，因为 Next 会在捆绑期间移除 Node API。一些示例 [在此](/aws/config/custom_overrides#define-a-global-to-use-node-in-the-middleware)）。
 
-On latest Next 15(works with latest OpenNext aswell) you can now add an `experimental` setting in `next.config.ts` to enable `nodejs` as the runtime for the middleware:
+在最新的 Next 15（也适用于最新的 OpenNext）上，你现在可以在 `next.config.ts` 中添加一个 `experimental` 设置，以启用 `nodejs` 作为中间件的运行时：
 
 ```ts
 const nextConfig: NextConfig = {
@@ -28,10 +28,10 @@ const nextConfig: NextConfig = {
     nodeMiddleware: true,
   },
 };
-// and then in your `middleware.ts` you put:
+// 然后在你的 `middleware.ts` 中写入：
 export const config = {
   runtime: "nodejs",
 };
 ```
 
-Here is the [PR](https://github.com/vercel/next.js/pull/75624) that introduced this feature in Next.
+这是在 Next 中引入此功能的 [PR](https://github.com/vercel/next.js/pull/75624)。

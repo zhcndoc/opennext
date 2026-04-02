@@ -1,21 +1,21 @@
 import { Callout } from "nextra/components";
 
-In some cases the simple example is not enough, and you want to add more customization to your server. This is where the lazy loaded overrides come in. You can override any part of the server by providing a function that returns a promise that resolves to the override object. This is useful when you want to add custom logic to your server, like adding a custom queue, or adding a custom converter.
+在某些情况下，简单的示例是不够的，您希望为服务器添加更多自定义功能。这就是懒加载覆盖（lazy loaded overrides）发挥作用的地方。您可以通过提供一个返回承诺（promise）的函数来覆盖服务器的任何部分，该承诺解析为覆盖对象。当您想为服务器添加自定义逻辑时，这很有用，比如添加自定义队列，或添加自定义转换器。
 
 <Callout>
-Be careful if you use the edge runtime (either in a function or by using the external middleware), we do 2 compilations of the `open-next.config.ts`, one for node and one for the edge runtime. If you're using some custom overrides, you likely want to add
+如果您使用 edge runtime（无论是在函数中还是通过使用外部中间件），请小心，我们会对 `open-next.config.ts` 进行 2 次编译，一次用于 node，一次用于 edge runtime。如果您使用了一些自定义覆盖，您可能想要添加
 ```ts
 edgeExternals: ['./customWrapper', './anyOtherOverrideUsed']
 ```
-to your `open-next.config.ts` to avoid the edge runtime to try to compile overrides that are not compatible with the edge runtime.
+到您的 `open-next.config.ts` 以避免 edge runtime 尝试编译与 edge runtime 不兼容的覆盖。
 
 </Callout>
 
-## Custom converter
+## 自定义转换器
 
-Sometimes you might want to modify the object received by OpenNext. For example `Config.YOUR_SECRET_KEY` from SST cannot be used in the middleware, so you might want to add it to the headers. This is where the custom converter comes in. You can add a custom converter to modify the object before it is passed to OpenNext.
+有时您可能想要修改 OpenNext 接收到的对象。例如，来自 SST 的 `Config.YOUR_SECRET_KEY` 不能在中间件中使用，所以您可能想要将其添加到 headers 中。这就是自定义转换器的作用所在。您可以在对象传递给 OpenNext 之前添加自定义转换器来修改它。
 
-You'll still have to use a fallback value during dev as this is not used by the dev server.
+在开发期间您仍然需要使用回退值，因为开发服务器不使用这个。
 
 ```ts
 // customConverter.ts
@@ -63,17 +63,17 @@ const config = {
 } as OpenNextConfig;
 ```
 
-## Custom wrapper
+## 自定义包装器
 
-Here we provide a few examples for some custom wrapper.
+这里我们提供一些自定义包装器的示例。
 
-### Define a global to use node in the middleware
+### 定义一个全局变量以便在中间件中使用 node
 
 ```ts
 // customWrapper.ts
 import defaultWrapper from "@opennextjs/aws/overrides/wrappers/aws-lambda.js";
 
-//Here you can define some globals
+// 在这里你可以定义一些全局变量
 declare global {
   var myApi: () => Promise<number>;
 }
@@ -100,17 +100,17 @@ const config = {
 export default config;
 ```
 
-But since Next dev server runs in a fake edge runtime and that the global is defined only for deployment, you'll have to mock the global in your middleware.
+但由于 Next 开发服务器运行在假的 edge runtime 中，且全局变量仅在部署时定义，您必须在中间件中模拟该全局变量。
 
 ```ts
 // middleware.ts
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-// Here you need to mock the global if not present
-// One way to avoid issues with different implementation would be to create an api endpoint
-// that uses the exact same logic as the global you defined earlier,
-// and that is only available during development i.e. /api/dev/myApi
+// 如果不存在，这里你需要模拟全局变量
+// 避免不同实现出现问题的一种方法是创建一个 api 端点
+// 它使用与你之前定义的全局变量完全相同的逻辑，
+// 并且仅在开发期间可用，例如 /api/dev/myApi
 if (!globalThis.myApi) {
   globalThis.myApi = async () => {
     return await fetch("http://localhost:3000/api/dev/myApi").then((res) => res.json());
@@ -118,22 +118,22 @@ if (!globalThis.myApi) {
 }
 
 export function middleware(request: NextRequest) {
-  // You can also send an error in the api endpoint itself
-  // Or you could add all the dev endpoint in their own lambda
-  // that you do not deploy in production
+  // 你也可以在 api 端点本身发送错误
+  // 或者你可以将所有开发端点添加到它们自己的 lambda 中
+  // 这样你就不会在生产环境中部署它们
   if (request.nextUrl.pathname.startsWith("/api/dev") && process.env.NODE_ENV === "production") {
     return NextResponse("This route is only available in development", {
       status: 500,
     });
   }
-  // Now you can use Node.js in your middleware
+  // 现在你可以在中间件中使用 Node.js 了
   const { nb } = await myApi();
 
   // ... your code here
 }
 ```
 
-### Use middy.js with the wrapper
+### 在包装器中使用 middy.js
 
 ```ts
 // customWrapper.ts
@@ -167,11 +167,11 @@ const config = {
 export default config;
 ```
 
-### Preload some routes during warmer event
+### 在 warmer 事件期间预加载一些路由
 
-In this example the custom wrapper is used to preload some important routes before the first request. This is useful if you have some routes that are slow on coldstart (Next lazily load the routes only when they are needed) and you want to preload them before the first request. This is also useful if you want to add some custom logic to the server, like adding a custom header to the response.
+在此示例中，自定义包装器用于在第一个请求之前预加载一些重要的路由。如果您有一些在冷启动时较慢的路由（Next 仅在需要时懒加载路由），并且您想在第一个请求之前预加载它们，这很有用。如果您想为服务器添加一些自定义逻辑，比如向响应添加自定义头，这也很有用。
 
-**WARNING**: This one is not properly tested. It's just an example of what you could do. You should test it properly before using it in production. Also preloading too many routes is probably a bad idea.
+**警告**：这个示例没有经过适当测试。这只是您可以做什么的一个示例。在生产环境中使用之前，您应该对其进行适当测试。此外，预加载太多路由可能不是一个好主意。
 
 ```ts
 // customWrapper.ts
@@ -201,11 +201,11 @@ const handler: WrapperHandler =
   async (handler, converter) =>
   async (event: AwsLambdaEvent): Promise<AwsLambdaReturn> => {
     console.log("custom wrapper");
-    // Handle warmer event
+    // 处理 warmer 事件
     if ("type" in event) {
       if (!isPreloaded) {
-        // You could preload every route you want here
-        // Be careful, while the route is preloading the lambda cannot process other requests
+        // 你可以在这里预加载你想要的每个路由
+        // 小心，当路由预加载时，lambda 无法处理其他请求
         await handler({
           type: "core",
           url: "/myRoute",
@@ -224,10 +224,10 @@ const handler: WrapperHandler =
     const internalEvent = await converter.convertFrom(event);
     internalEvent.headers["inserted-in-wrapper"] = "hello from wrapper";
 
-    //This is a workaround, there is an issue in node that causes node to crash silently if the OpenNextNodeResponse stream is not consumed
-    //This does not happen everytime, it's probably caused by suspended component in ssr (either via <Suspense> or loading.tsx)
-    //Everyone that wish to create their own wrapper without a StreamCreator should implement this workaround
-    //This is not necessary if the underlying handler does not use OpenNextNodeResponse (At the moment, OpenNextNodeResponse is used by the node runtime servers and the image server)
+    // 这是一个变通方法，node 中有一个问题，如果 OpenNextNodeResponse 流未被消耗，会导致 node 静默崩溃
+    // 这不会每次都发生，可能是由 ssr 中的 suspended 组件引起的（通过 <Suspense> 或 loading.tsx）
+    // 每个希望创建自己的包装器而不使用 StreamCreator 的人都应该实现这个变通方法
+    // 如果底层处理程序不使用 OpenNextNodeResponse，则不需要此操作（目前，OpenNextNodeResponse 由 node runtime 服务器和图像服务器使用）
     const fakeStream: StreamCreator = {
       writeHeaders: () => {
         return new Writable({
@@ -263,16 +263,16 @@ const config = {
 } as OpenNextConfig;
 ```
 
-## Custom Incremental cache
+## 自定义增量缓存
 
-You can take inspiration from our [`fs-dev`](https://github.com/opennextjs/opennextjs-aws/blob/main/packages/open-next/src/overrides/incrementalCache/fs-dev.ts) override which uses the file system to store the incremental cache. You need an `open-next.config.ts` with this:
+您可以从我们的 [`fs-dev`](https://github.com/opennextjs/opennextjs-aws/blob/main/packages/open-next/src/overrides/incrementalCache/fs-dev.ts) 覆盖中获得灵感，它使用文件系统来存储增量缓存。您需要一个包含以下内容的 `open-next.config.ts`：
 
 ```ts
 import type { OpenNextConfig } from "@opennextjs/aws/types/open-next.ts";
 const config = {
   default: {
     override: {
-      // can be any of our included ones or your own custom override
+      // 可以是我们包含的任何选项，也可以是你自己的自定义覆盖
       incrementalCache: () => import("./customIncrementalCache").then((mod) => mod.default),
     },
   },
@@ -281,18 +281,18 @@ const config = {
 export default config;
 ```
 
-[Included](https://github.com/opennextjs/opennextjs-aws/tree/main/packages/open-next/src/overrides/incrementalCache) ones are `'s3' | 's3-lite' | 'multi-tier-ddb-s3' | 'fs-dev' | 'dummy'`
+[包含的](https://github.com/opennextjs/opennextjs-aws/tree/main/packages/open-next/src/overrides/incrementalCache) 选项有 `'s3' | 's3-lite' | 'multi-tier-ddb-s3' | 'fs-dev' | 'dummy'`
 
-## Custom Queue
+## 自定义队列
 
-By default it will use SQS queue to revalidate stale routes. You can read more about this [here](/aws/config/overrides/queue). To create your own custom override you can take inspiration by looking at our [included](https://github.com/opennextjs/opennextjs-aws/tree/main/packages/open-next/src/overrides/queue) implementations. You need an `open-next.config.ts` with this:
+默认情况下，它将使用 SQS 队列来重新验证过时的路由。您可以[在这里](/aws/config/overrides/queue)阅读更多相关信息。要创建您自己的自定义覆盖，您可以通过查看我们的 [包含的](https://github.com/opennextjs/opennextjs-aws/tree/main/packages/open-next/src/overrides/queue) 实现来获得灵感。您需要一个包含以下内容的 `open-next.config.ts`：
 
 ```ts
 import type { OpenNextConfig } from "@opennextjs/aws/types/open-next.ts";
 const config = {
   default: {
     override: {
-      // can be any of our included ones or your own custom override
+      // 可以是我们包含的任何选项，也可以是你自己的自定义覆盖
       queue: () => import("./customQueue").then((mod) => mod.default),
     },
   },
@@ -301,18 +301,18 @@ const config = {
 export default config;
 ```
 
-[Included](https://github.com/opennextjs/opennextjs-aws/tree/main/packages/open-next/src/overrides/queue) ones are `'sqs' | 'sqs-lite' | 'direct' | 'dummy'`
+[包含的](https://github.com/opennextjs/opennextjs-aws/tree/main/packages/open-next/src/overrides/queue) 选项有 `'sqs' | 'sqs-lite' | 'direct' | 'dummy'`
 
-## Custom Tag cache
+## 自定义 Tag cache
 
-To override the tag cache you can take inspiration by looking at the [`fs-dev`](https://github.com/opennextjs/opennextjs-aws/blob/main/packages/open-next/src/overrides/tagCache/fs-dev.ts) override that uses the filesystem. You can read more about this override [here](/aws/config/overrides/tag_cache). You need an `open-next.config.ts` with this:
+要覆盖 tag cache，你可以参考使用文件系统的 [`fs-dev`](https://github.com/opennextjs/opennextjs-aws/blob/main/packages/open-next/src/overrides/tagCache/fs-dev.ts) 覆盖获取灵感。你可以 [这里](/aws/config/overrides/tag_cache) 阅读更多关于此覆盖的信息。你需要一个包含以下内容的 `open-next.config.ts`：
 
 ```ts
 import type { OpenNextConfig } from "@opennextjs/aws/types/open-next.ts";
 const config = {
   default: {
     override: {
-      // can be any of our included ones or your own custom override
+      // 可以是我们要包含的任何一项，也可以是你自己的自定义覆盖
       tagCache: () => import("./customTagCache").then((mod) => mod.default),
     },
   },
@@ -321,20 +321,20 @@ const config = {
 export default config;
 ```
 
-[Included](https://github.com/opennextjs/opennextjs-aws/tree/main/packages/open-next/src/overrides/tagCache) ones are `'dynamodb' | 'dynamodb-lite' | 'fs-dev' | 'dummy'`
+[包含的](https://github.com/opennextjs/opennextjs-aws/tree/main/packages/open-next/src/overrides/tagCache) 选项有 `'dynamodb' | 'dynamodb-lite' | 'fs-dev' | 'dummy'`
 
-## Custom Origin Resolver
+## 自定义 Origin Resolver
 
-This override is only used internally by OpenNext to resolve the origin of the request if you have an `external` middleware. You can take inspiration from looking at our included [`pattern-env`](https://github.com/opennextjs/opennextjs-aws/blob/main/packages/open-next/src/overrides/originResolver/pattern-env.ts) override. You need an `open-next.config.ts` with this:
+如果你有一个 `external` 中间件，此覆盖仅由 OpenNext 内部用于解析请求的源。你可以参考我们要包含的 [`pattern-env`](https://github.com/opennextjs/opennextjs-aws/blob/main/packages/open-next/src/overrides/originResolver/pattern-env.ts) 覆盖获取灵感。你需要一个包含以下内容的 `open-next.config.ts`：
 
 ```ts
 import type { OpenNextConfig } from "@opennextjs/aws/types/open-next.js";
 const config = {
   default: {},
   middleware: {
-    // must be true for the originResolver to be used
+    // 必须为 true 才能使用 originResolver
     external: true,
-    // can be any of our included ones or your own custom override
+    // 可以是我们要包含的任何一项，也可以是你自己的自定义覆盖
     originResolver: () => import("./customOriginResolver").then((mod) => mod.default),
   },
 } satisfies OpenNextConfig;
@@ -342,11 +342,11 @@ const config = {
 export default config;
 ```
 
-[Included](https://github.com/opennextjs/opennextjs-aws/tree/main/packages/open-next/src/overrides/originResolver) ones are `'pattern-env' | 'dummy'`
+[包含的](https://github.com/opennextjs/opennextjs-aws/tree/main/packages/open-next/src/overrides/originResolver) 选项有 `'pattern-env' | 'dummy'`
 
-## Custom Image Loader
+## 自定义 Image Loader
 
-This override is used in the image optimization server to load an image from a custom source. You can look at our implemention of using the file system [here](https://github.com/opennextjs/opennextjs-aws/blob/main/packages/open-next/src/overrides/imageLoader/fs-dev.ts). You need an `open-next.config.ts` with this:
+此覆盖用于图像优化服务器，从自定义源加载图像。你可以 [这里](https://github.com/opennextjs/opennextjs-aws/blob/main/packages/open-next/src/overrides/imageLoader/fs-dev.ts) 查看我们使用文件系统的实现。你需要一个包含以下内容的 `open-next.config.ts`：
 
 ```ts
 import type { OpenNextConfig } from "@opennextjs/aws/types/open-next.js";
@@ -360,11 +360,11 @@ const config = {
 export default config;
 ```
 
-[Included](https://github.com/opennextjs/opennextjs-aws/tree/main/packages/open-next/src/overrides/imageLoader) ones are `'s3' | 's3-lite' | 'host' | 'fs-dev' | 'dummy'`
+[包含的](https://github.com/opennextjs/opennextjs-aws/tree/main/packages/open-next/src/overrides/imageLoader) 选项有 `'s3' | 's3-lite' | 'host' | 'fs-dev' | 'dummy'`
 
-## Custom Warmer Invoke
+## 自定义 Warmer Invoke
 
-To have a custom override for the warmer invoke you can take inspiration by looking at our [`aws-lambda`](https://github.com/opennextjs/opennextjs-aws/blob/main/packages/open-next/src/overrides/warmer/aws-lambda.ts) override. You need an `open-next.config.ts` with this:
+要为 warmer invoke 设置自定义覆盖，你可以参考我们的 [`aws-lambda`](https://github.com/opennextjs/opennextjs-aws/blob/main/packages/open-next/src/overrides/warmer/aws-lambda.ts) 覆盖获取灵感。你需要一个包含以下内容的 `open-next.config.ts`：
 
 ```ts
 import type { OpenNextConfig } from "@opennextjs/aws/types/open-next.js";
@@ -378,11 +378,11 @@ const config = {
 export default config;
 ```
 
-[Included](https://github.com/opennextjs/opennextjs-aws/tree/main/packages/open-next/src/overrides/warmer) ones are `'aws-lambda' | 'dummy'`
+[包含的](https://github.com/opennextjs/opennextjs-aws/tree/main/packages/open-next/src/overrides/warmer) 选项有 `'aws-lambda' | 'dummy'`
 
-## Custom CDN Invalidation
+## 自定义 CDN Invalidation
 
-To have a custom override for the CDN Invalidation you can take inspiration by looking at our [`cloudfront`](https://github.com/opennextjs/opennextjs-aws/tree/main/packages/open-next/src/overrides/cdnInvalidation/cloudfront.ts) override. You need an `open-next.config.ts` with this:
+要为 CDN Invalidation 设置自定义覆盖，你可以参考我们的 [`cloudfront`](https://github.com/opennextjs/opennextjs-aws/tree/main/packages/open-next/src/overrides/cdnInvalidation/cloudfront.ts) 覆盖获取灵感。你需要一个包含以下内容的 `open-next.config.ts`：
 
 ```ts
 import type { OpenNextConfig } from "@opennextjs/aws/types/open-next.js";
@@ -397,11 +397,11 @@ const config = {
 export default config;
 ```
 
-[Included](https://github.com/opennextjs/opennextjs-aws/tree/main/packages/open-next/src/overrides/cdnInvalidation) ones are `'cloudfront' | 'dummy'`
+[包含的](https://github.com/opennextjs/opennextjs-aws/tree/main/packages/open-next/src/overrides/cdnInvalidation) 选项有 `'cloudfront' | 'dummy'`
 
-## Custom External Request Proxy
+## 自定义 External Request Proxy
 
-This is used by OpenNext to proxy rewritten requests to external services. You can read more about it [here](/aws/config/overrides/proxy_external_request). To have a custom override for the External Request Proxy you can take inspiration by looking at our [`fetch`](https://github.com/opennextjs/opennextjs-aws/blob/main/packages/open-next/src/overrides/proxyExternalRequest/fetch.ts) override. You need an `open-next.config.ts` with this:
+OpenNext 使用此项将重写的请求代理到外部服务。你可以 [这里](/aws/config/overrides/proxy_external_request) 阅读更多关于它的信息。要为 External Request Proxy 设置自定义覆盖，你可以参考我们的 [`fetch`](https://github.com/opennextjs/opennextjs-aws/blob/main/packages/open-next/src/overrides/proxyExternalRequest/fetch.ts) 覆盖获取灵感。你需要一个包含以下内容的 `open-next.config.ts`：
 
 ```ts
 import type { OpenNextConfig } from "@opennextjs/aws/types/open-next.js";
@@ -416,11 +416,11 @@ const config = {
 export default config;
 ```
 
-[Included](https://github.com/opennextjs/opennextjs-aws/tree/main/packages/open-next/src/overrides/proxyExternalRequest) ones are `'fetch' | 'node' | 'dummy'`
+[包含的](https://github.com/opennextjs/opennextjs-aws/tree/main/packages/open-next/src/overrides/proxyExternalRequest) 选项有 `'fetch' | 'node' | 'dummy'`
 
-## Custom Asset Resolver
+## 自定义 Asset Resolver
 
-This is used by OpenNext to resolve static assets. You can read more about it [here](/aws/config/overrides/asset_resolver). To have a custom override for the Asset Resolver, you need an `open-next.config.ts` with this:
+OpenNext 使用此项来解析静态资源。你可以 [这里](/aws/config/overrides/asset_resolver) 阅读更多关于它的信息。要为 Asset Resolver 设置自定义覆盖，你需要一个包含以下内容的 `open-next.config.ts`：
 
 ```ts
 import type { OpenNextConfig } from "@opennextjs/aws/types/open-next.js";
@@ -434,4 +434,4 @@ const config = {
 export default config;
 ```
 
-[Included](https://github.com/opennextjs/opennextjs-aws/tree/main/packages/open-next/src/overrides/assetResolver) one is `'dummy'`
+[包含的](https://github.com/opennextjs/opennextjs-aws/tree/main/packages/open-next/src/overrides/assetResolver) 选项是 `'dummy'`

@@ -1,20 +1,18 @@
 import { Callout } from "nextra/components";
 
-## Skew protection
+## 倾斜保护
 
-The Cloudflare adapter has _experimental support_ for skew protection based on [the preview URLs](https://developers.cloudflare.com/workers/configuration/previews/).
+Cloudflare 适配器基于 [预览 URL](https://developers.cloudflare.com/workers/configuration/previews/) 提供 _实验性支持_ 的倾斜保护。
 
 <Callout type="info">
-  Preview URLs are disabled for [Workers that implement a Durable
-  Object](https://developers.cloudflare.com/workers/configuration/previews/#limitations). If your app uses
-  Durable Objects, they will need to be implemented in a separate Worker.
+  对于 [实现 Durable Object 的 Worker](https://developers.cloudflare.com/workers/configuration/previews/#limitations)，预览 URL 被禁用。如果你的应用使用了 Durable Objects，它们需要在单独的 Worker 中实现。
 </Callout>
 
-### How to enable the skew protection
+### 如何启用倾斜保护
 
-**OpenNext config**
+**OpenNext 配置**
 
-Set `cloudflare.skewProtection.enabled` to `true` to enable skew protection:
+将 `cloudflare.skewProtection.enabled` 设置为 `true` 以启用倾斜保护：
 
 ```ts
 // open-next.config.ts
@@ -23,20 +21,20 @@ export default {
   cloudflare: {
     skewProtection: {
       enabled: true,
-      // Maximum number of previous versions to use.
-      // Optional, default to 20.
+      // 要使用的先前版本的最大数量。
+      // 可选，默认为 20。
       maxNumberOfVersions: 20,
-      // Age of the oldest version to use (from the last deployment date)
-      // Optional, default to 7 days.
+      // 要使用的最旧版本的期限（自上次部署日期起）
+      // 可选，默认为 7 天。
       maxVersionAgeDays: 7,
     },
   },
 } satisfies OpenNextConfig;
 ```
 
-**Wrangler configuration**
+**Wrangler 配置**
 
-The Worker needs to serve the correct version of the app assets. For that it need be be executed before incoming requests are matched against the assets. Set [`run_worker_first`](https://developers.cloudflare.com/workers/static-assets/binding/#run_worker_first) to `true` in your wrangler configuration to enable this behavior:
+Worker 需要提供服务正确版本的应用资产。为此，它需要在传入请求与资产匹配之前执行。在你的 wrangler 配置中将 [`run_worker_first`](https://developers.cloudflare.com/workers/static-assets/binding/#run_worker_first) 设置为 `true` 以启用此行为：
 
 ```jsonc
 // wrangler.jsonc
@@ -52,25 +50,24 @@ The Worker needs to serve the correct version of the app assets. For that it nee
 }
 ```
 
-**Environment variables**
+**环境变量**
 
-The following environment variables should be set when the skew protection is used:
+使用倾斜保护时应设置以下环境变量：
 
-- `CF_WORKER_NAME` should be set to the name of the worker, i.e. `my-app` given the config above. If you're using environment, the name of the app should contain your env, i.e. `my-app-<env>`
-- `CF_PREVIEW_DOMAIN` is the the subdomain of `workers.dev` where the previews are deployed, i.e. `<version>-<worker_name>.<domain>.workers.dev`
-- `CF_WORKERS_SCRIPTS_API_TOKEN` is an API token with the `Workers Scripts:Read` permission
-- `CF_ACCOUNT_ID` is the Cloudflare account id where the app is deployed.
+- `CF_WORKER_NAME` 应设置为 worker 的名称，即根据上述配置为 `my-app`。如果你使用的是环境，应用名称应包含你的环境，即 `my-app-<env>`
+- `CF_PREVIEW_DOMAIN` 是部署预览的 `workers.dev` 子域，即 `<version>-<worker_name>.<domain>.workers.dev`
+- `CF_WORKERS_SCRIPTS_API_TOKEN` 是一个具有 `Workers Scripts:Read` 权限的 API 令牌
+- `CF_ACCOUNT_ID` 是应用部署所在的 Cloudflare 账户 ID。
 
-Those variables are used to retrieve the past deployments of your application.
+这些变量用于检索你应用的过去部署。
 
-Note that in this context, environment variables include both your local [Cloudflare environment variables](https://developers.cloudflare.com/workers/configuration/environment-variables/)
-and the process' environment variables. If a variable is set in both places, the process environment variable will take precedence.
+请注意，在此上下文中，环境变量包括你的本地 [Cloudflare 环境变量](https://developers.cloudflare.com/workers/configuration/environment-variables/) 和进程的环境变量。如果在两处都设置了变量，进程环境变量将优先。
 
-**Next config**
+**Next 配置**
 
-You must set a different `deploymentId` in your next config each time your app is deployed. You will get an error if the `deploymentId` has already been used by a previous deployment.
+每次部署应用时，你必须在 next 配置中设置不同的 `deploymentId`。如果 `deploymentId` 已被之前的部署使用，你将收到错误。
 
-The cloudflare adapter exports a `getDeploymentId()` function that can be used to generate a unique deployment id.
+cloudflare 适配器导出一个 `getDeploymentId()` 函数，可用于生成唯一的部署 ID。
 
 ```ts
 // next.config.ts
@@ -82,10 +79,10 @@ const nextConfig = {
 };
 ```
 
-### What you should know
+### 你需要知道的事项
 
-- Because the Worker is configured to run in front of the assets Worker (`run_worker_first`), requesting an asset will count as a request to your Worker
-- Requesting an older deployment will generate 2 requests: the request to the latest version and the request to the older version
-- It is not currently possible to delete a deployment
-- Requests to an older deployment will be a few milli-seconds slower than requests to the latest version of the app
-- Request to a deployment older than the `maxNumberOfVersions` or older than `maxVersionAgeDays` will fallback to the current deployment
+- 因为 Worker 被配置为在资产 Worker 之前运行（`run_worker_first`），请求资产将计为对你的 Worker 的一次请求
+- 请求较旧的部署将生成 2 个请求：对最新版本的请求和对较旧版本的请求
+- 目前无法删除部署
+- 对较旧部署的请求将比对应用最新版本的请求慢几毫秒
+- 对早于 `maxNumberOfVersions` 或早于 `maxVersionAgeDays` 的部署的请求将回退到当前部署

@@ -1,75 +1,75 @@
-This is the main entrypoint of the server. It is used for every server and allow you to run either in serverless mode or as a long running server.
+这是服务器的主入口点。它用于每个服务器，允许你以无服务器模式运行或作为长期运行的服务器运行。
 
-If you want to better understand how to implement your own Wrapper, the easiest way would be to take a look at one of the existing [included Wrapper](https://github.com/opennextjs/opennextjs-aws/tree/main/packages/open-next/src/overrides/wrappers).
+如果你想更好地了解如何实现自己的 Wrapper，最简单的方法是查看现有的 [包含的 Wrapper](https://github.com/opennextjs/opennextjs-aws/tree/main/packages/open-next/src/overrides/wrappers) 之一。
 
-Couple of things to note :
+有几件事需要注意：
 
-- If you want to use streaming (for the `node` runtime of next), you'll need to create a `StreamCreator` and pass it to the `handler`. You can find some example in the [node](https://github.com/opennextjs/opennextjs-aws/blob/main/packages/open-next/src/overrides/wrappers/node.ts) or [aws-lambda-streaming](https://github.com/opennextjs/opennextjs-aws/blob/main/packages/open-next/src/overrides/wrappers/aws-lambda-streaming.ts) wrapper.
-- If you don't use streaming (like in the default `aws-lambda` wrapper), you may still need to provide a fake `StreamCreator` to the `handler` to avoid a weird issue with Node itself (see [here](https://github.com/opennextjs/opennextjs-aws/blob/f685ddea8f8a5c82591dc02713aff7138f2d9896/packages/open-next/src/overrides/wrappers/aws-lambda.ts#L49-L65) for an example and a more thorough explanation).
-- If you use the `edge` runtime of Next (either for the external middleware or for an `edge` route or page), you don't need the `StreamCreator` at all.
-- If you are in a serverless environment and it supports `waitUntil`, you should pass it to the handler as it is done in the [cloudflare-edge wrapper](https://github.com/opennextjs/opennextjs-aws/blob/87b59e59a8a0bf1e83d2d1df9efa0ad3bfc912f5/packages/open-next/src/overrides/wrappers/cloudflare-edge.ts#L65-L67). This might not be necessary depending on where you run it (for example the `aws-lambda-streaming` or the `node` wrapper doesn't need it.)
+- 如果你想使用 streaming（用于 next 的 `node` runtime），你需要创建一个 `StreamCreator` 并将其传递给 `handler`。你可以在 [node](https://github.com/opennextjs/opennextjs-aws/blob/main/packages/open-next/src/overrides/wrappers/node.ts) 或 [aws-lambda-streaming](https://github.com/opennextjs/opennextjs-aws/blob/main/packages/open-next/src/overrides/wrappers/aws-lambda-streaming.ts) wrapper 中找到一些示例。
+- 如果你不使用 streaming（如默认的 `aws-lambda` wrapper 中），你可能仍然需要向 `handler` 提供一个假的 `StreamCreator`，以避免 Node 本身的一个奇怪问题（见 [这里](https://github.com/opennextjs/opennextjs-aws/blob/f685ddea8f8a5c82591dc02713aff7138f2d9896/packages/open-next/src/overrides/wrappers/aws-lambda.ts#L49-L65) 获取示例和更详细的解释）。
+- 如果你使用 Next 的 `edge` runtime（无论是用于外部 middleware 还是用于 `edge` 路由或页面），你根本不需要 `StreamCreator`。
+- 如果你处于支持 `waitUntil` 的无服务器环境中，你应该将其传递给 handler，就像在 [cloudflare-edge wrapper](https://github.com/opennextjs/opennextjs-aws/blob/87b59e59a8a0bf1e83d2d1df9efa0ad3bfc912f5/packages/open-next/src/overrides/wrappers/cloudflare-edge.ts#L65-L67) 中所做的那样。这可能不是必需的，具体取决于你运行它的位置（例如 `aws-lambda-streaming` 或 `node` wrapper 不需要它。）
 
-## Included Wrappers
+## 包含的 Wrappers
 
 ### aws-lambda
 
-The `aws-lambda` Wrapper is the default wrapper for AWS Lambda. It is used by default if you don't provide any Wrapper in your configuration.
+`aws-lambda` Wrapper 是 AWS Lambda 的默认 wrapper。如果你在配置中没有提供任何 Wrapper，则默认使用它。
 
-#### Features
+#### 特性
 
 - [ ] Streaming
-- [ ] Proper support for `waitUntil`
+- [ ] 对 `waitUntil` 的适当支持
 
 ### aws-lambda-streaming
 
-The `aws-lambda-streaming` Wrapper is a wrapper that allows you to use streaming in AWS Lambda. Streaming must be enabled for this lambda.
+`aws-lambda-streaming` Wrapper 是一个允许你在 AWS Lambda 中使用 streaming 的 wrapper。必须为此 lambda 启用 streaming。
 
-#### Features
+#### 特性
 
 - [x] Streaming
-- [x] Proper support for `waitUntil`
+- [x] 对 `waitUntil` 的适当支持
 
 ### cloudflare-edge
 
-The `cloudflare-edge` Wrapper is the wrapper for Cloudflare Workers. It should be used for the external middleware and for the `edge` runtime of Next.
+`cloudflare-edge` Wrapper 是 Cloudflare Workers 的 wrapper。它应该用于外部 middleware 和 Next 的 `edge` runtime。
 
-#### Features
+#### 特性
 
 - [x] Streaming
-- [x] Proper support for `waitUntil`
+- [x] 对 `waitUntil` 的适当支持
 
 ### cloudflare-node
 
-The `cloudflare-node` Wrapper is the wrapper for Cloudflare Workers. It should be used only with the `node` runtime of Next and if you use `@opennextjs/cloudflare`.
+`cloudflare-node` Wrapper 是 Cloudflare Workers 的 wrapper。它应该仅与 Next 的 `node` runtime 一起使用，并且如果你使用 `@opennextjs/cloudflare`。
 
-#### Features
+#### 特性
 
 - [x] Streaming
-- [x] Proper support for `waitUntil`
+- [x] 对 `waitUntil` 的适当支持
 
 ### node
 
-The `node` Wrapper is the wrapper for classic Node.js Server. This one is a long running server.
+`node` Wrapper 是经典 Node.js Server 的 wrapper。这是一个长期运行的服务器。
 
-#### Features
+#### 特性
 
 - [x] Streaming
-- [x] Proper support for `waitUntil`
+- [x] 对 `waitUntil` 的适当支持
 
 ### express-dev
 
-The `express-dev` Wrapper is the wrapper for a classic Express server. It is a long running process and should be used for development purposes only.
+`express-dev` Wrapper 是经典 Express 服务器的 wrapper。它是一个长期运行的进程，仅应用于开发目的。
 
-#### Features
+#### 特性
 
 - [x] Streaming
-- [x] Proper support for `waitUntil`
+- [x] 对 `waitUntil` 的适当支持
 
 ### dummy
 
-The `dummy` Wrapper is a dummy implementation that will just forward the event and `StreamCreator` to the handler.
+`dummy` Wrapper 是一个虚拟实现，它只会将 event 和 `StreamCreator` 转发给 handler。
 
-#### Features
+#### 特性
 
 - [ ] Streaming
-- [ ] Proper support for `waitUntil`
+- [ ] 对 `waitUntil` 的适当支持

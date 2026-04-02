@@ -1,26 +1,20 @@
 import { Callout } from "nextra/components";
 
-## `__name` issues
+## `__name` 问题
 
-When using the OpenNext adapter, Wrangler processes the worker's code with [esbuild](https://esbuild.github.io/), and by default
-enables the [`keep-names`](https://esbuild.github.io/api/#keep-names) option. While this is generally useful for debugging, it can
-cause issues with certain Next.js libraries (e.g. [next-themes](https://www.npmjs.com/package/next-themes)) that convert scripts
-to strings. This happens because `esbuild` introduces a `__name` function at the top of modules, which may inadvertently appear
-in the generated script strings. When these strings are evaluated at runtime, the `__name` function might therefore not be defined,
-leading to errors logged in the developer console:
+在使用 OpenNext 适配器时，Wrangler 会使用 [esbuild](https://esbuild.github.io/) 处理 worker 的代码，并且默认启用 [`keep-names`](https://esbuild.github.io/api/#keep-names) 选项。虽然这通常有利于调试，但它可能会导致某些将脚本转换为字符串的 Next.js 库（例如 [next-themes](https://www.npmjs.com/package/next-themes)）出现问题。这是因为 `esbuild` 会在模块顶部引入一个 `__name` 函数，该函数可能会无意中出现在生成的脚本字符串中。当这些字符串在运行时被求值时，`__name` 函数可能因此未定义，从而导致开发者控制台中记录错误：
 
 ```
 Uncaught ReferenceError: __name is not defined
 ```
 
 <Callout>
-  Note that depending on your minification settings, the `__name` identifier might be minified, making the
-  error message less clear and potentially not explicitly mentioning `__name` in such cases.
+  请注意，根据您的混淆设置，`__name` 标识符可能会被混淆，使得错误消息不那么清晰，并且在这种情况下可能不会明确提及 `__name`。
 </Callout>
 
-### How to fix such issues
+### 如何修复此类问题
 
-To fix the issue you can simply set the `keep_names` option to `false` in your [`wrangler.jsonc` file](https://developers.cloudflare.com/workers/wrangler/configuration), like in the following example:
+要修复此问题，您只需在 [`wrangler.jsonc` 文件](https://developers.cloudflare.com/workers/wrangler/configuration) 中将 `keep_names` 选项设置为 `false`，如下例所示：
 
 ```jsonc
 {
@@ -32,7 +26,6 @@ To fix the issue you can simply set the `keep_names` option to `false` in your [
 }
 ```
 
-One potential drawback of this solution is that, depending on your minification settings, you may lose the ability to view the original
-function names in debugging tools.
+此解决方案的一个潜在缺点是，根据您的混淆设置，您可能会失去在调试工具中查看原始函数名的能力。
 
-<Callout>You must use Wrangler version `4.13.0` or later to use this option.</Callout>
+<Callout>您必须使用 Wrangler 版本 `4.13.0` 或更高版本才能使用此选项。</Callout>

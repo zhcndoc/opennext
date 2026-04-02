@@ -1,12 +1,12 @@
-### Known issues
+### 已知问题
 
-#### Caching Durable Objects (`DOQueueHandler` and `DOShardedTagCache`)
+#### 缓存 Durable Objects（`DOQueueHandler` 和 `DOShardedTagCache`）
 
-If your app uses [Durable Objects](https://developers.cloudflare.com/durable-objects/) for caching, you might see a warning while building your app:
+如果您的应用使用 [Durable Objects](https://developers.cloudflare.com/durable-objects/) 进行缓存，在构建应用时可能会看到一条警告：
 
 ```text
 ┌─────────────────────────────────┐
-│ OpenNext — Building Next.js app │
+│ OpenNext — 正在构建 Next.js 应用 │
 └─────────────────────────────────┘
 
 
@@ -14,18 +14,18 @@ If your app uses [Durable Objects](https://developers.cloudflare.com/durable-obj
 
    ▲ Next.js 15.2.4
 
-▲ [WARNING] 				You have defined bindings to the following internal Durable Objects:
+▲ [WARNING] 				您已为以下内部 Durable Objects 定义了绑定：
 
   				- {"name":"NEXT_CACHE_DO_QUEUE","class_name":"DOQueueHandler"}
-  				These will not work in local development, but they should work in production.
+  				这些在本地开发中将无法工作，但在生产环境中应该可以工作。
 
-  				If you want to develop these locally, you can define your DO in a separate Worker, with a
-  separate configuration file.
-  				For detailed instructions, refer to the Durable Objects section here:
+  				如果您想在本地开发这些，可以在单独的 Worker 中定义您的 DO，并使用
+  单独的配置文件。
+  				有关详细说明，请参阅此处的 Durable Objects 部分：
   https://developers.cloudflare.com/workers/wrangler/api#supported-bindings
 
-   Creating an optimized production build ...
-workerd/server/server.c++:1951: warning: A DurableObjectNamespace in the config referenced the class "DOQueueHandler", but no such Durable Object class is exported from the worker. Please make sure the class name matches, it is exported, and the class extends 'DurableObject'. Attempts to call to this Durable Object class will fail at runtime, but historically this was not a startup-time error. Future versions of workerd may make this a startup-time error.
+   正在创建优化的生产构建 ...
+workerd/server/server.c++:1951: warning: 配置中的 DurableObjectNamespace 引用了类 "DOQueueHandler"，但 worker 未导出此类 Durable Object 类。请确保类名匹配，已导出，且该类扩展自 'DurableObject'。尝试调用此 Durable Object 类将在运行时失败，但历史上这不是启动时错误。未来版本的 workerd 可能会将其变为启动时错误。
 ```
 
-The warning can be safely ignored as the caching Durable Objects are not used during the build.
+可以安全地忽略此警告，因为缓存 Durable Objects 在构建期间不会被使用。

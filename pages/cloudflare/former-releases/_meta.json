@@ -1,10 +1,10 @@
 {
-  "0.6": "Release 0.6",
-  "migrate-from-0.5-to-0.6": "",
-  "0.5": "Release 0.5",
-  "migrate-from-0.4-to-0.5": "",
-  "migrate-from-0.3-to-0.4": "",
-  "0.3": "Release 0.3",
-  "migrate-from-0.2-to-0.3": "",
-  "0.2": "Release 0.2"
+  "0.6": "0.6 版本",
+  "migrate-from-0.5-to-0.6": "从 0.5 迁移到 0.6",
+  "0.5": "0.5 版本",
+  "migrate-from-0.4-to-0.5": "从 0.4 迁移到 0.5",
+  "migrate-from-0.3-to-0.4": "从 0.3 迁移到 0.4",
+  "0.3": "0.3 版本",
+  "migrate-from-0.2-to-0.3": "从 0.2 迁移到 0.3",
+  "0.2": "0.2 版本"
 }

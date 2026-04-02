@@ -1,33 +1,32 @@
 import { Callout } from "nextra/components";
 
-## Caching
+## 缓存
 
-`@opennextjs/cloudflare` supports [caching](https://nextjs.org/docs/app/building-your-application/data-fetching/fetching-caching-and-revalidating#caching-data) and [revalidating](https://nextjs.org/docs/app/building-your-application/data-fetching/fetching-caching-and-revalidating#revalidating-data) data returned by subrequests you make in your app by calling [`fetch()`](https://developers.cloudflare.com/workers/runtime-apis/fetch/).
+`@opennextjs/cloudflare` 支持 [缓存](https://nextjs.org/docs/app/building-your-application/data-fetching/fetching-caching-and-revalidating#caching-data) 和 [重新验证](https://nextjs.org/docs/app/building-your-application/data-fetching/fetching-caching-and-revalidating#revalidating-data) 你在应用中通过调用 [`fetch()`](https://developers.cloudflare.com/workers/runtime-apis/fetch/) 发出的子请求所返回的数据。
 
-By default, all `fetch()` subrequests made in your Next.js app are cached. Refer to the [Next.js documentation](https://nextjs.org/docs/app/building-your-application/caching#opting-out-1) for information about how to disable caching for an individual subrequest, or for an entire route.
+默认情况下，你的 Next.js 应用中发出的所有 `fetch()` 子请求都会被缓存。请参阅 [Next.js 文档](https://nextjs.org/docs/app/building-your-application/caching#opting-out-1) 以了解如何为单个子请求或整个路由禁用缓存。
 
-[The cache persists across deployments](https://nextjs.org/docs/app/building-your-application/caching#data-cache). You are responsible for revalidating/purging this cache.
+[缓存会在部署之间持久存在](https://nextjs.org/docs/app/building-your-application/caching#data-cache)。你需要负责重新验证/清除此缓存。
 
 <Callout>
-  Workers KV is eventually consistent, which means that it can take up to 60 seconds for updates to be
-  reflected globally, when using the default TTL of 60 seconds.
+  Workers KV 是最终一致的，这意味着当使用默认的 60 秒 TTL 时，更新可能需要长达 60 秒才能在全球范围内反映出来。
 </Callout>
 
-### How to enable caching
+### 如何启用缓存
 
-`@opennextjs/cloudflare` uses [Workers KV](https://developers.cloudflare.com/kv/) as the cache for your Next.js app. Workers KV is [fast](https://blog.cloudflare.com/faster-workers-kv) and uses Cloudflare's [Tiered Cache](https://developers.cloudflare.com/cache/how-to/tiered-cache/) to increase cache hit rates. When you write cached data to Workers KV, you write to storage that can be read by any Cloudflare location. This means your app can fetch data, cache it in KV, and then subsequent requests anywhere around the world can read from this cache.
+`@opennextjs/cloudflare` 使用 [Workers KV](https://developers.cloudflare.com/kv/) 作为你的 Next.js 应用的缓存。Workers KV [速度快](https://blog.cloudflare.com/faster-workers-kv) 并使用 Cloudflare 的 [分层缓存](https://developers.cloudflare.com/cache/how-to/tiered-cache/) 来提高缓存命中率。当你将缓存数据写入 Workers KV 时，你是写入到任何 Cloudflare 位置都可以读取的存储中。这意味着你的应用可以获取数据，将其缓存到 KV 中，然后随后世界各地发出的请求都可以从这个缓存中读取。
 
-To enable caching, you must:
+要启用缓存，你必须：
 
-#### 1. Create a KV namespace
+#### 1. 创建 KV 命名空间
 
 ```
 npx wrangler@latest kv namespace create <YOUR_NAMESPACE_NAME>
 ```
 
-#### 2. Add the KV namespace to your Worker
+#### 2. 将 KV 命名空间添加到你的 Worker
 
-The binding name used in your app's worker will be `NEXT_CACHE_WORKERS_KV` by default. This is configurable and can be changed by setting the `__OPENNEXT_KV_BINDING_NAME` build-time environment variable.
+你的应用 worker 中使用的绑定名称默认为 `NEXT_CACHE_WORKERS_KV`。这是可配置的，可以通过设置 `__OPENNEXT_KV_BINDING_NAME` 构建时环境变量来更改。
 
 ```
 [[kv_namespaces]]

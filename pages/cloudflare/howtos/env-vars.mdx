@@ -1,44 +1,42 @@
 import { Callout } from "nextra/components";
 
-## Environment variables
+## 环境变量
 
-This entry describe the most sensible way to handle your environment variables which works well both during local development and once your application is deployed to Cloudflare Workers.
+本条目描述了处理环境变量最合理的方式，这种方式既适用于本地开发，也适用于应用程序部署到 Cloudflare Workers 之后。
 
-On the Cloudflare platform, your environment variables can be stored in either ["Environment variables"](https://developers.cloudflare.com/workers/configuration/environment-variables/) or ["Secrets"](https://developers.cloudflare.com/workers/configuration/secrets/). The difference being that Secrets can not be read back from either the dashboard or the CLI after being created.
+在 Cloudflare 平台上，您的环境变量可以存储在 ["环境变量"](https://developers.cloudflare.com/workers/configuration/environment-variables/) 或 ["密钥"](https://developers.cloudflare.com/workers/configuration/secrets/) 中。区别在于，密钥在创建后无法从仪表板或 CLI 中读回。
 
-### Local development
+### 本地开发
 
-While there are multiple ways to set environment variables for local development on the Cloudflare platform (adding them to to your [wrangler configuration](https://developers.cloudflare.com/workers/configuration/secrets/) or to a [.dev.vars](https://developers.cloudflare.com/workers/configuration/secrets/) file) that does not play well with the recommended development workflow as they would not be available while using `next dev`.
+虽然在 Cloudflare 平台上有多种方式为本地开发设置环境变量（将它们添加到 [wrangler 配置](https://developers.cloudflare.com/workers/configuration/secrets/) 或 [.dev.vars](https://developers.cloudflare.com/workers/configuration/secrets/) 文件中），但这与推荐的开发工作流不太兼容，因为在使用 `next dev` 时它们将不可用。
 
-What you should do instead is to use the Next.js [`.env` files](https://nextjs.org/docs/pages/building-your-application/configuring/environment-variables). By doing so the environment variables will be available on `process.env` both while running `next dev` and when running your app locally on a Worker with `wrangler dev`.
+您应该做的是使用 Next.js 的 [`.env` 文件](https://nextjs.org/docs/pages/building-your-application/configuring/environment-variables)。这样做后，无论是在运行 `next dev` 时，还是在使用 `wrangler dev` 在 Worker 上本地运行应用程序时，环境变量都将在 `process.env` 上可用。
 
-Next.js `.env` files are environment specific. That is a `.env.development` will take precedence over a `.env` file when you use the "development" environment. See the Next.js site for a detailed explanation of the [loading order](https://nextjs.org/docs/pages/building-your-application/configuring/environment-variables).
+Next.js `.env` 文件是特定于环境的。也就是说，当您使用 "development" 环境时，`.env.development` 的优先级将高于 `.env` 文件。请参阅 Next.js 网站以获取有关 [加载顺序](https://nextjs.org/docs/pages/building-your-application/configuring/environment-variables) 的详细解释。
 
-You should use the `NEXTJS_ENV` environment variable to select the environment to use when running your app locally on a worker, that's how you would select the "development" environment:
+您应该使用 `NEXTJS_ENV` 环境变量来选择在 worker 上本地运行应用程序时使用的环境，以下是选择 "development" 环境的方法：
 
 ```plain
 # .dev.vars
 NEXTJS_ENV=development
 ```
 
-The "production" environment is used by default when `NEXTJS_ENV` is not explicitly set.
+当未显式设置 `NEXTJS_ENV` 时，默认使用 "production" 环境。
 
-### Production
+### 生产环境
 
-`.env` and `.dev.vars` are local files that should not be added to source control. You should instead use the Cloudflare dashboard to set your environment variables for production.
+`.env` 和 `.dev.vars` 是本地文件，不应添加到版本控制中。您应该使用 Cloudflare 仪表板来设置生产环境的变量。
 
-#### Workers Builds
+#### Workers 构建
 
-When you use [Workers Builds](https://developers.cloudflare.com/workers/ci-cd/builds/) to deploy your application, the environment variables must be set in the ["Build variables and secrets"](https://developers.cloudflare.com/workers/ci-cd/builds/configuration/).
+当您使用 [Workers Builds](https://developers.cloudflare.com/workers/ci-cd/builds/) 部署应用程序时，必须在 ["构建变量和密钥"](https://developers.cloudflare.com/workers/ci-cd/builds/configuration/) 中设置环境变量。
 
-By settings the "Build variables and secrets", the Next build executed by Workers Builds will have access to the environment variables. It needs that access to inline the [`NEXT_PUBLIC_...` variables](https://nextjs.org/docs/pages/building-your-application/configuring/environment-variables#bundling-environment-variables-for-the-browser) and access non-`NEXT_PUBLIC_...` variables needed for SSG pages.
+通过设置“构建变量和密钥”，由 Workers Builds 执行的 Next 构建将能够访问环境变量。它需要该访问权限来内联 [`NEXT_PUBLIC_...` 变量](https://nextjs.org/docs/pages/building-your-application/configuring/environment-variables#bundling-environment-variables-for-the-browser) 并访问 SSG 页面所需的非 `NEXT_PUBLIC_...` 变量。
 
-#### Runtime variables
+#### 运行时变量
 
-Your Next application needs to access environment variables at runtime. You should always set the runtime environment variables [in the Cloudflare dashboard](https://developers.cloudflare.com/workers/configuration/environment-variables/#add-environment-variables-via-the-dashboard)
+您的 Next 应用程序需要在运行时访问环境变量。您应该始终 [在 Cloudflare 仪表板中](https://developers.cloudflare.com/workers/configuration/environment-variables/#add-environment-variables-via-the-dashboard) 设置运行时环境变量。
 
 <Callout type="info">
-  If you set environment variables from the dashboard, you can use the
-  [`--keep-vars`](https://developers.cloudflare.com/workers/wrangler/commands/#deploy) option of wrangler to
-  prevent them from being deleted by deployments, i.e. `opennextjs-cloudflare deploy -- --keep-vars`
+  如果您从仪表板设置环境变量，您可以使用 wrangler 的 [`--keep-vars`](https://developers.cloudflare.com/workers/wrangler/commands/#deploy) 选项来防止它们被部署删除，即 `opennextjs-cloudflare deploy -- --keep-vars`
 </Callout>

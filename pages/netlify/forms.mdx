@@ -1,17 +1,17 @@
-# Using Netlify Forms with Next.js
+# 在 Next.js 中使用 Netlify Forms
 
-Netlify Forms use [automatic detection of form tag attributes](https://docs.netlify.com/get-started/#set-up-netlify-forms) (example: `data-netlify`) at deploy time by scanning any static HTML files present or generated during the build.
+Netlify Forms 在部署时通过扫描构建期间存在或生成的任何静态 HTML 文件，使用 [表单标签属性的自动检测](https://docs.netlify.com/get-started/#set-up-netlify-forms)（例如：`data-netlify`）。
 
-As a security and anti-spam measure, only form and field names that Netlify detects at deployment are recognized by Netlify. When submitting a form, the form target URL must also be a static file.
+作为安全和反垃圾邮件措施，只有 Netlify 在部署时检测到的表单和字段名称才会被 Netlify 识别。提交表单时，表单目标 URL 也必须是静态文件。
 
-However, modern Next.js versions do not generate fully-static HTML pages because any page can be revalidated at runtime. Instead, relevant pages are pre-rendered at build time, and then stored in Next.js’s cache for serving. This means that your Next.js pages, including any form tags and attributes, are not written to static HTML files at deployment, and therefore cannot be the form’s target page. Attributes related to Netlify Forms set in these pages have no effect.
+然而，现代版本的 Next.js 不会生成完全静态的 HTML 页面，因为任何页面都可以在运行时重新验证。相反，相关页面在构建时预渲染，然后存储在 Next.js 的缓存中以供服务。这意味着您的 Next.js 页面（包括任何表单标签和属性）在部署时不会写入静态 HTML 文件，因此不能作为表单的目标页面。在这些页面中设置的与 Netlify Forms 相关的属性无效。
 
-## Workaround for Netlify Forms
+## Netlify Forms 的变通方案
 
-Here's one way to work around this limitation:
+以下是解决此限制的一种方法：
 
-1. Create a new HTML file in the `public` directory of your site. This file would be used for deploy-time form detection only. It can have any name, for example `public/__forms.html`.
-2. In that file, add form tags for all your Netlify forms and fields. In the below example, note that only the bare minimum is needed, as users would not see this HTML page at all.
+1. 在站点的 `public` 目录中创建一个新的 HTML 文件。该文件仅用于部署时的表单检测。它可以有任何名称，例如 `public/__forms.html`。
+2. 在该文件中，为所有 Netlify 表单和字段添加表单标签。在下面的示例中，请注意只需要最低限度的内容，因为用户根本不会看到这个 HTML 页面。
 
    ```html
    <html>
@@ -27,9 +27,9 @@ Here's one way to work around this limitation:
    </html>
    ```
 
-3. In your dynamic page or form component, handle the submission by serving a `POST` request to the static HTML file you’ve created above (using the example above: `/__forms`).
+3. 在您的动态页面或表单组件中，通过向您上面创建的静态 HTML 文件发送 `POST` 请求来处理提交（使用上面的示例：`/__forms`）。
 
-4. Once the request is completed, you should show a success notification or navigate to another page. Here’s a simplified example of the form component:
+4. 请求完成后，您应该显示成功通知或导航到另一个页面。以下是表单组件的简化示例：
 
    ```jsx
    "use client";
@@ -43,37 +43,37 @@ Here's one way to work around this limitation:
          headers: { "Content-Type": "application/x-www-form-urlencoded" },
          body: new URLSearchParams(formData).toString(),
        });
-       // Success and error handling ...
+       // 成功和错误处理 ...
      };
 
      return (
        <form name="feedback" onSubmit={handleFormSubmit}>
          <input type="hidden" name="form-name" value="feedback" />
-         <input name="name" type="text" placeholder="Name" required />
-         <input name="email" type="text" placeholder="Email (optional)" />
-         <button type="submit">Submit</button>
+         <input name="name" type="text" placeholder="姓名" required />
+         <input name="email" type="text" placeholder="电子邮件（可选）" />
+         <button type="submit">提交</button>
        </form>
      );
    }
    ```
 
-## Live demo
+## 在线演示
 
-For a more complete example which includes handling of submission states (success, error or pending), visit the [live demo](https://nextjs-platform-starter.netlify.app/classics) or explore the code for the [form component](https://github.com/netlify-templates/next-platform-starter/blob/main/components/feedback-form.jsx) and the [required static file](https://github.com/netlify-templates/next-platform-starter/blob/main/public/__forms.html).
+对于包含提交状态处理（成功、错误或待定）的更完整示例，请访问 [在线演示](https://nextjs-platform-starter.netlify.app/classics) 或探索 [表单组件](https://github.com/netlify-templates/next-platform-starter/blob/main/components/feedback-form.jsx) 和 [所需静态文件](https://github.com/netlify-templates/next-platform-starter/blob/main/public/__forms.html) 的代码。
 
-## Prevent silent failures
+## 防止静默失败
 
-To prevent silent failures of form detection or submission, we now trigger an intentional build failure when suspecting your code is incompatible:
+为了防止表单检测或提交的静默失败，当我们怀疑您的代码不兼容时，现在会触发故意的构建失败：
 
 ```txt
 @netlify/plugin-nextjs@5 requires migration steps to support Netlify Forms. Refer to https://ntl.fyi/next-runtime-forms-migration for migration example.
 ```
 
-This failure is triggered when both of the following conditions are met:
+当满足以下两个条件时，会触发此失败：
 
-- The adapter has found usage of `netlify` or `data-netlify` form attributes in your React code (which have no effect).
-- No static HTML file was found in your `public` directory having form attributes (thus marking that you’ve implemented the approach laid out above).
+- 适配器在您的 React 代码中发现了 `netlify` 或 `data-netlify` 表单属性的使用（这些属性无效）。
+- 在您的 `public` 目录中未找到具有表单属性的静态 HTML 文件（从而表明您已实施了上述方法）。
 
-### Skip the check
+### 跳过检查
 
-If you believe that a check failure is incorrect or would like to defer handling the issue to a later time, you can skip this check by adding a `NETLIFY_NEXT_VERIFY_FORMS` environment variable to your site, with the value `false`.
+如果您认为检查失败是不正确的，或者希望将问题的处理推迟到以后，您可以通过向站点添加值为 `false` 的 `NETLIFY_NEXT_VERIFY_FORMS` 环境变量来跳过此检查。

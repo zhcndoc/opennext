@@ -1,7 +1,7 @@
 {
-  "index": "Overview",
-  "get-started": "",
-  "bindings": "",
-  "caching": "",
-  "examples": ""
+  "index": "概览",
+  "get-started": "开始使用",
+  "bindings": "绑定",
+  "caching": "缓存",
+  "examples": "示例"
 }

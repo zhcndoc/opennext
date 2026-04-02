@@ -1,46 +1,46 @@
-This override is used by the [`cache` adapter](https://github.com/opennextjs/opennextjs-aws/blob/main/packages/open-next/src/adapters/cache.ts) that is provided by OpenNext to the NextServer. It is also used by OpenNext if `enableCacheInterception` is set to `true` in the configuration and by the `initializationFunction` for prepopulating the cache.
+此覆盖由 OpenNext 提供给 NextServer 的 [`cache` 适配器](https://github.com/opennextjs/opennextjs-aws/blob/main/packages/open-next/src/adapters/cache.ts) 使用。如果配置中将 `enableCacheInterception` 设置为 `true`，OpenNext 也会使用它，`initializationFunction` 也用它来预填充缓存。
 
-It is used for the cache tags (i.e. `revalidateTag` and `revalidatePath`). It does not handle anything related to the ISR/SSG cache or the fetch cache used by Next.js.
-It's main role is to determine if a path is stale based on the tags and also to update the tag cache when `revalidateTag` is called.
+它用于缓存标签（即 `revalidateTag` 和 `revalidatePath`）。它不处理任何与 Next.js 使用的 ISR/SSG 缓存或 fetch 缓存相关的内容。
+它的主要作用是根据标签确定路径是否过时，并在调用 `revalidateTag` 时更新标签缓存。
 
-The current implementation differs from the way Next.js standalone handle cache tags. In the standalone version, the cache tags are stored in a file, and every time a cache entry is accessed, it has to check for every tags if the entry is stale. This approach is very read heavy and doesn't work well with DB like DynamoDB.
-We choose to go another way. We store tags for every path that exists in the cache. This way, we can easily know if a path is stale by just checking the path instead of every tags used. This approach is more write heavy but it's a tradeoff we are willing to make.
-This also has the drawback of needing to prepopulate the cache with all the tags that are used in the application. This is done by the `initializationFunction`.
+当前的实现与 Next.js standalone 处理缓存标签的方式不同。在 standalone 版本中，缓存标签存储在文件中，每次访问缓存条目时，都必须检查每个标签以确认条目是否过时。这种方法读取密集型很高，并且与 DynamoDB 这样的数据库配合不佳。
+我们选择了另一种方式。我们为缓存中存在的每个路径存储标签。这样，我们只需检查路径而不是每个使用的标签，就可以轻松知道路径是否过时。这种方法更侧重于写入，但这是我们愿意做出的权衡。
+这也有一个缺点，即需要使用应用程序中使用的所有标签预填充缓存。这是由 `initializationFunction` 完成的。
 
-We might allow to choose how cache tags are handled in the future depending on the `TagCache` implementation. If you need this feature, feel free to open an issue on the [GitHub repository](https://github.com/opennextjs/opennextjs-aws).
+未来我们可能会允许根据 `TagCache` 实现来选择如何处理缓存标签。如果您需要此功能，请随时在 [GitHub 仓库](https://github.com/opennextjs/opennextjs-aws) 上提交 issue。
 
-If you want to better understand how to implement your own TagCache, the easiest way would be to take a look at the existing [included TagCache](https://github.com/opennextjs/opennextjs-aws/tree/main/packages/open-next/src/overrides/tagCache).
+如果您想更好地了解如何实现自己的 TagCache，最简单的方法是查看现有的 [内置 TagCache](https://github.com/opennextjs/opennextjs-aws/tree/main/packages/open-next/src/overrides/tagCache)。
 
-## Included TagCache
+## 内置 TagCache
 
 ### dynamodb
 
-The DynamoDB TagCache will store the cache tags in a DynamoDB table. It is used by default if you don't provide any TagCache in your configuration.
-It uses the `@aws-sdk/client-dynamodb` to interact with DynamoDB.
+DynamoDB TagCache 会将缓存标签存储在 DynamoDB 表中。如果您在配置中未提供任何 TagCache，则默认使用它。
+它使用 `@aws-sdk/client-dynamodb` 与 DynamoDB 交互。
 
-##### Requirements
+##### 要求
 
-- You need to provide the `CACHE_DYNAMO_TABLE`, `CACHE_BUCKET_REGION` environment variable to your server.
-- DynamoDB table should have a primary key `path` of type `String` and a sort key `tag` of type `String`. (It can reuse the same table as the one used by the default `tagCache`)
+- 您需要向服务器提供 `CACHE_DYNAMO_TABLE`、`CACHE_BUCKET_REGION` 环境变量。
+- DynamoDB 表应该有一个类型为 `String` 的主键 `path` 和一个类型为 `String` 的排序键 `tag`。（它可以重用默认 `tagCache` 使用的同一张表）
 
 ### dynamodb-lite
 
-The DynamoDBLite TagCache will store the cache tags in a DynamoDB table.
-This implementation is a lighter version of the `dynamodb` TagCache as it uses `aws4fetch` to interact with DynamoDB.
+DynamoDBLite TagCache 会将缓存标签存储在 DynamoDB 表中。
+此实现是 `dynamodb` TagCache 的轻量版本，因为它使用 `aws4fetch` 与 DynamoDB 交互。
 
-##### Requirements
+##### 要求
 
-- You need to provide the `CACHE_DYNAMO_TABLE`, `CACHE_BUCKET_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` and `AWS_SESSION_TOKEN` environment variables to your server.
-- DynamoDB table should have a primary key `path` of type `String` and a sort key `tag` of type `String`. (It can reuse the same table as the one used by the default `tagCache`)
+- 您需要向服务器提供 `CACHE_DYNAMO_TABLE`、`CACHE_BUCKET_REGION`、`AWS_ACCESS_KEY_ID`、`AWS_SECRET_ACCESS_KEY` 和 `AWS_SESSION_TOKEN` 环境变量。
+- DynamoDB 表应该有一个类型为 `String` 的主键 `path` 和一个类型为 `String` 的排序键 `tag`。（它可以重用默认 `tagCache` 使用的同一张表）
 
 ### dynamodb-nextMode
 
-TBA
+待定
 
 ### dummy
 
-The Dummy TagCache is a dummy implementation that will throw an exception. It should not be used unless you want to disable cache tags.
+Dummy TagCache 是一个虚拟实现，会抛出异常。除非您想禁用缓存标签，否则不应使用它。
 
 ### fs-dev
 
-The FsDev TagCache is a simple implementation that stores the cache tags in a file in the `.open-next/cache` folder and interact with it using the filesystem. It is useful for development purposes only.
+FsDev TagCache 是一个简单的实现，将缓存标签存储在 `.open-next/cache` 文件夹中的文件中，并使用文件系统与之交互。仅适用于开发目的。

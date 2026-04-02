@@ -1,37 +1,37 @@
 import { Callout } from "nextra/components";
 
-## Develop and deploy
+## 开发与部署
 
-### Development workflow
+### 开发工作流
 
-The primary purpose of `@opennextjs/cloudflare` is to take a Next.js application, built with standard Next.js tooling, and convert it into a format compatible with Cloudflare Workers.
+`@opennextjs/cloudflare` 的主要目的是获取使用标准 Next.js 工具构建的 Next.js 应用程序，并将其转换为与 Cloudflare Workers 兼容的格式。
 
-This code transformation process takes some time, making the adapter less than ideal for active application development, where a very fast feedback loop and other quality-of-life features, such as Hot Module Replacement (HMR), are crucial. Fortunately, Vercel already provides excellent tooling for this workflow, which Next.js developers are likely already familiar with.
+此代码转换过程需要一些时间，使得该适配器不太适合活跃的应用程序开发，因为在活跃开发中，非常快的反馈循环和其他生活质量功能（如热模块替换 (HMR)）至关重要。幸运的是，Vercel 已经为此工作流提供了出色的工具，Next.js 开发人员可能已经熟悉这些工具。
 
-We recommend that developers continue using the tools they are already comfortable with for local development and then use `@opennextjs/cloudflare` when they are ready to deploy their applications to the Cloudflare platform.
+我们建议开发人员继续使用他们已经熟悉的工具进行本地开发，然后在准备将应用程序部署到 Cloudflare 平台时使用 `@opennextjs/cloudflare`。
 
-Let's explore, in more detail, the application development workflow we recommend for the best developer experience.
+让我们更详细地探讨我们推荐的应用程序开发工作流，以获得最佳的开发人员体验。
 
-#### Create a new application based on a template
+#### 基于模板创建新应用程序
 
-To create a new Next.js app, pre-configured to run on Cloudflare using `@opennextjs/cloudflare`, run:
+要创建一个新的 Next.js 应用程序，预配置为使用 `@opennextjs/cloudflare` 在 Cloudflare 上运行，请运行：
 
 ```bash
 npm create cloudflare@latest -- my-next-app --framework=next --platform=workers
 ```
 
-#### Develop locally using `next dev`
+#### 使用 `next dev` 进行本地开发
 
-We believe that the best development workflow uses the `next dev` command provided by Next.js.
+我们认为最好的开发工作流是使用 Next.js 提供的 `next dev` 命令。
 
-To access Cloudflare resources using the `getCloudflareContext` API while running `next dev`, you will need to update the Next.js configuration to call `initOpenNextCloudflareForDev`, as shown in the following example:
+要在运行 `next dev` 时使用 `getCloudflareContext` API 访问 Cloudflare 资源，您需要更新 Next.js 配置以调用 `initOpenNextCloudflareForDev`，如下例所示：
 
 ```ts
 // next.config.ts
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  /* 此处配置选项 */
 };
 
 export default nextConfig;
@@ -40,39 +40,35 @@ import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 initOpenNextCloudflareForDev();
 ```
 
-#### Use `opennextjs-cloudflare` to build and test on the Workers runtime
+#### 使用 `opennextjs-cloudflare` 在 Workers 运行时上构建和测试
 
-After you've finished iterating on your Next.js application with `next dev`, you can convert it to a Cloudflare Worker by running the [`opennextjs-cloudflare build` command](/cloudflare/cli#build-command). This will generate the Worker code in the `.open-next` directory.
+在使用 `next dev` 完成 Next.js 应用程序的迭代后，您可以通过运行 [`opennextjs-cloudflare build` 命令](/cloudflare/cli#build-command) 将其转换为 Cloudflare Worker。这将在 `.open-next` 目录中生成 Worker 代码。
 
-You can then preview the app locally in the Cloudflare Workers runtime.
+然后，您可以在 Cloudflare Workers 运行时中本地预览应用程序。
 
-To preview your worker locally, run the [`opennextjs-cloudflare preview` command](/cloudflare/cli#preview-command). This will populate the cache and create a local server that runs your worker in the Cloudflare Workers runtime. Testing your worker is important to ensure that it has been properly built and is working as expected.
+要在本地预览您的 worker，请运行 [`opennextjs-cloudflare preview` 命令](/cloudflare/cli#preview-command)。这将填充缓存并创建一个本地服务器，在 Cloudflare Workers 运行时中运行您的 worker。测试您的 worker 很重要，以确保它已正确构建并按预期工作。
 
-### Deploy your application to Cloudflare Workers
+### 将您的应用程序部署到 Cloudflare Workers
 
-Both the [`deploy`](/cloudflare/cli#deploy-command) and [`upload`](/cloudflare/cli#upload-command) commands of `opennextjs-cloudflare` can be used to deploy your application to cloudflare Workers. Both commands will initialize the remote cache and upload your application to the Cloudflare infrastructure.
+`opennextjs-cloudflare` 的 [`deploy`](/cloudflare/cli#deploy-command) 和 [`upload`](/cloudflare/cli#upload-command) 命令都可用于将您的应用程序部署到 Cloudflare Workers。这两个命令都将初始化远程缓存并将您的应用程序上传到 Cloudflare 基础设施。
 
-While `deploy` will start serving your application as soon as it is uploaded, `upload` only creates a new version of the application so that you can use [gradual deployments](https://developers.cloudflare.com/workers/configuration/versions-and-deployments/gradual-deployments/).
+虽然 `deploy` 会在上传后立即开始提供您的应用程序服务，但 `upload` 仅创建应用程序的新版本，以便您可以使用 [渐进式部署](https://developers.cloudflare.com/workers/configuration/versions-and-deployments/gradual-deployments/)。
 
-#### Local build
+#### 本地构建
 
-Use the `build` command followed by either `deploy` or `upload` to deploy your local build.
+使用 `build` 命令，后跟 `deploy` 或 `upload` 来部署您的本地构建。
 
 <Callout type="warning">
-  When running the `build` command locally, `.dev.vars` and [Next `.env`
-  files](https://nextjs.org/docs/pages/building-your-application/configuring/environment-variables) might
-  override your configuration. It is preferable to use a CD system as [Workers
-  Builds](https://developers.cloudflare.com/workers/ci-cd/builds/) to deploy your application for reproducible
-  deployments.
+  在本地运行 `build` 命令时，`.dev.vars` 和 [Next `.env` 文件](https://nextjs.org/docs/pages/building-your-application/configuring/environment-variables) 可能会覆盖您的配置。最好使用 [Workers 构建](https://developers.cloudflare.com/workers/ci-cd/builds/) 等 CD 系统来部署您的应用程序，以实现可重复的部署。
 </Callout>
 
-#### Workers Builds
+#### Workers 构建
 
-When using Workers Builds, make sure to setup your environment variables as explained in [this guide](https://opennext.js.org/cloudflare/howtos/env-vars#production).
+使用 Workers 构建时，请确保按照 [本指南](https://opennext.js.org/cloudflare/howtos/env-vars#production) 中的说明设置环境变量。
 
-You can then connect your GitHub repository by following [the documentation](https://developers.cloudflare.com/workers/ci-cd/builds/git-integration/).
+然后，您可以按照 [文档](https://developers.cloudflare.com/workers/ci-cd/builds/git-integration/) 连接您的 GitHub 仓库。
 
-In the Build settings:
+在构建设置中：
 
-- The "Build command" should be set to `npx @opennextjs/cloudflare build`.
-- The "Deploy command" should be set to `npx @opennextjs/cloudflare deploy` (or `upload` to use gradual deployments).
+- “构建命令”应设置为 `npx @opennextjs/cloudflare build`。
+- “部署命令”应设置为 `npx @opennextjs/cloudflare deploy`（或使用 `upload` 进行渐进式部署）。

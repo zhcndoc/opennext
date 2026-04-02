@@ -1,61 +1,59 @@
 ---
-description: From an AWS-focused serverless adapter to a universal Next.js portability initiative backed by Cloudflare, Netlify, and the broader community. Today, an important milestone in the OpenNext story was achieved. More still to come.
+description: 从一个专注于 AWS 的无服务器适配器，发展到由 Cloudflare、Netlify 及更广泛社区支持的通用 Next.js 可移植性计划。今天，OpenNext 发展历程中的一个重要里程碑得以实现。后续还有更多内容。
 ---
 
 import { Callout } from "nextra/components";
 
 import styles from "../../styles/News.module.css";
 
-# 3 Years of OpenNext
+# OpenNext 的三年
 
 <time dateTime="2026-03-25" className={styles.date}>
-  March 25, 2026
+  2026 年 3 月 25 日
 </time>
 
-## Origin of OpenNext
+## OpenNext 的起源
 
-OpenNext began as a serverless adapter created by [SST](https://sst.dev) specifically for AWS Lambda, addressing the challenge of deploying Next.js applications on serverless platforms outside of Vercel's ecosystem.
+OpenNext 最初是由 [SST](https://sst.dev) 创建的一个无服务器适配器，专门用于 AWS Lambda，解决了在 Vercel 生态系统之外将 Next.js 应用程序部署到无服务器平台上的挑战。
 
-## OpenNext V3 and Community Expansion
+## OpenNext V3 与社区扩展
 
-The launch of [OpenNext V3 in May 2024](https://github.com/opennextjs/opennextjs-aws/releases/tag/v3.0.0) marked a pivotal shift, transforming the project from an AWS-focused tool into a more universal solution for Next.js portability. This version opened the door for other platforms to build their own adapters on top of OpenNext, with Cloudflare notably leveraging OpenNext's AWS adapter as a foundation for their own implementation. The expansion of OpenNext into a multi-platform initiative backed by contributions from Cloudflare, Netlify, and the broader community demonstrated the power of open-source collaboration in overcoming technical silos and making Next.js as platform-agnostic as possible.
+[2024 年 5 月推出的 OpenNext V3](https://github.com/opennextjs/opennextjs-aws/releases/tag/v3.0.0) 标志着一个关键的转变，将该项目从一个专注于 AWS 的工具转变为更通用的 Next.js 可移植性解决方案。此版本为其他平台基于 OpenNext 构建自己的适配器打开了大门，其中 Cloudflare 显著地利用 OpenNext 的 AWS 适配器作为其自身实现的基础。OpenNext 扩展到由 Cloudflare、Netlify 和更广泛社区贡献支持的多平台倡议，展示了开源协作在克服技术孤岛并使 Next.js 尽可能与平台无关方面的力量。
 
-## Collaboration with Vercel
+## 与 Vercel 的合作
 
-What started as an independent open-source project was later joined by Netlify and Cloudflare. Soon after, we started communicating with Vercel via unofficial channels. This collaboration grew even further with the creation of the Deployment Adapters Working Group, with others such as Google and AWS Amplify joining in. This group, in collaboration with Vercel, helped design what is today the [Deployment Adapters API](https://nextjs.org/docs/app/api-reference/config/next-config-js/adapterPath).
+最初作为一个独立的开源项目，后来 Netlify 和 Cloudflare 也加入了进来。不久之后，我们通过非官方渠道开始与 Vercel 沟通。随着部署适配器工作组（Deployment Adapters Working Group）的成立，这种合作进一步扩大，Google 和 AWS Amplify 等其他公司也加入其中。该小组与 Vercel 合作，帮助设计了如今的 [部署适配器 API](https://nextjs.org/docs/app/api-reference/config/next-config-js/adapterPath)。
 
-## The Adapters API: Building the Future
+## Adapters API：构建未来
 
-It all started with an RFC, shared privately in December 2024, and then [publicly in April 2025](https://github.com/vercel/next.js/discussions/77740). The RFC was met with a lot of positive feedback, and the Working Group was formed.
+这一切始于一个 RFC，于 2024 年 12 月私下分享，然后在 [2025 年 4 月公开](https://github.com/vercel/next.js/discussions/77740)。该 RFC 获得了大量积极反馈，并成立了工作组。
 
-The Adapters API helps alleviate one of the biggest challenges OpenNext had to solve: the build output. The Adapters API allows us to avoid reverse-engineering features, as the build output now follows a clear contract that every platform can follow.
+Adapters API 有助于缓解 OpenNext 必须解决的最大挑战之一：构建输出。Adapters API 允许我们避免逆向工程功能，因为构建输出现在遵循每个平台都可以遵循的明确契约。
 
-In Next.js 16 in October 2025, the Adapter API was released as an alpha. This was a major milestone, as it allowed us to start developing our new adapters in earnest.
+在 2025 年 10 月的 Next.js 16 中，Adapter API 作为 alpha 版本发布。这是一个重要的里程碑，因为它允许我们开始认真开发新的适配器。
 
-And now, in March 2026, **the Adapter API is stable in Next.js 16.2.** [Read more about this incredible milestone in the official Next.js announcement](https://nextjs.org/blog/nextjs-across-platforms).
+现在，到了 2026 年 3 月，**Adapter API 在 Next.js 16.2 中已稳定。** [在官方 Next.js 公告中阅读有关这一不可思议里程碑的更多信息](https://nextjs.org/blog/nextjs-across-platforms)。
 
-AWS and Cloudflare adapters are currently being built in a shared monorepo. The Netlify adapter is also in active development. We expect all three to be released by the end of 2026.
+AWS 和 Cloudflare 适配器目前正在共享的 monorepo 中构建。Netlify 适配器也在积极开发中。我们预计这三者都将在 2026 年底之前发布。
 
 <Callout>
-  Don't worry, the current OpenNext adapters are not going anywhere. They will still be supported and
-  maintained by the OpenNext community. In the case of Netlify, transition to the new adapter will be seamless
-  for users.
+  别担心，当前的 OpenNext 适配器不会消失。它们仍将得到 OpenNext 社区的支持和维护。对于 Netlify 而言，过渡到新适配器对用户来说将是无缝的。
 </Callout>
 
-## What's Next?
+## 接下来是什么？
 
-![Vertical timeline diagram showing the OpenNext and Next.js Adapter API roadmap from April 2023 to a future endpoint. A blue progress line marks completed milestones: SST ships OpenNext 1.0 for serverless self-hosting in April 2023; OpenNext expands as Netlify and Cloudflare join in October 2024; collaboration begins on an Adapter API spec in December 2024; the first Adapter API RFC draft is published in March 2025; and the Adapter API alpha lands in next@16 in October 2025, marked with a pulsing ring. Two milestones are labeled "TODAY": the Adapter API going stable in next@16.2 in March 2026, and portability being achieved with full fidelity specs for all features. Future milestones in gray show GA adapters for Netlify, Cloudflare, and AWS targeted for 2026; a level playing field where Working Group member platforms have information and time to support changes; and finally, "OpenNext disbands?" as the aspirational endpoint.](/opennext-timeline-202603.png)
+![垂直时间线图，展示了从 2023 年 4 月到未来终点的 OpenNext 和 Next.js Adapter API 路线图。一条蓝色进度线标记了已完成的里程碑：2023 年 4 月 SST 发布 OpenNext 1.0 用于无服务器自托管；2024 年 10 月 Netlify 和 Cloudflare 加入，OpenNext 扩展；2024 年 12 月开始协作制定 Adapter API 规范；2025 年 3 月发布第一个 Adapter API RFC 草案；2025 年 10 月 Adapter API alpha 登陆 next@16，标记为脉冲环。两个里程碑标记为“今天”：2026 年 3 月 Adapter API 在 next@16.2 中稳定，以及通过所有功能的完全保真规范实现可移植性。未来的灰色里程碑显示 Netlify、Cloudflare 和 AWS 的 GA 适配器目标为 2026 年；一个公平的竞争环境，工作组成员平台拥有支持变更的信息和时间；最后是"OpenNext 解散？”作为理想的终点。](/opennext-timeline-202603.png)
 
-Over the last three years, OpenNext has played a crucial role in pushing Next.js toward true portability. Now, the introduction of the Adapters API signals a new era. And [as announced today by the Next.js team](https://nextjs.org/blog/nextjs-across-platforms), OpenNext along with Netlify and Cloudflare are founding members of the new [Next.js Ecosystem Working Group](https://nextjs.org/ecosystem-working-group), along with Google, AWS Amplify, and others. This initiative and Vercel's associated commitments give us great confidence that Next.js will remain a flexible, open framework for years to come. For developers, this means more choices, fewer limitations, and a stronger, more inclusive web development community.
+在过去的三年里，OpenNext 在推动 Next.js 走向真正的可移植性方面发挥了至关重要的作用。现在，Adapters API 的引入标志着一个新时代的到来。正如 [Next.js 团队今天宣布的那样](https://nextjs.org/blog/nextjs-across-platforms)，OpenNext 与 Netlify 和 Cloudflare 一起成为新的 [Next.js 生态系统工作组](https://nextjs.org/ecosystem-working-group) 的创始成员，Google、AWS Amplify 和其他公司也加入其中。这一倡议和 Vercel 的相关承诺让我们深信，Next.js 在未来几年仍将是一个灵活、开放的框架。对于开发者来说，这意味着更多的选择、更少的限制，以及一个更强大、更包容的 Web 开发社区。
 
-The aims of OpenNext may evolve in the near future as we explore this new terrain together. Stay tuned.
+随着我们一起探索这片新领域，OpenNext 的目标可能在不久的将来演变。敬请期待。
 
-The future of Next.js is not just open, it's everywhere.
+Next.js 的未来不仅是开放的，它无处不在。
 
-## Read more
+## 阅读更多
 
-Next.js, OpenNext, Netlify, and Google Firebase have published simultaneous companion posts:
+Next.js、OpenNext、Netlify 和 Google Firebase 发布了同步的配套文章：
 
-- Read about the stable Adapter API, verified adapters, and the new working group in the [Next.js blog post](https://nextjs.org/blog/nextjs-across-platforms)
-- Read about remaining architectural challenges in the [Netlify blog post](https://www.netlify.com/blog/the-next-js-adapter-api-just-shipped-here-s-what-comes-next)
-- Read about the Google Cloud perspective in the [Firebase blog post](https://firebase.blog/posts/2026/03/nextjs-adapters)
+- 在 [Next.js 博客文章](https://nextjs.org/blog/nextjs-across-platforms) 中阅读有关稳定的 Adapter API、经过验证的适配器和新工作组的信息
+- 在 [Netlify 博客文章](https://www.netlify.com/blog/the-next-js-adapter-api-just-shipped-here-s-what-comes-next) 中阅读有关剩余架构挑战的信息
+- 在 [Firebase 博客文章](https://firebase.blog/posts/2026/03/nextjs-adapters) 中阅读 Google Cloud 的观点

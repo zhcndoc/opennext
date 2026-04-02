@@ -1,5 +1,5 @@
 {
-  "index": "Overview",
+  "index": "概览",
   "aws": "AWS",
   "cloudflare": "Cloudflare",
   "netlify": "Netlify",
@@ -7,7 +7,7 @@
     "type": "separator"
   },
   "news": {
-    "title": "News",
+    "title": "新闻",
     "theme": {
       "collapsed": false
     }

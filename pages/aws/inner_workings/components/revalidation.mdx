@@ -1,7 +1,7 @@
-The revalidation backend is used to read the queue and revalidate the routes. It is used for ISR only.
-For every received message it will trigger a `HEAD` request with `x-prerender-revalidate` header to the host.
+revalidation 后端用于读取队列并重新验证路由。它仅用于 ISR。
+对于每条接收到的消息，它将向主机触发一个带有 `x-prerender-revalidate` 头的 `HEAD` 请求。
 
-### Special Event and Result types
+### 特殊事件和结果类型
 
 ```typescript
 interface RevalidateEvent {

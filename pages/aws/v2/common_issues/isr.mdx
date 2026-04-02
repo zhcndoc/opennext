@@ -1,13 +1,13 @@
 import { Callout } from "nextra/components";
 
 <Callout type="warning" emoji="⚠️">
-  `next/cache` revalidation needs `next@13.5.1` or higher to work properly. If you are using an older version,
-  please upgrade.
+  `next/cache` 重新验证需要 `next@13.5.1` 或更高版本才能正常工作。如果您使用的是较旧版本，
+  请升级。
 </Callout>
 
-#### On-demand revalidation
+#### 按需重新验证
 
-When you manually revalidate the Next.js cache for a specific page, the ISR cache files stored on S3 will be updated. However, it is still necessary to invalidate the CloudFront cache:
+当您手动重新验证特定页面的 Next.js 缓存时，存储在 S3 上的 ISR 缓存文件将会更新。但是，仍然需要使 CloudFront 缓存失效：
 
 ```ts
 // pages/api/revalidate.js
@@ -18,13 +18,13 @@ export default async function handler(req, res) {
 }
 ```
 
-If the pages router is in use, you must also invalidate the `_next/data/BUILD_ID/foo.json` path. The value for `BUILD_ID` can be found in the `.next/BUILD_ID` build output and can be accessed at runtime via the `process.env.NEXT_BUILD_ID` environment variable.
+如果使用的是 pages 路由器，您还必须使 `_next/data/BUILD_ID/foo.json` 路径失效。`BUILD_ID` 的值可以在 `.next/BUILD_ID` 构建输出中找到，并且可以通过 `process.env.NEXT_BUILD_ID` 环境变量在运行时访问。
 
 ```ts
 await invalidateCloudFrontPaths(["/foo", `/_next/data/${process.env.NEXT_BUILD_ID}/foo.json`]);
 ```
 
-And here is an example of the `invalidateCloudFrontPaths()` function:
+下面是 `invalidateCloudFrontPaths()` 函数的一个示例：
 
 ```ts
 import { CloudFrontClient, CreateInvalidationCommand } from "@aws-sdk/client-cloudfront";
@@ -34,7 +34,7 @@ const cloudFront = new CloudFrontClient({});
 async function invalidateCloudFrontPaths(paths: string[]) {
   await cloudFront.send(
     new CreateInvalidationCommand({
-      // Set CloudFront distribution ID here
+      // 在此处设置 CloudFront 分配 ID
       DistributionId: distributionId,
       InvalidationBatch: {
         CallerReference: `${Date.now()}`,
@@ -48,21 +48,21 @@ async function invalidateCloudFrontPaths(paths: string[]) {
 }
 ```
 
-Note that manual CloudFront path invalidation incurs costs. According to the [AWS CloudFront pricing page](https://aws.amazon.com/cloudfront/pricing/):
+请注意，手动 CloudFront 路径失效会产生费用。根据 [AWS CloudFront 定价页面](https://aws.amazon.com/cloudfront/pricing/)：
 
-> No additional charge for the first 1,000 paths requested for invalidation each month. Thereafter, $0.005 per path requested for invalidation.
+> 每月前 1,000 个请求失效的路径不收取额外费用。此后，每个请求失效的路径收费 0.005 美元。
 
-Due to these costs, if multiple paths require invalidation, it is more economical to invalidate a wildcard path `/*`. For example:
+由于这些成本，如果多个路径需要失效，使通配符路径 `/*` 失效更经济。例如：
 
 ```ts
-// This costs $0.005 x 3 = $0.015 after the first 1000 paths
+// 在前 1000 个路径之后，这将花费 $0.005 x 3 = $0.015
 await invalidateCloudFrontPaths(["/page/a", "/page/b", "/page/c"]);
 
-// This costs $0.005, but also invalidates other routes such as "page/d"
+// 这将花费 $0.005，但也会使其他路由（如 "page/d"）失效
 await invalidateCloudFrontPaths(["/page/*"]);
 ```
 
-For on-demand revalidation via the [`next/cache` module](https://nextjs.org/docs/app/building-your-application/data-fetching/revalidating#using-on-demand-revalidation), if you want to retrieve the associated paths for a given tag, you can use this function:
+对于通过 [`next/cache` 模块](https://nextjs.org/docs/app/building-your-application/data-fetching/revalidating#using-on-demand-revalidation) 进行的按需重新验证，如果您想检索给定标签的关联路径，可以使用此函数：
 
 ```ts
 function getByTag(tag: string) {
@@ -80,7 +80,7 @@ function getByTag(tag: string) {
       })
     );
     return (
-      // We need to remove the buildId from the path
+      // 我们需要从路径中移除 buildId
       Items?.map(({ path: { S: key } }) => key?.replace(`${process.env.NEXT_BUILD_ID}/`, "") ?? "") ?? []
     );
   } catch (e) {
@@ -90,10 +90,9 @@ function getByTag(tag: string) {
 }
 ```
 
-#### Patch fetch behaviour for ISR. Only for next@13.5.1+
+#### 修补 ISR 的 fetch 行为。仅适用于 next@13.5.1+
 
-If you use ISR and fetch in your app, you may encounter a bug that makes your revalidate values inconsistent.
-The issue is that it revalidates using the lowest revalidate of all fetch calls in your page, regardless of their individual values. To fix this bug, you need to modify the fetch function in your root layout component with the following code snippet
+如果您在应用中使用 ISR 和 fetch，可能会遇到一个导致重新验证值不一致的 bug。问题在于它使用页面中所有 fetch 调用中最低的重新验证值进行重新验证，而不考虑它们各自的值。要修复此 bug，您需要使用以下代码片段修改根布局组件中的 fetch 函数
 
 ```ts
 export default function RootLayout() {

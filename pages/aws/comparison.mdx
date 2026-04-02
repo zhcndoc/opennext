@@ -1,25 +1,25 @@
-It should be noted that OpenNext does not actually deploy the app. It only bundles everything for your IAC to deploy it.
+需要注意的是，OpenNext 实际上并不部署应用程序。它只是将所有内容打包，以便您的 IAC 进行部署。
 
-Here is a table comparing the different options to deploy a next.js app:
+下表比较了部署 next.js 应用程序的不同选项：
 
-| Features                         | OpenNext          | Vercel | AWS Amplify | Docker Standalone |
+| 功能                         | OpenNext          | Vercel | AWS Amplify | Docker 独立版 |
 | -------------------------------- | ----------------- | ------ | ----------- | ----------------- |
-| **Function splitting**           | Yes               | Yes    | No          | No                |
-| **Multiple deployment target** ¹ | Yes               | Yes ²  | No          | No                |
-| **Serverless**                   | Yes               | Yes    | Yes         | No ³              |
-| **Warmer function**              | Yes               | No     | No          | Not necessary     |
-| **External middleware**          | Yes ⁴             | Yes    | No          | No                |
-| **Edge runtime support**         | Partial Support ⁵ | Yes    | Embedded ⁶  | Embedded ⁶        |
-| **ISR**                          | Yes               | Yes    | Yes         | Yes ⁷             |
-| **On-Demand Revalidation**       | Yes ⁸             | Yes    | No          | Yes ⁸             |
-| **Custom server**                | Yes ⁹             | No     | No          | Yes               |
+| **函数拆分**           | 是               | 是    | 否          | 否                |
+| **多部署目标** ¹ | 是               | 是 ²  | 否          | 否                |
+| **无服务器**                   | 是               | 是    | 是         | 否 ³              |
+| **预热函数**              | 是               | 否     | 否          | 无需     |
+| **外部中间件**          | 是 ⁴             | 是    | 否          | 否                |
+| **边缘运行时支持**         | 部分支持 ⁵ | 是    | 嵌入式 ⁶  | 嵌入式 ⁶        |
+| **ISR**                          | 是               | 是    | 是         | 是 ⁷             |
+| **按需重新验证**       | 是 ⁸             | 是    | 否          | 是 ⁸             |
+| **自定义服务器**                | 是 ⁹             | 否     | 否          | 是               |
 
-1. Multiple deployment target means that you can deploy the same app to different target like some part to ECS, some part to Lambda etc...
-2. Vercel supports only serverless Node (backed by AWS Lambda) and Edge runtime (backed by cloudflare workers)
-3. You can deploy a dockerized next.js app to AWS lambda using AWS Lambda Web adapter, but some part like ISR will not work as expected
-4. OpenNext supports external middleware, but it is not enabled by default.
-5. OpenNext supports edge runtime in node, but every route needs to be deployed separately. OpenNext supports edge runtime in cloudflare workers, but only for app router api routes.
-6. Embedded means that the edge runtime is embedded inside the bundle. It emulates a fake edge runtime inside the prod environment.
-7. You might experience some inconsistencies with ISR if you have a CDN in front of your app. Next always set the cache-control header to `s-maxage=REVALIDATION_TIME, stale-while-revalidate`, it means that your data (json or rsc) and your html might be out of sync.
-8. You need to invalidate the CDN manually. For OpenNext, here is an example for cloudfront
-9. OpenNext supports custom server, but it is not enabled by default. You can have a custom server even in a serverless environment.
+1. 多部署目标意味着您可以将同一个应用程序部署到不同的目标，例如部分部署到 ECS，部分部署到 Lambda 等...
+2. Vercel 仅支持无服务器 Node（由 AWS Lambda 支持）和边缘运行时（由 Cloudflare Workers 支持）
+3. 您可以使用 AWS Lambda Web Adapter 将容器化的 next.js 应用程序部署到 AWS Lambda，但某些部分（如 ISR）将无法按预期工作
+4. OpenNext 支持外部中间件，但默认未启用。
+5. OpenNext 支持 Node 中的边缘运行时，但每个路由需要单独部署。OpenNext 支持 Cloudflare Workers 中的边缘运行时，但仅适用于 App Router API 路由。
+6. 嵌入式意味着边缘运行时嵌入在 bundle 中。它在生产环境中模拟了一个假的边缘运行时。
+7. 如果您的应用程序前面有 CDN，您可能会遇到 ISR 不一致的情况。Next 总是将 cache-control 头设置为 `s-maxage=REVALIDATION_TIME, stale-while-revalidate`，这意味着您的数据（json 或 rsc）和您的 html 可能不同步。
+8. 您需要手动使 CDN 失效。对于 OpenNext，这里是 CloudFront 的示例
+9. OpenNext 支持自定义服务器，但默认未启用。即使在无服务器环境中，您也可以拥有自定义服务器。

@@ -1,42 +1,42 @@
-Server functions may experience performance issues due to Lambda cold starts. To mitigate this, the server function can be invoked periodically. Remember, **Warming is optional** and is only required if you want to keep the server function warm.
+服务器函数可能会因为 Lambda 冷启动而出现性能问题。为了缓解这种情况，可以定期调用服务器函数。请记住，**预热是可选的**，仅当您希望保持服务器函数处于预热状态时才需要。
 
-Please note, warming is currently only supported when the server function is deployed to a single region (Lambda).
+请注意，目前仅当服务器函数部署到单个区域 (Lambda) 时才支持预热。
 
-#### Prewarm
+#### 预热
 
-Each time you deploy, a new version of the Lambda function will be generated. All warmed server function instances will be turned off. And there won't be any warm instances until the warmer function runs again at the next 5-minute interval.
+每次部署时，都会生成一个新版本的 Lambda 函数。所有已预热的服务器函数实例都将被关闭。并且在预热函数在下个 5 分钟间隔再次运行之前，将没有任何预热实例。
 
-To ensure the functions are prewarmed on deploy, create a [CloudFormation Custom Resource](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-custom-resources.html) to invoke the warmer function on deployment. The custom resource should be configured as follows:
+为了确保函数在部署时被预热，请创建一个 [CloudFormation 自定义资源](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-custom-resources.html) 以便在部署时调用预热函数。自定义资源的配置应如下所示：
 
-- Invoke the warmer function on resource `Create` and `Update`.
-- Include a timestamp value in the resource property to ensure the custom resource runs on every deployment.
-- Grant `lambda:InvokeFunction` permission to allow the custom resource to invoke the warmer function.
+- 在资源 `Create` 和 `Update` 时调用预热函数。
+- 在资源属性中包含时间戳值，以确保自定义资源在每次部署时运行。
+- 授予 `lambda:InvokeFunction` 权限以允许自定义资源调用预热函数。
 
-#### Cost
+#### 成本
 
-There are three components to the cost:
+成本由三个部分组成：
 
-1. EventBridge scheduler: $0.00864
-
-   ```
-   Requests cost — 8,640 invocations per month x $1/million = $0.00864
-   ```
-
-1. Warmer function: $0.145728288
+1. EventBridge 调度器：$0.00864
 
    ```
-   Requests cost — 8,640 invocations per month x $0.2/million = $0.001728
-   Duration cost — 8,640 invocations per month x 1GB memory x 1s duration x $0.0000166667/GB-second = $0.144000288
+   请求成本 — 每月 8,640 次调用 x $1/百万 = $0.00864
    ```
 
-1. Server function: $0.0161280288 per warmed instance
+1. 预热函数：$0.145728288
 
    ```
-   Requests cost — 8,640 invocations per month x $0.2/million = $0.001728
-   Duration cost — 8,640 invocations per month x 1GB memory x 100ms duration x $0.0000166667/GB-second = $0.0144000288
+   请求成本 — 每月 8,640 次调用 x $0.2/百万 = $0.001728
+   持续时间成本 — 每月 8,640 次调用 x 1GB 内存 x 1s 持续时间 x $0.0000166667/GB-秒 = $0.144000288
    ```
 
-For example, keeping 50 instances of the server function warm will cost approximately **$0.96 per month**
+1. 服务器函数：每个预热实例 $0.0161280288
+
+   ```
+   请求成本 — 每月 8,640 次调用 x $0.2/百万 = $0.001728
+   持续时间成本 — 每月 8,640 次调用 x 1GB 内存 x 100ms 持续时间 x $0.0000166667/GB-秒 = $0.0144000288
+   ```
+
+例如，保持 50 个服务器函数实例处于预热状态，每月成本约为 **$0.96**
 
 ```
 
@@ -44,4 +44,4 @@ $0.00864 + $0.145728288 + $0.0161280288 x 50 = $0.960769728
 
 ```
 
-This cost estimate is based on the `us-east-1` region pricing and does not consider any free tier benefits.
+此成本估算基于 `us-east-1` 区域定价，未考虑任何免费套餐优惠。

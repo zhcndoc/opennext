@@ -1,13 +1,13 @@
 {
-  "wrapper": "Wrapper",
-  "converter": "Converter",
-  "incremental_cache": "Incremental Cache",
-  "tag_cache": "Tag Cache",
-  "queue": "Revalidation Queue",
-  "image_loader": "Image Loader",
-  "proxy_external_request": "External Request Proxy",
-  "origin_resolver": "Origin Resolver",
-  "invoke_function": "Invoke Function for the warmer",
-  "automatic_cdn_invalidation": "Automatic CDN Invalidation",
-  "asset_resolver": "Asset Resolver"
+  "wrapper": "包装器",
+  "converter": "转换器",
+  "incremental_cache": "增量缓存",
+  "tag_cache": "标签缓存",
+  "queue": "重新验证队列",
+  "image_loader": "图像加载器",
+  "proxy_external_request": "外部请求代理",
+  "origin_resolver": "源解析器",
+  "invoke_function": "为预热器调用函数",
+  "automatic_cdn_invalidation": "自动 CDN 失效",
+  "asset_resolver": "资源解析器"
 }

@@ -1,11 +1,11 @@
-When making some changes to OpenNext, it can be a bit cumbersome to need to deploy every time you want to test changes. If your change is not dependent on the wrapper or the converter, then you can create a custom `open-next.config.ts` file (you can use another name so that it doesn't conflict with your existing `open-next.config.ts`).
+在对 OpenNext 进行某些更改时，如果每次想要测试更改都需要部署，可能会有些繁琐。如果您的更改不依赖于 wrapper 或 converter，那么您可以创建一个自定义的 `open-next.config.ts` 文件（您可以使用另一个名称，以免与现有的 `open-next.config.ts` 冲突）。
 
-To run `OpenNext` locally:
+要在本地运行 `OpenNext`：
 
 ```bash
-# This is to build (the config-path is needed if you use a different name than the default one)
+# 这是为了构建（如果您使用的名称与默认名称不同，则需要 config-path）
 node /path/to/opennextjs-aws/packages/open-next/dist/index.js build --config-path open-next.local.config.ts
-# Then to run the server
+# 然后运行服务器
 node .open-next/server-functions/default/index.mjs
 ```
 
@@ -13,9 +13,9 @@ node .open-next/server-functions/default/index.mjs
 
 ```typescript
 // open-next.local.config.ts -
-// A good practice would be to use a different name so that it doesn't conflict
-// with your existing open-next.config.ts i.e. open-next.local.config.ts
-// You could also customize it by using custom overrides if you need to.
+// 一个好的做法是使用不同的名称，这样就不会
+// 与您现有的 open-next.config.ts 冲突，即 open-next.local.config.ts
+// 如果需要，您也可以通过使用自定义 overrides 来定制它。
 import type { OpenNextConfig } from "@opennextjs/aws/types/open-next.js";
 
 export default {
@@ -35,14 +35,14 @@ export default {
       converter: "dummy",
     },
     loader: "fs-dev",
-    // This part is not needed on arm linux, and image optimization will only work in linux
+    // 这部分在 arm linux 上不需要，且图像优化仅在 linux 上有效
     install: {
       arch: "x64",
       packages: ["sharp"],
     },
   },
 
-  // You can override the build command here so that you don't have to rebuild next every time you make a change
+  // 您可以在此处覆盖构建命令，这样每次更改时就不必重新构建 next
   //buildCommand: "echo 'No build command'",
 } satisfies OpenNextConfig;
 

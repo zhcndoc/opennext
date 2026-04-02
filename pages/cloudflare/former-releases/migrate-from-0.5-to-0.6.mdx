@@ -1,24 +1,24 @@
 import { Callout } from "nextra/components";
 
-### Migrate from 0.5 to 0.6
+### 从 0.5 迁移到 0.6
 
-`@opennextjs/cloudflare@0.6.0` introduces more options for caching.
+`@opennextjs/cloudflare@0.6.0` 引入了更多的缓存选项。
 
-The codebase has been refactored with some breaking changes, read-on to update your apps:
+代码库经过了重构并包含一些破坏性变更，请继续阅读以更新您的应用：
 
-##### Overrides location
+##### 覆盖位置
 
-The cloudflare overrides now live in `@opennextjs/cloudflare/overrides`:
+Cloudflare 覆盖文件现在位于 `@opennextjs/cloudflare/overrides`：
 
-- Incremental cache overrides: `@opennextjs/cloudflare/overrides/incremental-cache/...`
-- Tag cache overrides: `@opennextjs/cloudflare/overrides/tag-cache/...`
-- Queue overrides: `@opennextjs/cloudflare/overrides/queue/...`
+- 增量缓存覆盖：`@opennextjs/cloudflare/overrides/incremental-cache/...`
+- 标签缓存覆盖：`@opennextjs/cloudflare/overrides/tag-cache/...`
+- 队列覆盖：`@opennextjs/cloudflare/overrides/queue/...`
 
-For example the KV incremental cache override can be now imported as `@opennextjs/cloudflare/overrides/incremental-cache/kv-incremental-cache`.
+例如，KV 增量缓存覆盖现在可以导入为 `@opennextjs/cloudflare/overrides/incremental-cache/kv-incremental-cache`。
 
-##### Environment variables and bindings
+##### 环境变量和绑定
 
-We have updated the name for consistency:
+为了保持一致性，我们更新了名称：
 
 - `NEXT_CACHE_WORKERS_KV` -> `NEXT_INC_CACHE_KV`
 - `NEXT_CACHE_R2_...` -> `NEXT_INC_CACHE_R2_...`
@@ -27,19 +27,19 @@ We have updated the name for consistency:
 - `NEXT_CACHE_DO_REVALIDATION` -> `NEXT_CACHE_DO_QUEUE`
 - `NEXT_CACHE_REVALIDATION_WORKER` -> `WORKER_SELF_REFERENCE`
 
-`NEXT_CACHE_D1_TAGS_TABLE` and `NEXT_CACHE_D1_REVALIDATIONS_TABLE` have been dropped.
-The D1 tables have a fixed names `tags` and `revalidations`.
+`NEXT_CACHE_D1_TAGS_TABLE` 和 `NEXT_CACHE_D1_REVALIDATIONS_TABLE` 已被移除。
+D1 表现在具有固定的名称 `tags` 和 `revalidations`。
 
-##### CLI
+##### 命令行界面
 
-The CLI was previsouly invoked as `opennextjs-cloudflare` and now takes a mandatory command:
+CLI 以前通过 `opennextjs-cloudflare` 调用，现在需要必填的命令：
 
-- `opennextjs-cloudflare build` is the equivalent of executing `opennextjs-cloudflare` previously
-- `opennextjs-cloudflare populateCache local` is used to populate the `local` or `remote` cache
-- `opennextjs-cloudflare preview` is used to populate the local cache and start a dev server
-- `opennextjs-cloudflare deploy` is used to populate the remote cache and deploy
+- `opennextjs-cloudflare build` 等同于以前执行 `opennextjs-cloudflare`
+- `opennextjs-cloudflare populateCache local` 用于填充 `local` 或 `remote` 缓存
+- `opennextjs-cloudflare preview` 用于填充本地缓存并启动开发服务器
+- `opennextjs-cloudflare deploy` 用于填充远程缓存并部署
 
-You will need to update the `scripts` in your `package.json`:
+您需要更新 `package.json` 中的 `scripts`：
 
 ```json
 "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",

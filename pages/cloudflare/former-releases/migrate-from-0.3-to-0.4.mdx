@@ -1,17 +1,17 @@
 import { Callout } from "nextra/components";
 
-### Migrate from 0.3 to 0.4
+### 从 0.3 迁移到 0.4
 
-`@opennextjs/cloudflare@0.4.0` introduced a new `initOpenNextCloudflareForDev` utility and made `getCloudflareContext` synchronous,
-we'll explore those two differences below, and how they effect applications built using `0.3.x` versions of the adapter.
+`@opennextjs/cloudflare@0.4.0` 引入了一个新的 `initOpenNextCloudflareForDev` 工具函数，并将 `getCloudflareContext` 改为同步，
+我们将在下面探讨这两个差异，以及它们如何影响使用该适配器 `0.3.x` 版本构建的应用程序。
 
 ##### `initOpenNextCloudflareForDev`
 
-`initOpenNextCloudflareForDev` is a new utility that needs to be added to the Next.js configuration file in order to integrate the adapter
-with the Next.js dev server. If you don't plan on using the `next dev` command you can skip this section, otherwise update your Next.js
-configuration file to import and call the utility.
+`initOpenNextCloudflareForDev` 是一个新的工具函数，需要添加到 Next.js 配置文件中，以便将适配器
+与 Next.js 开发服务器集成。如果您不打算使用 `next dev` 命令，可以跳过本节，否则请更新您的 Next.js
+配置文件以导入并调用该工具函数。
 
-Example:
+示例：
 
 ```js
 // next.config.mjs
@@ -26,13 +26,14 @@ const nextConfig = {};
 export default nextConfig;
 ```
 
-##### Synchronous `getCloudflareContext` synchronous
+##### `getCloudflareContext` 变为同步
 
-`getCloudflareContext` is now synchronous.
-a promise that resolves to it.
+`getCloudflareContext` 现在是同步的。
 
-This means that if you had code that `await`ed `getCloudflareContext()` calls, such `await`s are no longer necessary and
-can be removed.
+一个解析为它的 promise。
 
-If your application is instead combining the result of `getCloudflareContext()` with on Ecmascript Promises APIs such as
-`then`, `catch` and `finally` those need to be removed since the function's result, as mentioned is no longer a promise.
+这意味着如果您曾有代码 `await` 了 `getCloudflareContext()` 调用，这些 `await` 不再必要，并且
+可以被移除。
+
+如果您的应用程序改为将 `getCloudflareContext()` 的结果与 Ecmascript Promises API 结合使用，例如
+`then`、`catch` 和 `finally`，这些也需要被移除，因为如上所述，函数的结果不再是一个 promise。

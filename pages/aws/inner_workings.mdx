@@ -1,23 +1,23 @@
-When calling `open-next build`, OpenNext **runs `next build`** to build the Next.js app, and then **transforms the build output** to a format that can be deployed to AWS.
+当调用 `open-next build` 时，OpenNext **运行 `next build`** 来构建 Next.js 应用，然后将**构建输出转换**为可以部署到 AWS 的格式。
 
-#### Building the Next.js app
+#### 构建 Next.js 应用
 
-OpenNext runs the `build` script in your `package.json` file. Depending on the lock file found in the app, the corresponding packager manager will be used. Either `npm run build`, `yarn build`, or `pnpm build` will be run. For more on customizing the build command, see [overriding the build command](/aws/advanced/options#custom-build-command).
+OpenNext 运行你 `package.json` 文件中的 `build` 脚本。根据应用中发现的锁文件，将使用相应的包管理器。将会运行 `npm run build`、`yarn build` 或 `pnpm build`。有关自定义构建命令的更多信息，请参阅 [覆盖构建命令](/aws/advanced/options#custom-build-command)。
 
-#### Transforming the build output
+#### 转换构建输出
 
-The build output is then transformed into a format that can be deployed to AWS. The transformed output is generated inside the `.open-next` folder within your Next.js app. Files in `assets/` are ready to be uploaded to AWS S3. And the function code is wrapped inside Lambda handlers, ready to be deployed to AWS Lambda or Lambda@Edge.
+构建输出随后被转换为可以部署到 AWS 的格式。转换后的输出生成在你 Next.js 应用内的 `.open-next` 文件夹中。`assets/` 中的文件已准备好上传到 AWS S3。函数代码被封装在 Lambda 处理程序中，准备好部署到 AWS Lambda 或 Lambda@Edge。
 
 ```bash
 my-next-app/
   .open-next/
-    cache/                         -> ISR cache files to upload - This cannot be directly served
-    assets/                        -> Static files to upload
+    cache/                         -> 要上传的 ISR 缓存文件 - 不能直接提供
+    assets/                        -> 要上传的静态文件
     server-functions/
-      default/                     -> Handler code for the default server
-      other-fn/                    -> Handler code for another backend
-    revalidation-function/         -> Handler code for revalidation backend
-    image-optimization-function/   -> Handler code for image optimization backend
-    warmer-function/               -> Cron job code to keep server function warm - Not mandatory
-    dynamodb-provider/               -> Code for a custom resource to populate the Tag Cache - Only necessary for app dir
+      default/                     -> 默认服务器的处理程序代码
+      other-fn/                    -> 另一个后端的处理程序代码
+    revalidation-function/         -> 重新验证后端的处理程序代码
+    image-optimization-function/   -> 图像优化后端的处理程序代码
+    warmer-function/               -> 保持服务器函数预热的定时任务代码 - 非必需
+    dynamodb-provider/               -> 用于填充 Tag 缓存的自定义资源代码 - 仅适用于 app 目录
 ```

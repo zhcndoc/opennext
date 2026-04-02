@@ -1,11 +1,11 @@
-## `workerd` specific code
+## `workerd` 特定代码
 
-### Configuration
+### 配置
 
-[`workerd`](https://github.com/cloudflare/workerd) is the runtime cloudflare uses to run Workers code.
+[`workerd`](https://github.com/cloudflare/workerd) 是 Cloudflare 用来运行 Workers 代码的运行时。
 
-While the [`nodejs_compat`](https://developers.cloudflare.com/workers/configuration/compatibility-flags/#nodejs-compatibility-flag) flag makes `workerd` mostly compatible with Node.js,
-there are still minor differences. Some packages publish code for different runtimes to account for those differences. For example, `postgres` has [conditional exports](https://nodejs.org/api/packages.html#conditional-exports) in its [`package.json`](https://github.com/porsager/postgres/blob/ad0ed4476e09f41f147859cb5a42971d2b99e9c7/package.json#L8-L13):
+虽然 [`nodejs_compat`](https://developers.cloudflare.com/workers/configuration/compatibility-flags/#nodejs-compatibility-flag) 标志使 `workerd` 大部分兼容 Node.js，
+但仍存在细微差异。一些包会为不同的运行时发布代码以应对这些差异。例如，`postgres` 在其 [`package.json`](https://github.com/porsager/postgres/blob/ad0ed4476e09f41f147859cb5a42971d2b99e9c7/package.json#L8-L13) 中有 [条件导出](https://nodejs.org/api/packages.html#conditional-exports)：
 
 ```json
 "exports": {
@@ -17,12 +17,12 @@ there are still minor differences. Some packages publish code for different runt
 },
 ```
 
-With such exports, Node.js applications use either `src/index.js` or `cjs/src/index.js` depending if the app use ESM or CJS.
+有了这样的导出，Node.js 应用程序会根据应用使用的是 ESM 还是 CJS 来使用 `src/index.js` 或 `cjs/src/index.js`。
 
-However we want to use the `workerd` specific entrypoint when using the Cloudflare adapter.
-For that, you need to instruct Next.js not to bundle packages as it would use the node conditions by default.
+然而，当我们使用 Cloudflare 适配器时，我们希望使用 `workerd` 特定的入口点。
+为此，您需要指示 Next.js 不要打包这些包，因为它默认会使用 `node` 条件。
 
-To do that, add those packages in the `serverExternalPackages` key of your `next.config.ts`:
+为此，请将这些包添加到您的 `next.config.ts` 的 `serverExternalPackages` 键中：
 
 ```ts
 // node.config.ts
@@ -38,12 +38,12 @@ initOpenNextCloudflareForDev();
 export default nextConfig;
 ```
 
-### Packages known to have `workerd` specific code
+### 已知具有 `workerd` 特定代码的包
 
 - `@libsql/isomorphic-ws`
-- `@prisma/client` (and the generated `.prisma/client`)
+- `@prisma/client`（以及生成的 `.prisma/client`）
 - `jose`
 - `postgres`
 - `react-textarea-autosize`
 
-Please report an issue on [the adapter GH repository](https://github.com/opennextjs/opennextjs-cloudflare/issues) to have packages added to this list.
+请在 [适配器 GH 仓库](https://github.com/opennextjs/opennextjs-cloudflare/issues) 上报告问题，以便将这些包添加到此列表中。

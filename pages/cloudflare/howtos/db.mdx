@@ -1,19 +1,19 @@
-This page will show you how to setup some popular database ORM libraries to use in OpenNext. There are some subtleties to be aware of when using these libraries in Cloudflare Workers, so we will cover those here.
+本页将向您展示如何在 OpenNext 中设置一些流行的数据库 ORM 库。在 Cloudflare Workers 中使用这些库时有一些细微之处需要注意，我们将在此涵盖这些内容。
 
-If you encounter issue with a specific library, please open an issue on the [OpenNext GitHub repository](https://github.com/opennextjs/opennextjs-cloudflare/issues).
+如果您遇到特定库的问题，请在 [OpenNext GitHub 仓库](https://github.com/opennextjs/opennextjs-cloudflare/issues) 上提交 issue。
 
 ## Drizzle ORM
 
-[Drizzle](https://developers.cloudflare.com/d1/reference/community-projects/#drizzle-orm) is a TypeScript ORM for SQL databases. It is designed to be lightweight and easy to use, making it a great choice for Cloudflare Workers.
-There is not much specific to configure in Drizzle, but there is one important thing to note is that you don't want to have a global client.
+[Drizzle](https://developers.cloudflare.com/d1/reference/community-projects/#drizzle-orm) 是一个用于 SQL 数据库的 TypeScript ORM。它旨在轻量且易于使用，是 Cloudflare Workers 的绝佳选择。
+在 Drizzle 中没有太多特定配置，但有一件重要的事情需要注意，那就是不要使用全局客户端。
 
 ### `lib/db.ts`
 
-Instead of creating a global client, you should create a new client for each request. This is because some adapters (like Postgres) will use a connection pool, and reuse the same connection for multiple requests. This is not allowed in Cloudflare Workers, and will cause subsequent requests to fail.
+不要创建全局客户端，您应该为每个请求创建一个新的客户端。这是因为某些适配器（如 Postgres）会使用连接池，并为多个请求重用相同的连接。这在 Cloudflare Workers 中是不允许的，会导致后续请求失败。
 
 #### PostgreSQL
 
-Instead of that :
+不要这样做：
 
 ```ts
 //lib/db.ts
@@ -28,13 +28,13 @@ const pool = new Pool({
 export const db = drizzle({ client: pool, schema });
 ```
 
-You should do this instead:
+您应该这样做：
 
 ```ts
 //lib/db.ts
 import { drizzle } from "drizzle-orm/node-postgres";
-// You can use cache from react to cache the client during the same request
-// this is not mandatory and only has an effect for server components
+// 您可以使用 react 中的 cache 在同一请求期间缓存客户端
+// 这不是强制性的，仅对服务器组件有效
 import { cache } from "react";
 import * as schema from "./schema/pg";
 import { Pool } from "pg";
@@ -42,14 +42,14 @@ import { Pool } from "pg";
 export const getDb = cache(() => {
   const pool = new Pool({
     connectionString: process.env.PG_URL,
-    // You don't want to reuse the same connection for multiple requests
+    // 您不希望为多个请求重用相同的连接
     maxUses: 1,
   });
   return drizzle({ client: pool, schema });
 });
 ```
 
-#### D1 example
+#### D1 示例
 
 ```ts
 import { getCloudflareContext } from "@opennextjs/cloudflare";
@@ -62,14 +62,14 @@ export const getDb = cache(() => {
   return drizzle(env.MY_D1, { schema });
 });
 
-// This is the one to use for static routes (i.e. ISR/SSG)
+// 这是用于静态路由的（即 ISR/SSG）
 export const getDbAsync = cache(async () => {
   const { env } = await getCloudflareContext({ async: true });
   return drizzle(env.MY_D1, { schema });
 });
 ```
 
-#### Hyperdrive example
+#### Hyperdrive 示例
 
 ```ts
 import { getCloudflareContext } from "@opennextjs/cloudflare";
@@ -83,34 +83,34 @@ export const getDb = cache(() => {
   const connectionString = env.HYPERDRIVE.connectionString;
   const pool = new Pool({
     connectionString,
-    // You don't want to reuse the same connection for multiple requests
+    // 您不希望为多个请求重用相同的连接
     maxUses: 1,
   });
   return drizzle({ client: pool, schema });
 });
 
-// This is the one to use for static routes (i.e. ISR/SSG)
+// 这是用于静态路由的（即 ISR/SSG）
 export const getDbAsync = cache(async () => {
   const { env } = await getCloudflareContext({ async: true });
   const connectionString = env.HYPERDRIVE.connectionString;
   const pool = new Pool({
     connectionString,
-    // You don't want to reuse the same connection for multiple requests
+    // 您不希望为多个请求重用相同的连接
     maxUses: 1,
   });
   return drizzle({ client: pool, schema });
 });
 ```
 
-You can then use the `getDb` function to get a new client for each request. This will ensure that you don't run into any issues with connection pooling.
+然后您可以使用 `getDb` 函数为每个请求获取一个新的客户端。这将确保您不会遇到任何连接池问题。
 
 ## Prisma ORM
 
-[Prisma](https://developers.cloudflare.com/d1/reference/community-projects/#prisma-orm) is a popular ORM for Node.js and TypeScript. It is designed to be easy to use and provides a lot of features out of the box. However, there are some subtleties to be aware of when using Prisma in Cloudflare Workers.
+[Prisma](https://developers.cloudflare.com/d1/reference/community-projects/#prisma-orm) 是一个流行的 Node.js 和 TypeScript ORM。它旨在易于使用，并提供许多开箱即用的功能。但是，在 Cloudflare Workers 中使用 Prisma 时有一些细微之处需要注意。
 
 ### `schema.prisma`
 
-When using prisma in OpenNext, you do not want to provide an output directory for the generated client.
+在 OpenNext 中使用 Prisma 时，不要为生成的客户端提供输出目录。
 
 ```prisma
 generator client {
@@ -119,11 +119,11 @@ generator client {
 }
 ```
 
-This is because the generated client needs to be patched by OpenNext to work with Cloudflare Workers. If you provide an output directory, OpenNext will not be able to patch the client and it will not work.
+这是因为生成的客户端需要由 OpenNext 修补才能与 Cloudflare Workers 一起工作。如果您提供了输出目录，OpenNext 将无法修补客户端，它将无法工作。
 
 ### `next.config.ts`
 
-Because prisma has some specific exports for cloudflare workers, you need to add the following to your `next.config.ts` file:
+因为 Prisma 有一些针对 Cloudflare Workers 的特定导出，您需要将以下内容添加到您的 `next.config.ts` 文件中：
 
 ```ts
 const nextConfig: NextConfig = {
@@ -131,15 +131,15 @@ const nextConfig: NextConfig = {
 };
 ```
 
-By doing this, this will ensure that both the generated client and the prisma client are included in the build for the `workerd` runtime.
+这样做可以确保生成的客户端和 Prisma 客户端都包含在 `workerd` 运行时的构建中。
 
 ### `lib/db.ts`
 
-Instead of creating a global client, you should create a new client for each request. This is because some adapters (like Postgres) will use a connection pool, and reuse the same connection for multiple requests. This is not allowed in Cloudflare Workers, and will cause subsequent requests to fail.
+不要创建全局客户端，您应该为每个请求创建一个新的客户端。这是因为某些适配器（如 Postgres）会使用连接池，并为多个请求重用相同的连接。这在 Cloudflare Workers 中是不允许的，会导致后续请求失败。
 
-#### D1 example
+#### D1 示例
 
-Instead of that :
+不要这样做：
 
 ```ts
 //lib/db.ts
@@ -152,13 +152,13 @@ const adapter = new PrismaD1(env.MY_D1);
 export const db = new PrismaClient();
 ```
 
-You should do this instead:
+您应该这样做：
 
 ```ts
 //lib/db.ts
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-// You can use cache from react to cache the client during the same request
-// this is not mandatory and only has an effect for server components
+// 您可以使用 react 中的 cache 在同一请求期间缓存客户端
+// 这不是强制性的，仅对服务器组件有效
 import { cache } from "react";
 import { PrismaClient } from "@prisma/client";
 import { PrismaD1 } from "@prisma/adapter-d1";
@@ -169,7 +169,7 @@ export const getDb = cache(() => {
   return new PrismaClient({ adapter });
 });
 
-// If you need access to `getCloudflareContext` in a static route (i.e. ISR/SSG), you should use the async version of `getCloudflareContext` to get the context.
+// 如果您需要在静态路由（即 ISR/SSG）中访问 `getCloudflareContext`，您应该使用 `getCloudflareContext` 的异步版本来获取上下文。
 export const getDbAsync = async () => {
   const { env } = await getCloudflareContext({ async: true });
   const adapter = new PrismaD1(env.MY_D1);
@@ -178,11 +178,11 @@ export const getDbAsync = async () => {
 };
 ```
 
-You can then use the `getDb` function to get a new client for each request. This will ensure that you don't run into any issues with connection pooling.
+然后您可以使用 `getDb` 函数为每个请求获取一个新的客户端。这将确保您不会遇到任何连接池问题。
 
 #### PostgreSQL
 
-You can also use Prisma with PostgreSQL. The setup is similar to the D1 setup above, but you need to use the `PrismaPostgres` adapter instead of the `PrismaD1` adapter.
+您也可以将 Prisma 与 PostgreSQL 一起使用。设置与上面的 D1 设置类似，但您需要使用 `PrismaPostgres` 适配器而不是 `PrismaD1` 适配器。
 
 ```ts
 import { cache } from "react";
@@ -197,17 +197,17 @@ export const getDb = cache(() => {
 });
 ```
 
-You can then use the `getDb` function to get a new client for each request. This will ensure that you don't run into any issues with connection pooling.
+然后您可以使用 `getDb` 函数为每个请求获取一个新的客户端。这将确保您不会遇到任何连接池问题。
 
 #### Hyperdrive
 
-You can also use Prisma with Hyperdrive. The setup is similar to the PostgreSQL setup above.
+您也可以将 Prisma 与 Hyperdrive 一起使用。设置与上面的 PostgreSQL 设置类似。
 
 ```ts
 //lib/db.ts
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-// You can use cache from react to cache the client during the same request
-// this is not mandatory and only has an effect for server components
+// 您可以使用 react 中的 cache 在同一请求期间缓存客户端
+// 这不是强制性的，仅对服务器组件有效
 import { cache } from "react";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
@@ -219,7 +219,7 @@ export const getDb = cache(() => {
   return new PrismaClient({ adapter });
 });
 
-// This is the one to use for static routes (i.e. ISR/SSG)
+// 这是用于静态路由的（即 ISR/SSG）
 export const getDbAsync = async () => {
   const { env } = await getCloudflareContext({ async: true });
   const connectionString = env.HYPERDRIVE.connectionString;

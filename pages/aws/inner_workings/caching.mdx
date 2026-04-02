@@ -1,27 +1,27 @@
-## Caching in Next and OpenNext
+## Next 和 OpenNext 中的缓存
 
-Caching could become tricky very fast when using Next outside of Vercel. There is a lot of things that need to be taken into account.
+在 Vercel 之外使用 Next 时，缓存可能会很快变得棘手。有很多事情需要考虑。
 
-Usually, you'll deploy your Next app with a CDN in front of it. This CDN will cache the responses from your Next app and serve them to the users. This is great for performance, but it can also be a problem when you need to invalidate the cache. We provide some code examples in this doc to help with [cloudfront cache invalidation](#cloudfront-cache-invalidation). **In OpenNext, you only need to do this if you do On Demand Revalidation**.
+通常，你会在 Next 应用前面部署一个 CDN。这个 CDN 将缓存来自你的 Next 应用的响应并提供给用户。这对性能很有好处，但当你需要使缓存失效时，这也可能成为一个问题。我们在本文档中提供了一些代码示例来帮助处理 [CloudFront 缓存失效](#cloudfront-cache-invalidation)。**在 OpenNext 中，只有当你进行按需重新验证（On Demand Revalidation）时才需要这样做**。
 
-Also the default Next.js standalone output (or `next start`) does not work in a serverless environment because it tries to do the revalidation in the background.
+此外，默认的 Next.js 独立输出（或 `next start`）在无服务器环境中无法工作，因为它试图在后台进行重新验证。
 
-Default Next.js also uses the file system to cache files. You can override it by providing your own cache implementation. This is done **automatically** when using OpenNext.
+默认的 Next.js 还使用文件系统来缓存文件。你可以通过提供自己的缓存实现来覆盖它。在使用 OpenNext 时，这是**自动**完成的。
 
-There is also 2 issues with the default `Cache-Control` headers that Next.js sets.
-They use this header by default `s-maxage=YOUR_REVALIDATION_TIME, stale-while-revalidate`. There is 2 issue with that:
+Next.js 设置的默认 `Cache-Control` 头也存在 2 个问题。
+他们默认使用这个头 `s-maxage=YOUR_REVALIDATION_TIME, stale-while-revalidate`。这有 2 个问题：
 
-- `stale-while-revalidate` is not the proper syntax for the `Cache-Control` header. It should be `stale-while-revalidate=TIME_WHERE_YOU_SERVE_STALE`. They added this [undocumented options](https://github.com/vercel/next.js/blob/952da876f7bb8590d0222b2579117f8a2bd301bb/packages/next/src/server/config-shared.ts#L202) to remedy this in recent version of Next
-- Setting `s-maxage` to the same value for every request to the same page could be a bad idea.
-  Next can serve different content based on if you request the full html or are doing client side navigation (RSC or JSON for page router)
-  This can cause inconsistencies in the cache with ISR especially when you can have big revalidation time.
-  For example, let's assume you use app router, you have a link to your homepage in your main navbar and you set ISR to 1 day. Every other page will have a different RSC cache entry (for client side navigation). This will result in as many cache entry as you have pages in your app which all will have that same 1 day `s-maxage` value but could have been requested at very different time. This could lead to some pages being served with stale content for as long as 2 day.
+- `stale-while-revalidate` 不是 `Cache-Control` 头的正确语法。它应该是 `stale-while-revalidate=TIME_WHERE_YOU_SERVE_STALE`。他们在最近版本的 Next 中添加了此 [未记录的选项](https://github.com/vercel/next.js/blob/952da876f7bb8590d0222b2579117f8a2bd301bb/packages/next/src/server/config-shared.ts#L202) 来补救这个问题
+- 为同一页面的每个请求设置相同的 `s-maxage` 值可能不是一个好主意。
+  Next 可以根据你是请求完整 HTML 还是进行客户端导航（页面路由器的 RSC 或 JSON）来提供不同的内容。
+  这可能导致 ISR 缓存不一致，尤其是当你有很长的重新验证时间时。
+  例如，假设你使用 app router，你在主导航栏中有一个指向首页的链接，并将 ISR 设置为 1 天。其他每个页面都将有一个不同的 RSC 缓存条目（用于客户端导航）。这将导致你的应用中有多少页面就有多少缓存条目，它们都将具有相同的 1 天 `s-maxage` 值，但可能是在非常不同的时间被请求的。这可能导致某些页面提供长达 2 天的过时内容。
 
-**All of these issues are automatically fixed for you in OpenNext**
+**所有这些问题在 OpenNext 中都会自动为你修复**
 
-### Cloudfront cache invalidation
+### CloudFront 缓存失效
 
-When you manually revalidate the Next.js cache for a specific page, the ISR cache files stored on S3 will be updated. However, it is still necessary to invalidate the CloudFront cache:
+当你手动重新验证特定页面的 Next.js 缓存时，存储在 S3 上的 ISR 缓存文件将被更新。但是，仍然需要使 CloudFront 缓存失效：
 
 ```ts
 // pages/api/revalidate.js
@@ -32,13 +32,13 @@ export default async function handler(req, res) {
 }
 ```
 
-If the pages router is in use, you must also invalidate the `_next/data/BUILD_ID/foo.json` path. The value for `BUILD_ID` can be found in the `.next/BUILD_ID` build output and can be accessed at runtime via the `process.env.NEXT_BUILD_ID` environment variable.
+如果使用的是 pages router，你还必须使 `_next/data/BUILD_ID/foo.json` 路径失效。`BUILD_ID` 的值可以在 `.next/BUILD_ID` 构建输出中找到，并且可以在运行时通过 `process.env.NEXT_BUILD_ID` 环境变量访问。
 
 ```ts
 await invalidateCloudFrontPaths(["/foo", `/_next/data/${process.env.NEXT_BUILD_ID}/foo.json`]);
 ```
 
-And here is an example of the `invalidateCloudFrontPaths()` function:
+下面是 `invalidateCloudFrontPaths()` 函数的一个示例：
 
 ```ts
 import { CloudFrontClient, CreateInvalidationCommand } from "@aws-sdk/client-cloudfront";
@@ -48,7 +48,7 @@ const cloudFront = new CloudFrontClient({});
 async function invalidateCloudFrontPaths(paths: string[]) {
   await cloudFront.send(
     new CreateInvalidationCommand({
-      // Set CloudFront distribution ID here
+      // 在此处设置 CloudFront 分配 ID
       DistributionId: distributionId,
       InvalidationBatch: {
         CallerReference: `${Date.now()}`,
@@ -62,21 +62,21 @@ async function invalidateCloudFrontPaths(paths: string[]) {
 }
 ```
 
-Note that manual CloudFront path invalidation incurs costs. According to the [AWS CloudFront pricing page](https://aws.amazon.com/cloudfront/pricing/):
+请注意，手动 CloudFront 路径失效会产生费用。根据 [AWS CloudFront 定价页面](https://aws.amazon.com/cloudfront/pricing/)：
 
-> No additional charge for the first 1,000 paths requested for invalidation each month. Thereafter, $0.005 per path requested for invalidation.
+> 每月前 1,000 个请求失效的路径不收取额外费用。此后，每个请求失效的路径收费 0.005 美元。
 
-Due to these costs, if multiple paths require invalidation, it is more economical to invalidate a wildcard path `/*`. For example:
+由于这些成本，如果多个路径需要失效，使通配符路径 `/*` 失效更经济。例如：
 
 ```ts
-// This costs $0.005 x 3 = $0.015 after the first 1000 paths
+// 在前 1000 个路径之后，这将花费 $0.005 x 3 = $0.015
 await invalidateCloudFrontPaths(["/page/a", "/page/b", "/page/c"]);
 
-// This costs $0.005, but also invalidates other routes such as "page/d"
+// 这将花费 $0.005，但也会使其他路由（如 "page/d"）失效
 await invalidateCloudFrontPaths(["/page/*"]);
 ```
 
-For on-demand revalidation via the [`next/cache` module](https://nextjs.org/docs/app/building-your-application/data-fetching/revalidating#using-on-demand-revalidation), if you want to retrieve the associated paths for a given tag, you can use this function:
+对于通过 [`next/cache` 模块](https://nextjs.org/docs/app/building-your-application/data-fetching/revalidating#using-on-demand-revalidation) 进行的按需重新验证，如果你想检索给定标签的关联路径，你可以使用此函数：
 
 ```ts
 import { DynamoDBClient, QueryCommand } from "@aws-sdk/client-dynamodb";

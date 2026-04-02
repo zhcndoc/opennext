@@ -1,14 +1,14 @@
 import { Callout } from "nextra/components";
 
-## Image Optimization
+## 图像优化
 
-Next.js has a builtin [`<Image>` component](https://nextjs.org/docs/pages/building-your-application/optimizing/images) to automatically optimize your images for faster page loads. To enable image optimization, you must either define an image binding or use a custom loader.
+Next.js 内置了一个 [`<Image>` 组件](https://nextjs.org/docs/pages/building-your-application/optimizing/images)，可自动优化图像以加快页面加载速度。要启用图像优化，您必须定义图像绑定或使用自定义加载器。
 
-### Use a Cloudflare Images binding
+### 使用 Cloudflare Images 绑定
 
-The Cloudflare adapter provides a Next.js-compatible image optimization API using [Cloudflare Images](https://developers.cloudflare.com/images/) that can be [configured with `next.config.js`](https://nextjs.org/docs/app/api-reference/components/image#configuration-options).
+Cloudflare 适配器使用 [Cloudflare Images](https://developers.cloudflare.com/images/) 提供了一个与 Next.js 兼容的图像优化 API，可以通过 [`next.config.js`](https://nextjs.org/docs/app/api-reference/components/image#configuration-options) 进行配置。
 
-The `IMAGES` binding must be defined to enable image optimization:
+必须定义 `IMAGES` 绑定才能启用图像优化：
 
 ```jsonc
 // wrangler.jsonc
@@ -19,23 +19,23 @@ The `IMAGES` binding must be defined to enable image optimization:
 }
 ```
 
-Image optimization can incur additional costs. See [Cloudflare Images pricing](https://developers.cloudflare.com/images/pricing/) for details.
+图像优化可能会产生额外费用。请参阅 [Cloudflare Images 定价](https://developers.cloudflare.com/images/pricing/) 了解详情。
 
-#### Compatibility notes
+#### 兼容性说明
 
-- Only PNG, JPEG, WEBP, AVIF, GIF, and SVG are supported. Unsupported images will be returned unchanged without optimization.
-- [`minimumCacheTTL` configuration](https://nextjs.org/docs/app/api-reference/components/image#minimumcachettl) is not supported. All assets (static, local, or remote) are handled as either immutable (cache forever) or not. Except for the `immutable` attribute, it does not respect the cache behavior set by the `Cache-Control` header for non-static images.
-- [`dangerouslyAllowLocalIP` configuration](https://nextjs.org/docs/app/api-reference/components/image#dangerouslyallowlocalip) is not supported. Local IP addresses are always allowed if the URL is allowed by the `remotePatterns` configuration.
+- 仅支持 PNG、JPEG、WEBP、AVIF、GIF 和 SVG。不支持的图像将未经优化原样返回。
+- 不支持 [`minimumCacheTTL` 配置](https://nextjs.org/docs/app/api-reference/components/image#minimumcachettl)。所有资产（静态、本地或远程）均被视为不可变（永久缓存）或可变。除了 `immutable` 属性外，它不尊重非静态图像的 `Cache-Control` 头设置的缓存行为。
+- 不支持 [`dangerouslyAllowLocalIP` 配置](https://nextjs.org/docs/app/api-reference/components/image#dangerouslyallowlocalip)。如果 `remotePatterns` 配置允许该 URL，则始终允许本地 IP 地址。
 
-### Use a custom loader
+### 使用自定义加载器
 
-You first need to [enable Cloudflare Images](https://developers.cloudflare.com/images/get-started/#enable-transformations-on-your-zone) for your zone.
+您首先需要为您的区域 [启用 Cloudflare Images](https://developers.cloudflare.com/images/get-started/#enable-transformations-on-your-zone)。
 
-It is strongly advised to restrict the image origins that can be transformed to where your images are hosted, i.e. a [R2 bucket](https://developers.cloudflare.com/r2/buckets/).
+强烈建议将可转换的图像来源限制为托管图像的位置，例如 [R2 存储桶](https://developers.cloudflare.com/r2/buckets/)。
 
-You then need to configure your Next application to use a custom loader for Cloudflare Images.
+然后您需要配置 Next 应用程序以使用 Cloudflare Images 的自定义加载器。
 
-Create an `image-loader.ts` at the root of your application:
+在应用程序根目录下创建 `image-loader.ts`：
 
 ```ts
 // image-loader.ts
@@ -51,7 +51,7 @@ export default function cloudflareLoader({ src, width, quality }: ImageLoaderPro
     params.push(`quality=${quality}`);
   }
   if (process.env.NODE_ENV === "development") {
-    // Serve the original image when using `next dev`
+    // 在使用 `next dev` 时提供原始图像
     return `${src}?${params.join("&")}`;
   }
   return `/cdn-cgi/image/${params.join(",")}/${normalizeSrc(src)}`;
@@ -59,13 +59,13 @@ export default function cloudflareLoader({ src, width, quality }: ImageLoaderPro
 ```
 
 <Callout type="warning">
-  This simple loader does not respect [Next.js
-  remotePatterns](https://nextjs.org/docs/pages/api-reference/components/image#remotepatterns). You should
-  configure [the allowed source origins](https://developers.cloudflare.com/images/transform-images/sources/)
-  in the dashboard.
+  此简单加载器不尊重 [Next.js
+  remotePatterns](https://nextjs.org/docs/pages/api-reference/components/image#remotepatterns)。您应该
+  在仪表板中配置 [允许的来源](https://developers.cloudflare.com/images/transform-images/sources/)
+  。
 </Callout>
 
-You will then need to update your app configuration to use this loader:
+然后您需要更新应用程序配置以使用此加载器：
 
 ```ts
 // next.config.ts
@@ -83,7 +83,7 @@ export default nextConfig;
 ```
 
 <Callout type="info">
-  Images using the cloudflare loader are served directly without going through the middleware.
+  使用 cloudflare 加载器的图像将直接提供，无需经过中间件。
 </Callout>
 
-See more details in the [Cloudflare Images documentation](https://developers.cloudflare.com/images/transform-images/integrate-with-frameworks/).
+请参阅 [Cloudflare Images 文档](https://developers.cloudflare.com/images/transform-images/integrate-with-frameworks/) 了解更多详情。

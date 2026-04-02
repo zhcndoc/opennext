@@ -1,41 +1,41 @@
-If your Next.js app is already deployed to another platform or using another open-source framework, you'd want to take a look here:
+如果您的 Next.js 应用已经部署到其他平台或使用其他开源框架，您应该看看这里：
 
-#### From OpenNext V2
+#### 来自 OpenNext V2
 
-If you used all the default configurations, you should be able to deploy your app without any changes.
+如果您使用了所有默认配置，您应该能够无需任何更改即可部署您的应用。
 
-OpenNext V3 replaced all the build args with a [custom config file](/aws/config#configuration-file).
+OpenNext V3 将所有构建参数替换为 [自定义配置文件](/aws/config#configuration-file)。
 
-Here are the old build args and their new equivalent:
+以下是旧的构建参数及其新的对应项：
 
-- `--build-command` : `buildCommand` inside the config file.
-- `--app-path`: `appPath` inside the config file.
-- `--build-output-path`: `buildOutputPath` inside the config file.
-- `--package-json-path`: `packageJsonPath` inside the config file.
-- `--minify`: `minify` options inside each function property. This is enabled on a per function basis now.
-- `--streaming`: This is dependent on the wrapper you're using on a per function basis. To enable streaming in aws lambda, you can set `wrapper: 'aws-lambda-streaming'` in the override property of the function. Please note that AWS lambda streaming still suffer from buffering issue from the runtime itself. See [here](/aws/inner_workings/components/overview#aws-lambda-streaming) for more info.
-- `--dangerously-disable-dynamodb-cache`: `dangerous.disableTagCache` inside the config file.
-- `--dangerously-disable-incremental-cache`: `dangerous.disableIncrementalCache` inside the config file.
+- `--build-command`：配置文件中的 `buildCommand`。
+- `--app-path`：配置文件中的 `appPath`。
+- `--build-output-path`：配置文件中的 `buildOutputPath`。
+- `--package-json-path`：配置文件中的 `packageJsonPath`。
+- `--minify`：每个函数属性内的 `minify` 选项。现在是基于每个函数启用的。
+- `--streaming`：这取决于您为每个函数使用的 wrapper。要在 aws lambda 中启用流式传输，您可以在函数的 override 属性中设置 `wrapper: 'aws-lambda-streaming'`。请注意，AWS lambda 流式传输仍然受到运行时本身缓冲问题的影响。请参阅 [此处](/aws/inner_workings/components/overview#aws-lambda-streaming) 了解更多信息。
+- `--dangerously-disable-dynamodb-cache`：配置文件中的 `dangerous.disableTagCache`。
+- `--dangerously-disable-incremental-cache`：配置文件中的 `dangerous.disableIncrementalCache`。
 
 #### Vercel
 
-Everything should already be set up for you. But there are a few things you should know:
+一切应该已经为您设置好了。但有一些事情您应该知道：
 
-- Streaming by default is disabled in open-next (for now). It is very **experimental** right now see [here](/aws/inner_workings/streaming) for more info.
-- Middleware is not run for static file and for image requests with open-next.
+- 默认情况下，open-next 中禁用了流式传输（暂时）。目前非常 **实验性**，请参阅 [此处](/aws/inner_workings/streaming) 了解更多信息。
+- 使用 open-next 时，静态文件和图片请求不会运行 Middleware。
 
 #### AWS Amplify
 
-TODO
+待办
 
 #### serverless-nextjs
 
-You should remove some stuff from your `next.config.js` file, otherwise you'll get a build error.:
+您应该从 `next.config.js` 文件中移除一些内容，否则您将遇到构建错误：
 
 ```js
 module.exports = {
   // ...
-  target: "serverless", // remove this
+  target: "serverless", // 移除此项
   // ...
 };
 ```

@@ -1,43 +1,43 @@
 import { Callout } from "nextra/components";
 
-This override is used by OpenNext to trigger the revalidation of stale routes.
-Before sending the response to the client, OpenNext will check if the route is stale and if it is, it will call the queue override to revalidate the route.
+此覆盖由 OpenNext 使用，用于触发过期路由的重新验证。
+在向客户端发送响应之前，OpenNext 将检查路由是否过期，如果是，它将调用队列覆盖来重新验证该路由。
 
-If you want to better understand how to implement your own Queue, the easiest way would be to take a look at the existing [included Queue](https://github.com/opennextjs/opennextjs-aws/tree/main/packages/open-next/src/overrides/queue).
+如果你想更好地了解如何实现自己的队列，最简单的方法是查看现有的 [内置队列](https://github.com/opennextjs/opennextjs-aws/tree/main/packages/open-next/src/overrides/queue)。
 
-Couple of things to note :
+有几件事需要注意：
 
-- The default implementation use an SQS queue. This has the main advantage of being able to control the concurrency of the revalidations as well as avoiding trigerring the revalidation multiple times for the same route.
-- You don't have to use a queue at all. You could trigger the revalidation directly in the Queue override itself. You can see a very simple implementation of this [in the `direct` override](https://github.com/opennextjs/opennextjs-aws/blob/main/packages/open-next/src/overrides/queue/direct.ts).
+- 默认实现使用 SQS 队列。其主要优势在于能够控制重新验证的并发性，并避免对同一路线多次触发重新验证。
+- 你根本不需要使用队列。你可以直接在队列覆盖本身中触发重新验证。你可以在 [`direct` 覆盖](https://github.com/opennextjs/opennextjs-aws/blob/main/packages/open-next/src/overrides/queue/direct.ts) 中看到一个非常简单的实现。
 
-## Included Queue
+## 内置队列
 
 ### sqs
 
-The SQS Queue will send a message to an SQS queue for each route that needs to be revalidated. It is used by default if you don't provide any Queue in your configuration.
-It uses the `@aws-sdk/client-sqs` to interact with SQS.
+SQS 队列将为每个需要重新验证的路径向 SQS 队列发送一条消息。如果你在配置中没有提供任何队列，则默认使用它。
+它使用 `@aws-sdk/client-sqs` 与 SQS 交互。
 
-#### Requirements
+#### 要求
 
-- You need to provide the `REVALIDATION_QUEUE_URL` environment variable to your server.
+- 你需要向服务器提供 `REVALIDATION_QUEUE_URL` 环境变量。
 
 ### sqs-lite
 
-The SQSLite Queue will send a message to an SQS queue for each route that needs to be revalidated.
-This implementation is a lighter version of the `sqs` Queue as it uses `aws4fetch` to interact with SQS.
+SQSLite 队列将为每个需要重新验证的路径向 SQS 队列发送一条消息。
+此实现是 `sqs` 队列的轻量版本，因为它使用 `aws4fetch` 与 SQS 交互。
 
-#### Requirements
+#### 要求
 
-- You need to provide the `REVALIDATION_QUEUE_URL`, `REVALIDATION_QUEUE_REGION`(will fallback to `us-east-1`), `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` and `AWS_SESSION_TOKEN` environment variables to your server.
+- 你需要向服务器提供 `REVALIDATION_QUEUE_URL`、`REVALIDATION_QUEUE_REGION`（将回退到 `us-east-1`）、`AWS_ACCESS_KEY_ID`、`AWS_SECRET_ACCESS_KEY` 和 `AWS_SESSION_TOKEN` 环境变量。
 
 ### direct
 
-The Direct Queue will directly trigger the revalidation of the route in the Queue override itself. It is useful for development purposes and when you don't want to use a queue.
+Direct 队列将在队列覆盖本身中直接触发路由的重新验证。它适用于开发目的以及当你不想使用队列时。
 
 <Callout type="warning">
-  Be careful with this implementation as it could lead to multiple revalidations of the same route.
+  小心此实现，因为它可能导致同一路线的多次重新验证。
 </Callout>
 
 ### dummy
 
-The Dummy Queue is a dummy implementation that will throw an exception. It should not be used unless you want to disable ISR.
+Dummy 队列是一个虚拟实现，它将抛出异常。除非你想禁用 ISR，否则不应使用它。

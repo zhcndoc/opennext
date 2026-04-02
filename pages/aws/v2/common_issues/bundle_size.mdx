@@ -1,41 +1,41 @@
 import { Callout } from "nextra/components";
 
-#### Reducing Bundle Size
+#### 减小打包体积
 
-Serverless environments are sensitive to bundle size, since it has to download and unzip the contents. To help reduce cold start times as much as possible, you should remove any unnecessary files in the node_modules or report offending dev libraries in this [PR](https://github.com/sst/open-next/pull/242)
+Serverless 环境对打包体积很敏感，因为它必须下载并解压内容。为了尽可能减少冷启动时间，你应该移除 `node_modules` 中任何不必要的文件，或者在此 [PR](https://github.com/sst/open-next/pull/242) 中报告有问题的开发库。
 
 <Callout type="info" emoji="ℹ️">
-  Next 14+ no longer includes dev dependencies like @swc, esbuild, etc... in the output node_modules, so
-  please upgrade at your earliest convenience.
+  Next 14+ 不再在输出的 node_modules 中包含像 @swc, esbuild 等... 的开发依赖，所以
+  请尽快升级。
 </Callout>
 
-#### Unzipped size must be smaller than 262144000 bytes
+#### 解压后的大小必须小于 262144000 字节
 
-To identify the module that's taking up too much space (and isn't serverless friendly):
+要识别占用过多空间（且不适合 serverless）的模块：
 
 ```bash
 du -hs .open-next/server-function/node_modules/* | sort -rh
 ```
 
-If your app requires the offending library, then consider moving your business logic of the `api` to its own lambda, eg: `/api/v2` => `Api Lambda`
+如果你的应用需要这个有问题的库，那么考虑将 `api` 的业务逻辑移动到它自己的 lambda 中，例如：`/api/v2` => `Api Lambda`
 
 <Callout type="info" emoji="ℹ️">
-  There is a [PR](https://github.com/sst/open-next/pull/242) to remove some dev dependency from the output
-  node_modules but that requires more testing before it can merge.
+  有一个 [PR](https://github.com/sst/open-next/pull/242) 旨在从输出中移除一些开发依赖
+  node_modules，但这需要更多的测试才能合并。
 </Callout>
 
-#### Common issues
+#### 常见问题
 
 ##### Sharp
 
-`sharp` is not needed outside of the `Image Optimization` function so you should not have it as a dependency. But if you are depending on `sharp`, be sure to install it with the correct flags for your lambda.
-eg: `--arch=arm64 --platform=linux --target=18 --libc=glibc`
+`sharp` 在 `Image Optimization` 函数之外不需要，所以你不应该将它作为依赖。但如果你依赖 `sharp`，请确保为你的 lambda 使用正确的标志安装它。
+例如：`--arch=arm64 --platform=linux --target=18 --libc=glibc`
 
 ##### pdfjs
 
-- If you need to use pdfjs, you should install it with `npm i pdfjs-dist--no-optional` because the optional dep: `canvas` takes about 180MB.
+- 如果你需要使用 pdfjs，你应该使用 `npm i pdfjs-dist--no-optional` 安装它，因为可选依赖：`canvas` 大约占用 180MB。
 
-- If the above doesn't work (or gives some compilation errors) you can try:
+- 如果上述方法不起作用（或给出一些编译错误），你可以尝试：
 
 ```js
   experimental: {
@@ -45,6 +45,6 @@ eg: `--arch=arm64 --platform=linux --target=18 --libc=glibc`
   },
 ```
 
-##### Others
+##### 其他
 
-Please open an issue or let us know on discord if there are any other modules that are causing issues.
+如果有任何其他模块导致问题，请提交 issue 或在 discord 上告诉我们。

@@ -1,54 +1,53 @@
 import { Callout } from "nextra/components";
 
-Open-next use esbuild to build the project. Given that we aim to support multiple version of Next and multiple runtime, we developed a plugin to override some parts of our code at build time with an esbuild plugin.
+Open-next 使用 esbuild 来构建项目。鉴于我们的目标是支持多个版本的 Next 和多个运行时，我们开发了一个插件，以便在构建时使用 esbuild 插件覆盖部分代码。
 
 <Callout type="warning" emoji="⚠️">
-  As of now, the plugin is internal and not exposed to the user. We might expose it in the future, but for
-  now, it is used only internally.
+  目前，该插件是内部的，未向用户开放。我们未来可能会开放它，但目前仅供内部使用。
 </Callout>
 
-#### How to use
+#### 如何使用
 
-You need to create a ts file where you will override the code. Inside this file, you can use the following syntax:
+你需要创建一个 ts 文件，在其中覆盖代码。在此文件中，你可以使用以下语法：
 
 ```ts
 //#import
-// Everything inside here will be placed at the top of the file
+// 这里面的所有内容将被放置在文件顶部
 const test = "test";
 //#endImport
 
 //#override import
-// Everything inside here will replace the content of the override with the given id: import
-// To get the id you'll need to look at the file you want to override
+// 这里面的所有内容将替换具有给定 id 的覆盖内容：import
+// 要获取 id，你需要查看想要覆盖的文件
 import { requestHandler } from "./util.js";
 //#endOverride
 
 //#override fnId
-// Everything inside here will replace the content of the override with the given id: fnId
+// 这里面的所有内容将替换具有给定 id 的覆盖内容：fnId
 export const fnId = (req: IncomingMessage, res: ServerResponse) => {
   requestHandler(req, res);
 };
 //#endOverride
 ```
 
-and then you use the plugin this way:
+然后你这样使用插件：
 
 ```ts
 import openNextPlugin from "./plugin.js";
 
 openNextPlugin({
   name: "name of the plugin",
-  target: /plugins\/serverHandler\.js/g, // regex to match the file to override
-  replacements: ["./serverHandler.replacement.js"], // path to the files containing the overrides
+  target: /plugins\/serverHandler\.js/g, // 用于匹配要覆盖文件的正则表达式
+  replacements: ["./serverHandler.replacement.js"], // 包含覆盖内容的文件路径
 }),
 
 ```
 
-#### Known issues
+#### 已知问题
 
-Do not include `types` in #override and #imports, as esbuild will remove preceeding comments (ie it removes //#override id)when it builds.
+不要在 #override 和 #imports 中包含 `types`，因为 esbuild 在构建时会移除前面的注释（即它会移除 //#override id）。
 
-Instead, put the `import type` outside like:
+相反，请将 `import type` 放在外面，如下所示：
 
 ```
 import type { PluginHandler } from "../next-types.js";
@@ -60,4 +59,4 @@ import { requestHandler } from "./util.js";
 //#endOverride
 ```
 
-The types are removed in the final output anyways.
+反正类型在最终输出中也会被移除。

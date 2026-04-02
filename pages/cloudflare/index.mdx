@@ -3,72 +3,72 @@ import WindowsSupport from "../../shared/WindowsSupport.mdx";
 
 ## Cloudflare
 
-The [`@opennextjs/cloudflare`](https://www.npmjs.com/package/@opennextjs/cloudflare) adapter lets you deploy Next.js apps to [Cloudflare Workers](https://developers.cloudflare.com/workers) using the [Node.js "runtime" from Next.js](https://nextjs.org/docs/app/building-your-application/rendering/edge-and-nodejs-runtimes).
+[`@opennextjs/cloudflare`](https://www.npmjs.com/package/@opennextjs/cloudflare) 适配器允许您使用 [Next.js 的 Node.js“运行时”](https://nextjs.org/docs/app/building-your-application/rendering/edge-and-nodejs-runtimes) 将 Next.js 应用部署到 [Cloudflare Workers](https://developers.cloudflare.com/workers)。
 
-### Get Started
+### 快速开始
 
-##### New apps
+##### 新应用
 
-To create a new Next.js app, pre-configured to run on Cloudflare using `@opennextjs/cloudflare`, run:
+要创建一个新的 Next.js 应用，并预配置为使用 `@opennextjs/cloudflare` 在 Cloudflare 上运行，请运行：
 
 ```
 npm create cloudflare@latest -- my-next-app --framework=next --platform=workers
 ```
 
-##### Existing Next.js apps
+##### 现有 Next.js 应用
 
-Follow the guide [here](/cloudflare/get-started) to use [@opennextjs/cloudflare](https://www.npmjs.com/package/@opennextjs/cloudflare) with an existing Next.js app.
+请遵循 [此处](/cloudflare/get-started) 的指南，在现有的 Next.js 应用中使用 [@opennextjs/cloudflare](https://www.npmjs.com/package/@opennextjs/cloudflare)。
 
-### Supported Next.js runtimes
+### 支持的 Next.js 运行时
 
-Next.js has [two "runtimes"](https://nextjs.org/docs/app/building-your-application/rendering/edge-and-nodejs-runtimes) — "Edge" and "Node.js". When you use `@opennextjs/cloudflare`, your app should use the Node.js runtime, which is more fully featured, and allows you to use the [Node.js APIs](https://developers.cloudflare.com/workers/runtime-apis/nodejs/) that are provided by the Cloudflare Workers runtime.
+Next.js 拥有 [两种“运行时”](https://nextjs.org/docs/app/building-your-application/rendering/edge-and-nodejs-runtimes) —— "Edge" 和 "Node.js"。当您使用 `@opennextjs/cloudflare` 时，您的应用应该使用 Node.js 运行时，它功能更齐全，并允许您使用 Cloudflare Workers 运行时提供的 [Node.js API](https://developers.cloudflare.com/workers/runtime-apis/nodejs/)。
 
-This is an important difference from `@cloudflare/next-on-pages`, which only supports the "Edge" runtime. The Edge Runtime code in Next.js [intentionally constrains which APIs from Node.js can be used](https://github.com/vercel/next.js/blob/canary/packages/next/src/build/webpack/plugins/middleware-plugin.ts#L820), and the "Edge" runtime does not support all Next.js features.
+这与 `@cloudflare/next-on-pages` 有一个重要区别，后者仅支持 "Edge" 运行时。Next.js 中的 Edge 运行时代码 [故意限制了可以使用的 Node.js API](https://github.com/vercel/next.js/blob/canary/packages/next/src/build/webpack/plugins/middleware-plugin.ts#L820)，并且 "Edge" 运行时不支持所有 Next.js 功能。
 
-### Supported Next.js versions
+### 支持的 Next.js 版本
 
-All minor and patch versions of Next.js 16 and the latest minors of Next.js 14 and 15 are supported.
-Next.js 14 support will be dropped Q1 2026. It is [no more supported](https://nextjs.org/support-policy#supported-versions) by the Next.js team.
+支持 Next.js 16 的所有次版本和补丁版本，以及 Next.js 14 和 15 的最新次版本。
+Next.js 14 的支持将于 2026 年第一季度停止。它已被 Next.js 团队 [不再支持](https://nextjs.org/support-policy#supported-versions)。
 
-To help improve compatibility, we encourage you to [report bugs](https://github.com/opennextjs/opennextjs-cloudflare/issues) and contribute code!
+为了帮助提高兼容性，我们鼓励您 [报告 bug](https://github.com/opennextjs/opennextjs-cloudflare/issues) 并贡献代码！
 
-### Supported Next.js features
+### 支持的 Next.js 功能
 
-- [x] [App Router](https://nextjs.org/docs/app)
-- [x] [Route Handlers](https://nextjs.org/docs/app/building-your-application/routing/route-handlers)
-- [x] [Dynamic routes](https://nextjs.org/docs/app/building-your-application/routing/dynamic-routes)
-- [x] [Static Site Generation (SSG)](https://nextjs.org/docs/app/building-your-application/rendering/server-components#static-rendering-default)
-- [x] [Server-Side Rendering (SSR)](https://nextjs.org/docs/app/building-your-application/rendering/server-components)
-- [x] [Middleware](https://nextjs.org/docs/app/building-your-application/routing/middleware)
-- [ ] [Node Middleware](https://nextjs.org/docs/app/building-your-application/routing/middleware#runtime) introduced in 15.2 are not yet supported
-- [x] [Image optimization](https://nextjs.org/docs/app/building-your-application/optimizing/images) (See [this guide](/cloudflare/howtos/image) to configure [Cloudflare Images](https://developers.cloudflare.com/images/))
-- [x] [Partial Prerendering (PPR)](https://nextjs.org/docs/app/building-your-application/rendering/partial-prerendering)
-- [x] [Pages Router](https://nextjs.org/docs/pages)
-- [x] [Incremental Static Regeneration (ISR)](https://nextjs.org/docs/app/building-your-application/data-fetching/incremental-static-regeneration)
-- [x] [Support for after](https://nextjs.org/blog/next-15-rc#executing-code-after-a-response-with-nextafter-experimental)
-- [x] [Composable Caching](https://nextjs.org/blog/composable-caching) (`'use cache'`)
+- [x] [App 路由](https://nextjs.org/docs/app)
+- [x] [路由处理器](https://nextjs.org/docs/app/building-your-application/routing/route-handlers)
+- [x] [动态路由](https://nextjs.org/docs/app/building-your-application/routing/dynamic-routes)
+- [x] [静态站点生成 (SSG)](https://nextjs.org/docs/app/building-your-application/rendering/server-components#static-rendering-default)
+- [x] [服务器端渲染 (SSR)](https://nextjs.org/docs/app/building-your-application/rendering/server-components)
+- [x] [中间件](https://nextjs.org/docs/app/building-your-application/routing/middleware)
+- [ ] 15.2 中引入的 [Node 中间件](https://nextjs.org/docs/app/building-your-application/routing/middleware#runtime) 尚不支持
+- [x] [图像优化](https://nextjs.org/docs/app/building-your-application/optimizing/images)（参见 [本指南](/cloudflare/howtos/image) 配置 [Cloudflare Images](https://developers.cloudflare.com/images/)）
+- [x] [部分预渲染 (PPR)](https://nextjs.org/docs/app/building-your-application/rendering/partial-prerendering)
+- [x] [Pages 路由](https://nextjs.org/docs/pages)
+- [x] [增量静态再生 (ISR)](https://nextjs.org/docs/app/building-your-application/data-fetching/incremental-static-regeneration)
+- [x] [支持 after](https://nextjs.org/blog/next-15-rc#executing-code-after-a-response-with-nextafter-experimental)
+- [x] [可组合缓存](https://nextjs.org/blog/composable-caching) (`'use cache'`)
 - [x] [Turbopack](https://nextjs.org/docs/app/api-reference/turbopack)
 
-We welcome both contributions and feedback!
+我们欢迎贡献和反馈！
 
-### Windows support
+### Windows 支持
 
 <WindowsSupport />
 
-### How `@opennextjs/cloudflare` Works
+### `@opennextjs/cloudflare` 的工作原理
 
-The OpenNext Cloudflare adapter works by taking the Next.js build output and transforming it, so that it can run in Cloudflare Workers.
+OpenNext Cloudflare 适配器通过获取 Next.js 构建输出并对其进行转换来工作，以便它可以在 Cloudflare Workers 中运行。
 
-When you add [@opennextjs/cloudflare](https://www.npmjs.com/package/@opennextjs/cloudflare) as a dependency to your Next.js app, and then run `npx @opennextjs/cloudflare` the adapter first builds your app by running the `build` script in your `package.json`, and then transforms the build output to a format that you can run locally using [Wrangler](https://developers.cloudflare.com/workers/wrangler/), and deploy to Cloudflare.
+当您向 Next.js 应用添加 [@opennextjs/cloudflare](https://www.npmjs.com/package/@opennextjs/cloudflare) 作为依赖，然后运行 `npx @opennextjs/cloudflare` 时，适配器首先通过运行 `package.json` 中的 `build` 脚本来构建您的应用，然后将构建输出转换为您可以使用 [Wrangler](https://developers.cloudflare.com/workers/wrangler/) 在本地运行并部署到 Cloudflare 的格式。
 
-You can view the code for `@opennextjs/cloudflare` [here](https://github.com/opennextjs/opennextjs-cloudflare/blob/main/packages/cloudflare/src) to understand what it does under the hood.
+您可以 [此处](https://github.com/opennextjs/opennextjs-cloudflare/blob/main/packages/cloudflare/src) 查看 `@opennextjs/cloudflare` 的代码，以了解其底层工作原理。
 
-### Note on Worker Size Limits
+### 关于 Worker 大小限制的说明
 
-The size limit of a Cloudflare Worker is 3 MiB on the Workers Free plan, and 10 MiB on the Workers Paid plan. After building your Worker, `wrangler` will show both the original and compressed sizes:
+Cloudflare Worker 的大小限制在 Workers 免费计划上为 3 MiB，在 Workers 付费计划上为 10 MiB。构建 Worker 后，`wrangler` 将显示原始大小和压缩大小：
 
 ```
 Total Upload: 13833.20 KiB / gzip: 2295.89 KiB
 ```
 
-Only the latter (compressed size) matters for [the Worker size limit](https://developers.cloudflare.com/workers/platform/limits/#worker-size).
+只有后者（压缩大小）计入 [Worker 大小限制](https://developers.cloudflare.com/workers/platform/limits/#worker-size)。

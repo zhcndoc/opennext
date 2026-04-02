@@ -1,17 +1,17 @@
-This override is used by OpenNext to proxy rewritten requests to external services. It is used either in the `external` middleware (if set) or in the default/splitted server if the middleware is bundled.
+此覆盖由 OpenNext 用于将重写的请求代理到外部服务。它在 `external` 中间件（如果已设置）中使用，或者在中间件被捆绑时在默认/分割服务器中使用。
 
-If you want to better understand how to implement your own ProxyExternalRequest, the easiest way would be to take a look at the existing [included ProxyExternalRequest](https://github.com/opennextjs/opennextjs-aws/tree/main/packages/open-next/src/overrides/proxyExternalRequest).
+如果你想更好地了解如何实现自己的 ProxyExternalRequest，最简单的方法是查看现有的 [包含的 ProxyExternalRequest](https://github.com/opennextjs/opennextjs-aws/tree/main/packages/open-next/src/overrides/proxyExternalRequest)。
 
-## Included Proxy External Request
+## 包含的代理外部请求
 
 ### node
 
-This uses node-proxy to proxy the request to the external service.
+这使用 node-proxy 将请求代理到外部服务。
 
 ### fetch
 
-This uses fetch to proxy the request to the external service. It doesn't work in Node.js
+这使用 fetch 将请求代理到外部服务。它在 Node.js 中不起作用
 
 ### dummy
 
-This is a dummy implementation that throws a FatalError.
+这是一个虚拟实现，会抛出 FatalError。

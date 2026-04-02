@@ -1,47 +1,47 @@
 import { Callout } from "nextra/components";
 
 <Callout>
-  This documentation is still a work in progress. Some parts might be missing or incomplete.
+  本文档仍在编写中。部分内容可能缺失或不完整。
 
-This is also mostly for advanced use cases (Overriding some default, provide support for another Cloud provider, creating your own IAC component ...), most people won't need to use this.
+这也主要用于高级用例（覆盖某些默认设置、为另一个云提供商提供支持、创建自己的 IAC 组件...），大多数人不需要使用此功能。
 
 </Callout>
 
-## General
+## 常规
 
-- For the node runtime, you need at least Node 18.
-- For the edge runtime, you can use both Node 18+ or cloudflare workers with `node_compat` flag enabled (Cloudflare workers support is experimental)
-- Open-next doesn't work well on Windows. We recommend using WSL2 or a Linux VM.
+- 对于 node 运行时，您至少需要 Node 18。
+- 对于 edge 运行时，您可以使用 Node 18+ 或启用了 `node_compat` 标志的 cloudflare workers（Cloudflare workers 支持处于实验阶段）
+- Open-next 在 Windows 上运行不佳。我们建议使用 WSL2 或 Linux 虚拟机。
 
-## Backends
+## 后端
 
-Every backend is a separate module. The following backends are available:
+每个后端都是一个单独的模块。可用后端如下：
 
-- Servers (Node or Edge runtime)
-- Middleware (If manually set to external)
-- Image Optimization
-- Revalidation
-- Warmer
-- Initializer
+- 服务器（Node 或 Edge 运行时）
+- 中间件（如果手动设置为 external）
+- 图像优化
+- 重新验证
+- 预热器
+- 初始化器
 
-All these backends can be overridden to fit your needs. They share some common ground for the configuration and the way they are used.
+所有这些后端都可以被覆盖以满足您的需求。它们在配置和使用方式上有一些共同点。
 
-### Common Overrides
+### 常见覆盖
 
-Every custom overrides (not `string`) share a `BaseOverride` types and needs to be wrapped this way:
+每个自定义覆盖（非 `string`）共享 `BaseOverride` 类型，并需要这样包装：
 
 ```typescript
 type BaseOverride = {
   name: string;
 };
 
-// This is the type of the override
+// 这是覆盖的类型
 type LazyLoadedOverride<T extends BaseOverride> = () => Promise<T>;
 ```
 
-#### Wrapper
+#### 包装器
 
-The wrapper is the main entrypoint for the backend. This is the type of the wrapper:
+包装器是后端的主要入口点。这是包装器的类型：
 
 ```typescript
 type WrapperHandler<
@@ -58,24 +58,24 @@ export type Wrapper<
 };
 ```
 
-The `handler` is the original handler that is being wrapped. The `converter` is the converter that is being used to convert the event and the result.
+`handler` 是被包装的原始处理程序。`converter` 是用于转换事件和结果的转换器。
 
-Here is a list of the provided wrappers:
+以下是提供的包装器列表：
 
-- `aws-lambda` - The default AWS Lambda wrapper - It is the default wrapper
-- `aws-lambda-streaming` - The AWS Lambda wrapper with streaming support
-- `node` - The Node wrapper - Create a node server, not suitable for serverless
-- `cloudflare` - The Cloudflare wrapper - For Cloudflare Worker
+- `aws-lambda` - 默认 AWS Lambda 包装器 - 它是默认包装器
+- `aws-lambda-streaming` - 支持流式传输的 AWS Lambda 包装器
+- `node` - Node 包装器 - 创建 node 服务器，不适合无服务器环境
+- `cloudflare` - Cloudflare 包装器 - 用于 Cloudflare Worker
 
-##### Aws Lambda streaming
+##### Aws Lambda 流式传输
 
-If you want to enable streaming in lambda, you need to use this wrapper. It is not enabled by default.
+如果您想在 lambda 中启用流式传输，需要使用此包装器。默认情况下未启用。
 
-Be aware that you might encounter some unexpected behaviors when using streaming. Aws Lambda seems to apply some buffering on the response. In some rare cases it might mean that streaming won't properly start. This is an issue with the lambda runtime itself, but this should only impact TTFB (Time To First Byte) in those cases. See this [github issue](https://github.com/aws/aws-lambda-nodejs-runtime-interface-client/issues/94)
+请注意，使用流式传输时可能会遇到一些意外行为。Aws Lambda 似乎会对响应应用一些缓冲。在某些罕见情况下，这可能意味着流式传输无法正常启动。这是 lambda 运行时本身的问题，但在这些情况下应该只会影响 TTFB（首字节时间）。请参阅此 [GitHub 问题](https://github.com/aws/aws-lambda-nodejs-runtime-interface-client/issues/94)
 
-#### Converter
+#### 转换器
 
-The converter is used to convert the event and the result. This is the type of the converter:
+转换器用于转换事件和结果。这是转换器的类型：
 
 ```typescript
 export type Converter<
@@ -87,15 +87,15 @@ export type Converter<
 };
 ```
 
-The `convertFrom` method is used to convert the event to the internal event used by the backend internal handler. The `convertTo` method is used to convert the result to the expected result.
-`convertTo` can usually be ignored when using streaming as the result is being streamed directly.
+`convertFrom` 方法用于将事件转换为后端内部处理程序使用的内部事件。`convertTo` 方法用于将结果转换为预期结果。
+使用流式传输时通常可以忽略 `convertTo`，因为结果是直接流式传输的。
 
-Here is a list of the provided converters:
+以下是提供的转换器列表：
 
-- `aws-apigw-v2` - The default AWS API Gateway v2 converter - It is the default converter
-- `aws-apigw-v1` - The AWS API Gateway v1 converter
-- `aws-cloudfront` - The AWS CloudFront converter - Used for lambda@edge
-- `edge` - The Edge converter - Converts from `Request` and to `Response`
-- `node` - The Node converter - Converts from `IncomingMessage` and to `ServerResponse`
-- `sqs-revalidate` - The SQS Revalidate converter - Used by default for the revalidation backend
-- `dummy` - The Dummy converter - Does nothing
+- `aws-apigw-v2` - 默认 AWS API Gateway v2 转换器 - 它是默认转换器
+- `aws-apigw-v1` - AWS API Gateway v1 转换器
+- `aws-cloudfront` - AWS CloudFront 转换器 - 用于 lambda@edge
+- `edge` - Edge 转换器 - 从 `Request` 转换到 `Response`
+- `node` - Node 转换器 - 从 `IncomingMessage` 转换到 `ServerResponse`
+- `sqs-revalidate` - SQS Revalidate 转换器 - 默认用于重新验证后端
+- `dummy` - Dummy 转换器 - 不执行任何操作

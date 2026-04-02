@@ -1,66 +1,66 @@
 import { Callout } from "nextra/components";
 
-## Performance tips
+## 性能提示
 
-They are a lot of features and knobs you can tune to improve the performance of your app. This page lists some of the recommend settings.
+有很多功能和配置项可以调整以提高应用程序的性能。本页列出了一些推荐的设置。
 
-### General
+### 常规
 
-You should regularly update to the latest available version of [`@opennextjs/cloudflare`](https://www.npmjs.com/package/@opennextjs/cloudflare) to benefit from the latest performance and security updates.
+您应该定期更新到 [`@opennextjs/cloudflare`](https://www.npmjs.com/package/@opennextjs/cloudflare) 的最新可用版本，以获得最新的性能和安全更新。
 
-### Caching
+### 缓存
 
-Caching can drastically improves the performance of your application by only fetching data / re-generating your pages when they change.
+缓存可以通过仅在数据更改/页面重新生成时获取数据来大幅提高应用程序的性能。
 
-To get the most out of caching, you should start by reading how Next.js implements caching. The ["Caching in Next.js" guide](https://nextjs.org/docs/app/guides/caching) is a good place to start.
+为了充分利用缓存，您应该首先阅读 Next.js 如何实现缓存。["Next.js 中的缓存"指南](https://nextjs.org/docs/app/guides/caching) 是一个不错的起点。
 
-You should then check [how to configure caching](/cloudflare/caching) for the OpenNext adapter. See below for some advice.
+然后您应该检查 [如何配置缓存](/cloudflare/caching) 以适用于 OpenNext 适配器。参见下文获取一些建议。
 
-#### [Incremental Cache](/cloudflare/caching#incremental-static-regeneration-isr)
+#### [增量缓存](/cloudflare/caching#incremental-static-regeneration-isr)
 
-The Incremental cache is the store containing all the cached data (i.e. pages, `fetch`, `unstable_cache`).
+增量缓存是包含所有缓存数据的存储（即页面、`fetch`、`unstable_cache`）。
 
-You should use the Workers Static Assets based cache if your site is SSG. It is the fastest available option. Note that as Workers Static Assets are read-only, this option can not be used with revalidation.
+如果您的站点是 SSG，您应该使用基于 Workers Static Assets 的缓存。这是最快的可用选项。请注意，由于 Workers Static Assets 是只读的，此选项不能与重新验证一起使用。
 
-When your app uses re-validation, use the R2 based store instead. We recommend the following settings to get the best performance:
+当您的应用程序使用重新验证时，请改用基于 R2 的存储。我们建议以下设置以获得最佳性能：
 
-- use regional cache by wrapping the handler into `withRegionalCache(...)`
-  - use the `long-lived` mode
-  - you should not need to explicitly set `shouldLazilyUpdateOnCacheHit` nor `bypassTagCacheOnCacheHit` as they are set to the most performant mode by default
-- setup [automatic cache purge](/cloudflare/caching#automatic-cache-purge)
+- 通过使用 `withRegionalCache(...)` 包装处理器来使用区域缓存
+  - 使用 `long-lived` 模式
+  - 您应该不需要显式设置 `shouldLazilyUpdateOnCacheHit` 或 `bypassTagCacheOnCacheHit`，因为它们默认设置为性能最高的模式
+- 设置 [自动缓存清除](/cloudflare/caching#automatic-cache-purge)
 
 <Callout type="info">
-  Using KV is not recommended as it is eventually consistent. It could cause stale data to be persisted
-  indefinitely
+  不建议使用 KV，因为它是最终一致性的。它可能导致陈旧数据
+  无限期持久化
 </Callout>
 
-#### [Tag Cache](/cloudflare/caching#tag-cache-for-on-demand-revalidation)
+#### [标签缓存](/cloudflare/caching#tag-cache-for-on-demand-revalidation)
 
-The Tag Cache is not properly a cache. It only stores the timestamp at which tags have been revalidated.
+标签缓存并不是真正的缓存。它仅存储标签被重新验证的时间戳。
 
-It should be configured for App-Router based app using `revalidateTag` or `revalidatePath`.
+它应该为使用 `revalidateTag` 或 `revalidatePath` 的基于 App-Router 的应用程序进行配置。
 
-The D1 based tag cache should only be used if your site receives low traffic. The Durable Object based tag cache is the recommend option for most sites. See [the reference guide](/cloudflare/caching#tag-cache-for-on-demand-revalidation) for the available configuration options.
+基于 D1 的标签缓存仅应在您的站点接收低流量时使用。基于 Durable Object 的标签缓存是大多数站点的推荐选项。参见 [参考指南](/cloudflare/caching#tag-cache-for-on-demand-revalidation) 了解可用的配置选项。
 
-Application using `revalidateTag` exclusively (and not `revalidatePath`) will benefit from using the `withFilter` wrapper with the `softTagFilter` filter.
+专门使用 `revalidateTag`（而不使用 `revalidatePath`）的应用程序将受益于使用 `withFilter` 包装器和 `softTagFilter` 过滤器。
 
-#### [Static Assets](/cloudflare/caching#static-assets-caching)
+#### [静态资产](/cloudflare/caching#static-assets-caching)
 
-You should add a `public/_headers` file to cache the static assets served by your app.
+您应该添加一个 `public/_headers` 文件来缓存应用程序提供的静态资产。
 
-See the [Cloudflare documentation](https://developers.cloudflare.com/workers/static-assets/headers/) for a detailed explanation of the default and the syntax.
+参见 [Cloudflare 文档](https://developers.cloudflare.com/workers/static-assets/headers/) 了解默认值和语法的详细解释。
 
-### [Multiple Workers](https://opennext.js.org/cloudflare/howtos/multi-worker)
+### [多个 Workers](https://opennext.js.org/cloudflare/howtos/multi-worker)
 
-Deploying the middleware and the main server to distinct Workers can help with performance. As when a page can be retrieved from the cache, the main server can be fully bypassed.
+将中间件和主服务器部署到不同的 Workers 有助于提高性能。因为当页面可以从缓存中检索时，完全可以绕过主服务器。
 
-### Troubleshooting performance
+### 排查性能问题
 
-You can profile the code to troubleshoot performance issues.
+您可以对代码进行性能分析以排查性能问题。
 
-#### Building unminified code
+#### 构建未最小化的代码
 
-Code profiles are much easier to read when the code is not minified, you can use the following settings to generate unminified code
+当代码未最小化时，代码性能分析结果更易阅读，您可以使用以下设置生成未最小化的代码
 
 **next.config.ts**
 
@@ -79,20 +79,20 @@ const nextConfig = {
 
 **CLI**
 
-Use the `--noMinify` option when building the app:
+构建应用程序时使用 `--noMinify` 选项：
 
 ```bash
 opennextjs-cloudflare build --noMinify
 ```
 
-#### Record a profile
+#### 记录性能分析
 
-You should first launch a local version of your application by running
+您应该首先通过运行以下命令启动应用程序的本地版本
 
 ```bash
 opennextjs-cloudflare preview
 ```
 
-Once the app is running, follow [the steps from the Workers doc](https://developers.cloudflare.com/workers/observability/dev-tools/cpu-usage/) to record a CPU profile.
+应用程序运行后，遵循 [Workers 文档中的步骤](https://developers.cloudflare.com/workers/observability/dev-tools/cpu-usage/) 记录 CPU 性能分析。
 
-You can then inspect the profile and check if any particular section of the application is unexpectedly slow.
+然后您可以检查性能分析结果，并检查应用程序的任何特定部分是否意外缓慢。

@@ -1,9 +1,9 @@
 {
-  "overview": "Overview",
-  "server": "Server",
-  "middleware": "Middleware",
-  "image_optimization": "Image Optimization",
-  "revalidation": "Revalidation",
-  "warmer": "Warmer",
-  "initializer": "Initializer"
+  "overview": "概览",
+  "server": "服务端",
+  "middleware": "中间件",
+  "image_optimization": "图像优化",
+  "revalidation": "重新验证",
+  "warmer": "预热器",
+  "initializer": "初始化器"
 }

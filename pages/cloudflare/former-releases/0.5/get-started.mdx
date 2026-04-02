@@ -1,48 +1,47 @@
 import { Callout } from "nextra/components";
 
-### Get Started
+### 开始使用
 
-#### New apps
+#### 新应用
 
-To create a new Next.js app, pre-configured to run on Cloudflare using `@opennextjs/cloudflare`, run:
+要创建一个新的 Next.js 应用，预配置为使用 `@opennextjs/cloudflare` 在 Cloudflare 上运行，请运行：
 
 ```sh
 npm create cloudflare@latest -- my-next-app --framework=next --experimental
 ```
 
-#### Existing Next.js apps
+#### 现有的 Next.js 应用
 
-##### 1. Install @opennextjs/cloudflare
+##### 1. 安装 @opennextjs/cloudflare
 
-First, install [@opennextjs/cloudflare](https://www.npmjs.com/package/@opennextjs/cloudflare):
+首先，安装 [@opennextjs/cloudflare](https://www.npmjs.com/package/@opennextjs/cloudflare)：
 
 ```sh
 npm install --save-dev @opennextjs/cloudflare@latest
 ```
 
-##### 2. Install Wrangler
+##### 2. 安装 Wrangler
 
-Install the [Wrangler CLI](https://developers.cloudflare.com/workers/wrangler/) as a devDependency:
+将 [Wrangler CLI](https://developers.cloudflare.com/workers/wrangler/) 安装为 devDependency：
 
 ```sh
 npm install --save-dev wrangler@latest
 ```
 
 <Callout>
-  You must use Wrangler version `3.99.0` or later to deploy Next.js apps using `@opennextjs/cloudflare`.
+  您必须使用 Wrangler 版本 `3.99.0` 或更高版本才能使用 `@opennextjs/cloudflare` 部署 Next.js 应用。
 </Callout>
 
-##### 3. Create a wrangler configuration file
+##### 3. 创建 wrangler 配置文件
 
 <Callout type="info">
-  This step is optional since `@opennextjs/cloudflare` creates this file for you during the build process (if
-  not already present).
+  此步骤是可选的，因为 `@opennextjs/cloudflare` 会在构建过程中为您创建此文件（如果
+  尚未存在）。
 </Callout>
 
-A [wrangler configuration file](https://developers.cloudflare.com/workers/wrangler/configuration/) is needed for your
-application to be previewed and deployed, it is also where you configure your Worker and define what resources it can access via [bindings](https://developers.cloudflare.com/workers/runtime-apis/bindings/service-bindings).
+您的应用需要 [wrangler 配置文件](https://developers.cloudflare.com/workers/wrangler/configuration/) 才能进行预览和部署，这也是您配置 Worker 并通过 [bindings](https://developers.cloudflare.com/workers/runtime-apis/bindings/service-bindings) 定义它可以访问哪些资源的地方。
 
-You can create one yourself in the root directory of your Next.js app with the name `wrangler.jsonc` and the following content:
+您可以在 Next.js 应用的根目录中自行创建一个名为 `wrangler.jsonc` 的文件，内容如下：
 
 ```jsonc
 {
@@ -56,8 +55,8 @@ You can create one yourself in the root directory of your Next.js app with the n
     "binding": "ASSETS",
   },
   "kv_namespaces": [
-    // Create a KV binding with the binding name "NEXT_CACHE_WORKERS_KV"
-    // to enable the KV based caching:
+    // 创建一个绑定名为 "NEXT_CACHE_WORKERS_KV" 的 KV binding
+    // 以启用基于 KV 的缓存：
     // {
     //   "binding": "NEXT_CACHE_WORKERS_KV",
     //   "id": "<BINDING_ID>"
@@ -67,23 +66,23 @@ You can create one yourself in the root directory of your Next.js app with the n
 ```
 
 <Callout>
-  As shown above: - You must enable the [`nodejs_compat` compatibility
-  flag](https://developers.cloudflare.com/workers/runtime-apis/nodejs/) *and* set your [compatibility
-  date](https://developers.cloudflare.com/workers/configuration/compatibility-dates/) to `2024-09-23` or
-  later, in order for your Next.js app to work with @opennextjs/cloudflare - The `main` and `assets` values
-  should also not be changed unless you modify the build output result in some way - You can add a binding
-  named `NEXT_CACHE_WORKERS_KV` to make use of Next.js' caching as described in the [Caching
-  docs](/cloudflare/caching)
+  如上所示：- 您必须启用 [`nodejs_compat` compatibility
+  flag](https://developers.cloudflare.com/workers/runtime-apis/nodejs/) *并且* 设置您的 [compatibility
+  date](https://developers.cloudflare.com/workers/configuration/compatibility-dates/) 为 `2024-09-23` 或
+  更高版本，以便您的 Next.js 应用能与 @opennextjs/cloudflare 一起工作 - `main` 和 `assets` 值
+  也不应更改，除非您以某种方式修改了构建输出结果 - 您可以添加一个 binding
+  名为 `NEXT_CACHE_WORKERS_KV` 以利用 Next.js 的缓存，如 [Caching
+  docs](/cloudflare/caching) 中所述
 </Callout>
 
-##### 4. Add an `open-next.config.ts` file
+##### 4. 添加 `open-next.config.ts` 文件
 
 <Callout type="info">
-  This step is optional since `@opennextjs/cloudflare` creates this file for you during the build process (if
-  not already present).
+  此步骤是可选的，因为 `@opennextjs/cloudflare` 会在构建过程中为您创建此文件（如果
+  尚未存在）。
 </Callout>
 
-Add a [`open-next.config.ts`](https://opennext.js.org/aws/config) file to the root directory of your Next.js app:
+将一个 [`open-next.config.ts`](https://opennext.js.org/aws/config) 文件添加到您的 Next.js 应用的根目录：
 
 ```ts
 import { defineCloudflareConfig } from "@opennextjs/cloudflare";
@@ -95,23 +94,23 @@ export default defineCloudflareConfig({
 ```
 
 <Callout>
-  To use the `OpenNextConfig` type as illustrated above (which is not necessary), you need to install the
-  `@opennextjs/aws` NPM package as a dev dependency.
+  要使用如上所示的 `OpenNextConfig` 类型（这不是必须的），您需要将
+  `@opennextjs/aws` NPM 包安装为 dev dependency。
 </Callout>
 
-##### 5. Add a `.dev.vars` file
+##### 5. 添加 `.dev.vars` 文件
 
-Then, add a [`.dev.vars`](https://developers.cloudflare.com/workers/testing/local-development/#local-only-environment-variables) file to the root directory of your Next.js app:
+然后，将一个 [`.dev.vars`](https://developers.cloudflare.com/workers/testing/local-development/#local-only-environment-variables) 文件添加到您的 Next.js 应用的根目录：
 
 ```text
 NEXTJS_ENV=development
 ```
 
-The `NEXTJS_ENV` variable defines the environment to use when loading Next.js `.env` files. It defaults to "production" when not defined.
+`NEXTJS_ENV` 变量定义了加载 Next.js `.env` 文件时要使用的环境。未定义时默认为 "production"。
 
-##### 6. Update the `package.json` file
+##### 6. 更新 `package.json` 文件
 
-Add the following to the scripts field of your `package.json` file:
+将以下内容添加到 `package.json` 文件的 scripts 字段中：
 
 ```json
 "preview": "opennextjs-cloudflare && wrangler dev",
@@ -119,53 +118,52 @@ Add the following to the scripts field of your `package.json` file:
 "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
 ```
 
-- `npm run preview`: Builds your app and serves it locally, allowing you to quickly preview your app running locally in the Workers runtime, via a single command.
-- `npm run deploy`: Builds your app, and then deploys it to Cloudflare
-- `cf-typegen`: Generates a `cloudflare-env.d.ts` file at the root of your project containing [the types for the `env`](https://developers.cloudflare.com/workers/wrangler/commands/#types).
+- `npm run preview`：构建您的应用并在本地提供服务，允许您通过单个命令快速预览在 Workers 运行时中本地运行的应用。
+- `npm run deploy`：构建您的应用，然后将其部署到 Cloudflare
+- `cf-typegen`：在项目的根目录生成一个 `cloudflare-env.d.ts` 文件，其中包含 [`env` 的类型](https://developers.cloudflare.com/workers/wrangler/commands/#types)。
 
-##### 7. Add caching with Workers KV
+##### 7. 使用 Workers KV 添加缓存
 
-See the [Caching docs](/cloudflare/caching) for information on enabling Next.js caching in your OpenNext project.
+请参阅 [Caching docs](/cloudflare/caching) 以获取有关在 OpenNext 项目中启用 Next.js 缓存的信息。
 
-##### 8. Remove any `export const runtime = "edge";` if present
+##### 8. 如果存在，移除任何 `export const runtime = "edge";`
 
-Before deploying your app, remove the `export const runtime = "edge";` line from any of your source files.
+在部署应用之前，从任何源文件中移除 `export const runtime = "edge";` 行。
 
-The edge runtime is not supported yet with `@opennextjs/cloudflare`.
+@opennextjs/cloudflare 尚不支持 edge runtime。
 
-##### 9. Add `.open-next` to `.gitignore`
+##### 9. 将 `.open-next` 添加到 `.gitignore`
 
-You should add `.open-next` to your `.gitignore` file to prevent the build output from being committed to your repository.
+您应该将 `.open-next` 添加到 `.gitignore` 文件中，以防止构建输出被提交到您的仓库。
 
-##### 10. Remove `@cloudflare/next-on-pages` (if necessary)
+##### 10. 移除 `@cloudflare/next-on-pages`（如有必要）
 
-If your Next.js app currently uses `@cloudflare/next-on-pages`, you'll want to remove it, and make a few changes.
+如果您的 Next.js 应用当前使用 `@cloudflare/next-on-pages`，您需要移除它，并进行一些更改。
 
-Uninstalling the [`@cloudflare/next-on-pages`](https://www.npmjs.com/package/@cloudflare/next-on-pages) package as well as the [`eslint-plugin-next-on-pages`](https://www.npmjs.com/package/eslint-plugin-next-on-pages) package if present.
+卸载 [`@cloudflare/next-on-pages`](https://www.npmjs.com/package/@cloudflare/next-on-pages) 包以及 [`eslint-plugin-next-on-pages`](https://www.npmjs.com/package/eslint-plugin-next-on-pages) 包（如果存在）。
 
-Remove any reference of these packages from your source and configuration files.
-This includes:
+从您的源文件和配置文件中移除对这些包的任何引用。
+这包括：
 
-- `setupDevPlatform()` calls in your Next.js config file
-- `getRequestContext` imports from `@cloudflare/next-on-pages` from your source files
-  (those can be replaced with `getCloudflareContext` calls from `@opennextjs/cloudflare`)
-- next-on-pages eslint rules set in your Eslint config file
+- 您的 Next.js 配置文件中的 `setupDevPlatform()` 调用
+- 您的源文件中从 `@cloudflare/next-on-pages` 导入的 `getRequestContext`
+  （这些可以替换为来自 `@opennextjs/cloudflare` 的 `getCloudflareContext` 调用）
+- 您的 Eslint 配置文件中设置的 next-on-pages eslint 规则
 
-##### 11. Develop locally
+##### 11. 本地开发
 
-You can continue to run `next dev` when developing locally.
+在本地开发时，您可以继续运行 `next dev`。
 
-Modify your Next.js configuration file to import and call the `initOpenNextCloudflareForDev` utility
-from the `@opennextjs/cloudflare` package. This makes sure that the Next.js dev server can optimally integrate with the open-next cloudflare adapter and it is necessary for using bindings during local development.
+修改您的 Next.js 配置文件以导入并调用 `@opennextjs/cloudflare` 包中的 `initOpenNextCloudflareForDev` 工具函数。这确保 Next.js 开发服务器能够最佳地与 open-next cloudflare 适配器集成，并且对于在本地开发期间使用 bindings 是必要的。
 
-This is an example of a Next.js configuration file calling the utility:
+这是一个调用该工具函数的 Next.js 配置文件示例：
 
 ```ts
 // next.config.ts
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  /* 此处配置选项 */
 };
 
 export default nextConfig;
@@ -174,17 +172,17 @@ import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 initOpenNextCloudflareForDev();
 ```
 
-After having added the `initOpenNextCloudflareForDev()` call in your Next.js configuration file, you will be able, during local development, to access in any of your server code, local versions of Cloudflare bindings as indicated in the [bindings documentation](./bindings).
+在 Next.js 配置文件中添加 `initOpenNextCloudflareForDev()` 调用后，您将能够在本地开发期间，在任何服务器代码中访问 Cloudflare bindings 的本地版本，如 [bindings documentation](./bindings) 中所示。
 
-In step 3, we also added the `npm run preview`, which allows you to quickly preview your app running locally in the Workers runtime,
-rather than in Node.js. This allows you to test changes in the same runtime as your app will run in when deployed to Cloudflare.
+在步骤 3 中，我们还添加了 `npm run preview`，它允许您快速预览在 Workers 运行时中本地运行的应用，
+而不是在 Node.js 中。这允许您在与应用部署到 Cloudflare 时相同的运行时中测试更改。
 
-##### 12. Deploy to Cloudflare Workers
+##### 12. 部署到 Cloudflare Workers
 
-Either deploy via the command line:
+要么通过命令行部署：
 
 ```sh
 npm run deploy
 ```
 
-Or [connect a GitHub or GitLab repository](https://developers.cloudflare.com/workers/ci-cd/), and Cloudflare will automatically build and deploy each pull request you merge to your production branch.
+要么 [连接 GitHub 或 GitLab 仓库](https://developers.cloudflare.com/workers/ci-cd/)，Cloudflare 将自动构建并部署您合并到生产分支的每个 pull request。

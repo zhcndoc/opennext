@@ -1,11 +1,13 @@
 {
-  "index": "Overview",
-  "get_started": "Getting started",
-  "compatibility": "Compatibility",
-  "config": "Configuration",
-  "comparison": "Comparison",
-  "inner_workings": "How does it work?",
-  "faq": "FAQ",
-  "common_issues": "Troubleshooting",
-  "contribute": "Contributing"
+  "index": "概览",
+  "get_started": "快速开始",
+  "compatibility": "兼容性",
+  "config": "配置",
+  "comparison": "对比",
+  "inner_workings": "工作原理",
+  "faq": "常见问题",
+  "common_issues": "故障排查",
+  "contribute": "贡献指南",
+  "migration": "迁移指南",
+  "reference-implementation": "参考实现"
 }

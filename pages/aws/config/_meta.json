@@ -1,8 +1,8 @@
 {
-  "simple_example": "Simple Example",
-  "custom_overrides": "Custom Overrides",
-  "reference": "Reference",
-  "full_example": "Full Example",
+  "simple_example": "简单示例",
+  "custom_overrides": "自定义覆盖",
+  "reference": "参考",
+  "full_example": "完整示例",
   "nx": "Nx Monorepo",
-  "overrides": "Overrides"
+  "overrides": "覆盖项"
 }

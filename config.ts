@@ -8,10 +8,10 @@ interface Site {
 }
 
 export const SITE: Site = {
-  title: "OpenNext",
+  title: "OpenNext 中文文档",
   sst: "https://sst.dev",
-  url: "https://opennext.js.org",
+  url: "https://opennext.zhcndoc.com",
   github: "https://github.com/opennextjs",
   discord: "https://discord.gg/opennextjs",
-  description: "Open-source Next.js adapters",
+  description: "开源的 Next.js 适配器，支持 SST、Next.js 和 Vercel 平台",
 };

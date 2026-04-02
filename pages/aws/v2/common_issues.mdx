@@ -1,23 +1,23 @@
-#### Cannot find module next
+#### 找不到模块 next
 
-You might stumble upon this error inside cloudwatch logs: `Cannot find module 'next'`.
-It is likely that you are in a monorepo and you have several lock files.
-Just make sure that you have a single lock file in the root of your project.
+您可能会在 CloudWatch 日志中遇到此错误：`Cannot find module 'next'`。
+很可能是您处于一个 monorepo 中，并且有多个锁文件。
+只需确保项目根目录下只有一个锁文件。
 
-#### headers, redirect, rewrites in `next-config` and middleware are not working in next 13.4.12+
+#### headers, redirect, rewrites 在 `next-config` 和 middleware 中于 next 13.4.12+ 版本不起作用
 
-If you use a version of nextjs >= 13.4.12, you'll need to use an open-next version >= 2.1
+如果您使用的 nextjs 版本 >= 13.4.12，则需要使用 open-next 版本 >= 2.1
 
-#### My api route are returning empty response and i'm using sentry
+#### 我的 api 路由返回空响应，并且我正在使用 sentry
 
-If you are using sentry, API routes returns empty body. You could try configuring sentry to ignore API routes. You can read more about it [here](https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/?opt-out-of-auto-instrumentation-on-specific-routes)
+如果您正在使用 sentry，API 路由会返回空主体。您可以尝试配置 sentry 以忽略 API 路由。您可以 [此处](https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/?opt-out-of-auto-instrumentation-on-specific-routes) 阅读更多相关信息
 
-#### My ISR page has this cache-control header `s-maxage=2, stale-while-revalidate=2592000`
+#### 我的 ISR 页面有这个 cache-control 头 `s-maxage=2, stale-while-revalidate=2592000`
 
-Given how ISR works, while waiting for the revalidation to happen, the page will be served using this cache control header. This prevent your server from being overloaded by a lot of requests while the revalidation is done. You can read more about it [here](/aws/v2/inner_workings/isr).
+鉴于 ISR 的工作方式，在等待重新验证发生时，页面将使用此 cache control 头提供服务。这可以防止您的服务器在重新验证完成期间因大量请求而过载。您可以 [此处](/aws/v2/inner_workings/isr) 阅读更多相关信息。
 
-#### Unzipped size must be smaller than 262144000 bytes
+#### 解压后的大小必须小于 262144000 字节
 
-AWS Lambda has an unzipped size limit of 250MB. If your app is over this limit, then it is most likely using a node_module library that is too large for serverless or there is a large dev dependency getting bundled.
-For example, `pdfjs` has `canvas` optional dependency which takes up 180MB. For more details, [read me](/aws/v2/common_issues/bundle_size).
-Note: a large bundle size will increase cold start significantly.
+AWS Lambda 有 250MB 的解压后大小限制。如果您的应用超过此限制，那么很可能是使用了对于 serverless 来说太大的 node_module 库，或者有一个大的开发依赖被打包进去了。
+例如，`pdfjs` 有 `canvas` 可选依赖，占用了 180MB。更多详情，[阅读此处](/aws/v2/common_issues/bundle_size)。
+注意：较大的打包大小会显著增加冷启动时间。

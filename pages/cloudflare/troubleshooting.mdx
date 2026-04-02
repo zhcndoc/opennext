@@ -1,27 +1,27 @@
 import { Callout } from "nextra/components";
 
-## Troubleshooting
+## 故障排除
 
-### "Your Worker exceeded the size limit of 3 MiB"
+### "您的 Worker 超出了 3 MiB 的大小限制"
 
-The Cloudflare Account you are deploying to is on the Workers Free plan, which [limits the size of each Worker to 3 MiB](https://developers.cloudflare.com/workers/platform/limits/#worker-size). When you subscribe to the Workers Paid plan, each Worker can be up to 10 MiB.
+您部署到的 Cloudflare 账户位于 Workers 免费计划上，该计划 [将每个 Worker 的大小限制为 3 MiB](https://developers.cloudflare.com/workers/platform/limits/#worker-size)。当您订阅 Workers 付费计划时，每个 Worker 最大可达 10 MiB。
 
-When deploying your Worker, `wrangler` will show both the original and compressed sizes. Only the latter (gzipped size) matters for these limits.
+部署 Worker 时，`wrangler` 会显示原始大小和压缩后的大小。只有后者（gzip 压缩后的大小）与这些限制相关。
 
-### "Your Worker exceeded the size limit of 10 MiB"
+### "您的 Worker 超出了 10 MiB 的大小限制"
 
-If your Worker is larger than 10 MiB compressed — there might be unnecessary code ending up in your production bundle. You can visualize and understand this by running:
+如果您的 Worker 压缩后大于 10 MiB —— 可能有一些不必要的代码进入了您的生产环境打包包中。您可以通过运行以下命令来可视化并理解这一点：
 
-1. `npx @opennextjs/cloudflare build` within your project's root directory
-2. `cd .open-next/server-functions/default` to open the directory that contains the bundled code
-3. Take the file named `handler.mjs.meta.json` and use the [ESBuild Bundle Analyzer](https://esbuild.github.io/analyze/) to visualize your application's code, and understand the largest parts of your production bundle
+1. 在项目根目录内运行 `npx @opennextjs/cloudflare build`
+2. `cd .open-next/server-functions/default` 打开包含打包代码的目录
+3. 获取名为 `handler.mjs.meta.json` 的文件，并使用 [ESBuild Bundle Analyzer](https://esbuild.github.io/analyze/) 来可视化您的应用程序代码，并了解生产环境打包包中最大的部分
 
-### My app fails to build when I import a specific NPM package
+### 导入特定 NPM 包时我的应用构建失败
 
-First, make sure that the `nodejs_compat` compatibility flag is enabled, and your compatibility date is set to on or after "2024-09-23", in your [wrangler configuration file](https://developers.cloudflare.com/workers/wrangler/configuration/).
-Refer to the [Node.js Workers docs](https://developers.cloudflare.com/workers/runtime-apis/nodejs/) for more details on Node.js support in Cloudflare Workers.
+首先，确保在您的 [wrangler 配置文件](https://developers.cloudflare.com/workers/wrangler/configuration/) 中启用了 `nodejs_compat` 兼容性标志，并且您的兼容性日期设置为 "2024-09-23" 或之后。
+有关 Cloudflare Workers 中 Node.js 支持的更多详细信息，请参阅 [Node.js Workers 文档](https://developers.cloudflare.com/workers/runtime-apis/nodejs/)。
 
-Some NPM packages define multiple exports. For example:
+某些 NPM 包定义了多个导出。例如：
 
 ```
 "exports": {
@@ -32,9 +32,9 @@ Some NPM packages define multiple exports. For example:
 },
 ```
 
-When you use `@opennextjs/cloudflare`, [Wrangler](https://developers.cloudflare.com/workers/wrangler/) bundles your code before running it locally, or deploying it to Cloudflare. Wrangler has to choose which export to use, when you import a module. By default, Wrangler, which uses [esbuild](https://esbuild.github.io/), handles this in a way that is not compatible with some NPM packages.
+当您使用 `@opennextjs/cloudflare` 时，[Wrangler](https://developers.cloudflare.com/workers/wrangler/) 会在本地运行代码或将其部署到 Cloudflare 之前打包您的代码。当您导入模块时，Wrangler 必须选择使用哪个导出。默认情况下，使用 [esbuild](https://esbuild.github.io/) 的 Wrangler 处理此问题的方式与某些 NPM 包不兼容。
 
-You may want to modify how Wrangler resolves multiple exports, such that when you import packages, the `node` export, if present, is used. You can do do by defining the following variables in a `.env` file within the root directory of your Next.js app:
+您可能希望修改 Wrangler 解析多个导出的方式，以便在导入包时使用 `node` 导出（如果存在）。您可以通过在 Next.js 应用根目录下的 `.env` 文件中定义以下变量来实现：
 
 ```
 WRANGLER_BUILD_CONDITIONS=""
@@ -43,25 +43,25 @@ WRANGLER_BUILD_PLATFORM="node"
 
 ### `Error: Cannot perform I/O on behalf of a different request.`
 
-Some DB clients (i.e. [`postgres`](https://www.npmjs.com/package/postgres)) create a connection to the DB server when they are first instantiated and re-use it for later requests.
-This programming model is not compatible with the Workers runtime where a connection can not be re-used in a different request.
+某些数据库客户端（例如 [`postgres`](https://www.npmjs.com/package/postgres)）在首次实例化时创建到数据库服务器的连接，并在后续请求中重用该连接。
+这种编程模型与 Workers 运行时不兼容，因为在不同的请求中无法重用连接。
 
-The following error is generated in such a case:
+在这种情况下会生成以下错误：
 
 ```text
 ⨯ Error: Cannot perform I/O on behalf of a different request. I/O objects (such as streams, request/response bodies, and others) created in the context of one request handler cannot be accessed from a different request's handler. This is a limitation of Cloudflare Workers which allows us to improve overall performance. (I/O type: Writable)
 ```
 
-To solve this, you should create the DB client inside a request context and not keep a global DB client.
+为解决此问题，您应该在请求上下文内创建数据库客户端，而不是保留全局数据库客户端。
 
-A global client would not work:
+全局客户端无法工作：
 
 ```ts
 // src/lib/db.ts
 import postgres from "postgres";
 
-// `client` is global.
-// As the connection would be shared across requests, it fails on worker
+// `client` 是全局的。
+// 由于连接将在请求间共享，它在 worker 上会失败
 export const client = postgres(process.env.DATABASE_URL, { max: 5 });
 
 // src/app/api/route.ts
@@ -74,14 +74,14 @@ export async function GET() {
 }
 ```
 
-It can fixed by creating the client for each incoming request:
+可以通过为每个传入请求创建客户端来修复此问题：
 
 ```ts
 // src/app/api/route.ts
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  // The client is created for each incoming request and no connection is shared across requests
+  // 客户端为每个传入请求创建，并且没有连接在请求间共享
   const client = postgres(process.env.DATABASE_URL, { max: 5 });
   return new Response(JSON.stringify(await client`SELECT * FROM users;`));
 }
@@ -89,7 +89,7 @@ export async function GET() {
 
 ### `Error: Failed to load chunk server/chunks/ssr/<chunk_name>.js`
 
-If you see an error similar to:
+如果您看到类似以下的错误：
 
 ```text
 ✘ [ERROR] ⨯ Error: Failed to load chunk server/chunks/ssr/<chunk_name>.js
@@ -101,11 +101,11 @@ If you see an error similar to:
       at .open-next/server-functions/default/.next/server/app/page.js
 ```
 
-You are likely using an older version of the OpenNext adapter with Turbopack builds. Please upgrade `@opennextjs/cloudflare` to the latest version for Turbopack support, or use Webpack builds.
+您可能正在使用带有 Turbopack 构建的旧版本 OpenNext 适配器。请升级 `@opennextjs/cloudflare` 到最新版本以支持 Turbopack，或使用 Webpack 构建。
 
 ### `X [ERROR] Could not resolve "<package>"`
 
-When you see the following error during the build:
+当您在构建期间看到以下错误时：
 
 ```text
 ⚙️ Bundling the OpenNext server...
@@ -113,21 +113,21 @@ When you see the following error during the build:
 X [ERROR] Could not resolve "<package name>"
 ```
 
-It might be because the package contains workerd specific code.
+这可能是因为该包包含特定于 workerd 的代码。
 
-Check this [howto](/cloudflare/howtos/workerd) for a solution.
+查看此 [操作指南](/cloudflare/howtos/workerd) 以获取解决方案。
 
 ### `ReferenceError: FinalizationRegistry is not defined`
 
-If you encounter this error when using features that rely on modern JavaScript APIs:
+如果您在使用依赖现代 JavaScript API 的功能时遇到此错误：
 
 ```text
 ✘ [ERROR] ⨯ ReferenceError: FinalizationRegistry is not defined
 ```
 
-This error occurs because the `FinalizationRegistry` API is not available in older Cloudflare Workers compatibility dates.
+发生此错误是因为 `FinalizationRegistry` API 在较旧的 Cloudflare Workers 兼容性日期中不可用。
 
-To fix this issue, update your `compatibility_date` in `wrangler.toml` or `wrangler.jsonc` to `2025-05-05` or later:
+要修复此问题，请将 `wrangler.toml` 或 `wrangler.jsonc` 中的 `compatibility_date` 更新为 `2025-05-05` 或更高版本：
 
 ```json
 {
@@ -135,4 +135,4 @@ To fix this issue, update your `compatibility_date` in `wrangler.toml` or `wrang
 }
 ```
 
-Refer to the [Cloudflare Workers compatibility flags documentation](https://developers.cloudflare.com/workers/configuration/compatibility-flags/#enable-finalizationregistry-and-weakref) for more details.
+有关更多详细信息，请参阅 [Cloudflare Workers 兼容性标志文档](https://developers.cloudflare.com/workers/configuration/compatibility-flags/#enable-finalizationregistry-and-weakref)。

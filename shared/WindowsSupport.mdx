@@ -1,17 +1,12 @@
-OpenNext can be used on Windows systems but Windows full support is not guaranteed because:
+OpenNext 可以在 Windows 系统上使用，但无法保证对 Windows 的完整支持，原因如下：
 
-- Next.js tooling itself has Windows support issues and OpenNext is built on these tools
-- the OpenNext team has limited capacity and fully supporting Windows (given the point above)
-  has been determined to be a lower priority, thus the effort and testing on Windows is limited
+- Next.js 自身的工具链就存在 Windows 支持问题，而 OpenNext 又建立在这些工具之上
+- OpenNext 团队的资源有限，而考虑到上面这一点，完整支持 Windows 的优先级较低，因此在 Windows 上的投入和测试也较少
 
-Given the above, you can develop your application under Windows at your own risk. If you don't have an alternative we
-recommend either:
+基于以上原因，您可以自行承担风险在 Windows 下开发应用。如果您没有其他选择，我们建议您：
 
-- running OpenNext using [the Windows Subsystem for Linux (WSL)](https://learn.microsoft.com/en-us/windows/wsl/),
-- in a Linux Virtual Machine or
-- develop your application using the standard Next.js tooling and deploy it using OpenNext in CI/CD systems such
-  as [GitHub Actions](https://github.com/features/actions) that run linux/MacOS environments
+- 使用 [适用于 Linux 的 Windows 子系统（WSL）](https://learn.microsoft.com/en-us/windows/wsl/) 运行 OpenNext
+- 在 Linux 虚拟机中运行
+- 使用标准的 Next.js 工具链开发，并通过在 Linux/MacOS 环境中运行的 CI/CD 系统（例如 [GitHub Actions](https://github.com/features/actions)）使用 OpenNext 部署应用
 
-Windows Subsystem for Linux (WSL) allows you to run a Linux environment on your Windows machine, without the need for
-a separate virtual machine or dual booting. Visual Studio Code has [an extension](https://code.visualstudio.com/docs/remote/wsl)
-that makes developing with WSL very easy.
+适用于 Linux 的 Windows 子系统（WSL）允许您在 Windows 机器上运行 Linux 环境，而无需单独的虚拟机或双系统启动。Visual Studio Code 还有一个 [扩展](https://code.visualstudio.com/docs/remote/wsl)，可以让使用 WSL 开发变得非常轻松。

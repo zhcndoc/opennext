@@ -1,16 +1,16 @@
 import { Callout } from "nextra/components";
 
 <Callout type="warning" emoji="⚠️">
-  Streaming support is **EXTREMELY EXPERIMENTAL**... AWS has updated their runtime in the past which broke streaming... It seems stable now but if they do another rugpull, it could cause your app to break.
+  流式支持处于**极度实验性**阶段... AWS 过去曾更新过其运行时导致流式功能失效... 现在看起来稳定了，但如果他们再次进行破坏性变更，可能会导致你的应用崩溃。
 
-**It's not recommended to use streaming in production.**
+**不建议在生产环境中使用流式功能。**
 
 </Callout>
 
-Streaming is using the new AWS lambda support for [streaming responses](https://docs.aws.amazon.com/lambda/latest/dg/configuration-response-streaming.html). This allows you to send data to the client as it's generated instead of waiting for the entire response to be generated.
+流式功能使用了 AWS lambda 对 [流式响应](https://docs.aws.amazon.com/lambda/latest/dg/configuration-response-streaming.html) 的新支持。这允许你在数据生成时将其发送给客户端，而无需等待整个响应生成完毕。
 
-If you want to try streaming you need to set the function url invoke mode to `RESPONSE_STREAM`.
-You'll also need to add a `--streaming` tags to the build cli.
+如果你想尝试流式功能，你需要将 function url invoke mode 设置为 `RESPONSE_STREAM`。
+你还需要在构建 cli 中添加一个 `--streaming` 标签。
 
 ```bash
 open-next build --streaming

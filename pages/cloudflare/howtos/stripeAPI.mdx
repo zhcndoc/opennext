@@ -1,14 +1,14 @@
 ## [Stripe API](https://www.npmjs.com/package/stripe)
 
-When [creating a Stripe object](https://docs.stripe.com/js/initializing), the default http client implementation is based on `node:https` which is not implemented on Workers.
+当 [创建 Stripe 对象](https://docs.stripe.com/js/initializing) 时，默认的 HTTP 客户端实现基于 `node:https`，这在 Workers 上并未实现。
 
-However you can use an http client based on fetch ([`FetchHttpClient`](https://github.com/stripe/stripe-node/blob/54d423e5d1118dc35c4b76260889826003e00e9f/src/net/FetchHttpClient.ts)) via the `httpClient` option:
+不过，您可以通过 `httpClient` 选项使用基于 fetch 的 HTTP 客户端 ([`FetchHttpClient`](https://github.com/stripe/stripe-node/blob/54d423e5d1118dc35c4b76260889826003e00e9f/src/net/FetchHttpClient.ts))：
 
 ```ts
 import Stripe from "stripe";
 
 const stripe = Stripe(STRIPE_API_KEY, {
-  // Cloudflare Workers use the Fetch API for their API requests.
+  // Cloudflare Workers 使用 Fetch API 进行其 API 请求。
   httpClient: Stripe.createFetchHttpClient(),
 });
 ```

@@ -1,22 +1,22 @@
-OpenNext use 3 different esbuild plugins internally to recompile or modify the source code depending on some condition like the next version or the runtime used
+OpenNext 内部使用 3 个不同的 esbuild 插件，根据某些条件（如 next 版本或使用的运行时）重新编译或修改源代码
 
-#### OpenNext Replacement Plugin
+#### OpenNext 替换插件
 
-This plugin is used to replace some code in the source code with some other code.
+此插件用于将源代码中的某些代码替换为其他代码。
 
-Here is a very simple example of how to use it:
+这是一个非常简单的使用示例：
 
 ```typescript
 openNextPlugin({
-    // The target file to replace code in
+    // 要替换代码的目标文件
     target: /plugins\/default\.js/g,
-    // This is where the plugin will look for the code to replace
+    // 插件将在此处查找要替换的代码
     replacements: [require.resolve("./plugins/default.js")],
-    // This is to delete some code from the target file
+    // 这是要从目标文件中删除某些代码
     deletes: ["id1"],
   })
 
-  //To inject arbitrary code by using (import at top of file):
+  // 通过使用（文件顶部的 import）注入任意代码：
 
   //#import
 
@@ -25,22 +25,22 @@ openNextPlugin({
 
   //#endImport
 
-  To replace code:
+  替换代码：
 
   //#override id1
 
   export function overrideMe() {
-     // I will replace the "id1" block in the target file
+     // 我将替换目标文件中的 "id1" 块
   }
 
   //#endOverride
 ```
 
-#### OpenNext Resolve Plugin
+#### OpenNext 解析插件
 
-This plugin is used to avoid having to bundle the whole library in the final bundle. It will replace the dynamic import of the overrides with the one that we want to use.
+此插件用于避免在最终捆绑包中捆绑整个库。它将把覆盖项的动态导入替换为我们想要使用的那个。
 
-Here is a very simple example of how to use it:
+这是一个非常简单的使用示例：
 
 ```typescript
 openNextResolvePlugin({
@@ -51,21 +51,21 @@ openNextResolvePlugin({
 });
 ```
 
-#### OpenNext Edge Plugin
+#### OpenNext Edge 插件
 
-This plugin is used to properly compile routes or middleware built for the `edge` runtime.
+此插件用于正确编译为 `edge` 运行时构建的路由或中间件。
 
-Here is a very simple example of how to use it:
+这是一个非常简单的使用示例：
 
 ```typescript
 openNextEdgePlugin({
-  // The path to the .next directory
+  // .next 目录的路径
   nextDir: "next",
-  // The path to the edgeFunctionHandler.js file that we'll use to bundle the routing
+  // 我们将用于捆绑路由的 edgeFunctionHandler.js 文件的路径
   edgeFunctionHandlerPath: "./edgeFunctionHandler.js",
-  // The middlewareInfo from the middleware manifest file
+  // 来自中间件清单文件的 middlewareInfo
   middlewareInfo: middlewareInfo
-  // If the app should be bundled for cloudflare workers
+  // 如果应用应该为 cloudflare workers 捆绑
   isInCloudflare: true
 })
 ```

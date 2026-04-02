@@ -1,7 +1,7 @@
 {
-  "routing": "Routing Layer",
-  "caching": "Caching (ISR/SSG)",
-  "cache_interception": "Optional Cache Interception",
-  "components": "Main Components",
-  "architecture": "Default Architecture"
+  "routing": "路由层",
+  "caching": "缓存（ISR/SSG）",
+  "cache_interception": "可选缓存拦截",
+  "components": "核心组件",
+  "architecture": "默认架构"
 }

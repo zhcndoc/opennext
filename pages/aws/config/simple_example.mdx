@@ -1,13 +1,11 @@
 import { Callout } from "nextra/components";
 
-Here you can find the most common `open-next.config.ts` file examples that you could easily take as a starting point for your own configuration.
+在这里，你可以找到最常见的 `open-next.config.ts` 文件示例，你可以轻松地将它们作为自己配置的起点。
 
-## Streaming with lambda
+## 使用 Lambda 进行流式传输
 
 <Callout type="info" emoji="ℹ️">
-  If you have an issue with streaming send a message on
-  [discord](https://discord.com/channels/1283128968140161065/1286094576788177059) and contact AWS support to
-  let them know of the issue.
+  如果你在流式传输方面遇到问题，请在 [discord](https://discord.com/channels/1283128968140161065/1286094576788177059) 上发送消息并联系 AWS 支持团队，让他们知道这个问题。
 </Callout>
 
 ```ts
@@ -15,7 +13,7 @@ import type { OpenNextConfig } from "@opennextjs/aws/types/open-next.js";
 const config = {
   default: {
     override: {
-      wrapper: "aws-lambda-streaming", // This is necessary to enable lambda streaming
+      wrapper: "aws-lambda-streaming", // 这是启用 lambda 流式传输所必需的
     },
   },
 } satisfies OpenNextConfig;
@@ -23,25 +21,25 @@ const config = {
 export default config;
 ```
 
-Be aware that there has been some issues in the past with AWS breaking streaming from one day to another. This seems to be resolved now.
-[Thread 1](https://discord.com/channels/983865673656705025/1230482660913184800)
-[Thread 2](https://discord.com/channels/983865673656705025/1249368592558985247)
+请注意，过去曾出现过 AWS 某天突然破坏流式传输功能的问题。这似乎现在已经解决了。
+[主题 1](https://discord.com/channels/983865673656705025/1230482660913184800)
+[主题 2](https://discord.com/channels/983865673656705025/1249368592558985247)
 
-## Splitting the server
+## 拆分服务器
 
 ```ts
 import type { OpenNextConfig } from "@opennextjs/aws/types/open-next.js";
 const config = {
-  // This is the default server, similar to the server-function in open-next v2
-  // In this case we are not providing any override, so it will generate a normal lambda (i.e. no streaming)
+  // 这是默认服务器，类似于 open-next v2 中的 server-function
+  // 在这种情况下，我们没有提供任何 override，因此它将生成一个普通的 lambda（即没有流式传输）
   default: {},
-  // You can define multiple functions here, each with its own routes, patterns and overrides
+  // 你可以在这里定义多个函数，每个函数都有自己的 routes、patterns 和 overrides
   functions: {
     myFn: {
-      // Patterns needs to use the glob pattern
+      // Patterns 需要使用 glob 模式
       patterns: ["route1", "route2", "route3"],
-      // For app dir, you need to include route|page, no need to include layout or loading
-      // It needs to be prepended with app/ or pages/ depending on the directory used
+      // 对于 app 目录，你需要包含 route|page，无需包含 layout 或 loading
+      // 需要根据使用的目录在前面加上 app/ 或 pages/
       routes: ["app/route1/page", "app/route2/page", "pages/route3"],
       override: {
         wrapper: "aws-lambda-streaming",
@@ -53,13 +51,10 @@ const config = {
 export default config;
 ```
 
-## Use aws4fetch instead of AWS sdk
+## 使用 aws4fetch 代替 AWS sdk
 
 <Callout type="info" emoji="ℹ️">
-  By default we use S3, DynamoDB and SQS for handling ISR/SSG and the fetch cache. We interact with them using
-  AWS sdk v3. This can contribute a lot to the cold start. There is a built-in option to use
-  [aws4fetch](https://github.com/mhart/aws4fetch) instead of the AWS sdk that can reduce cold start up to
-  300ms. Requires `OpenNext v3.0.3+`. Here is how you enable it:
+  默认情况下，我们使用 S3、DynamoDB 和 SQS 来处理 ISR/SSG 和 fetch 缓存。我们使用 AWS sdk v3 与它们交互。这可能会导致冷启动时间增加很多。有一个内置选项可以使用 [aws4fetch](https://github.com/mhart/aws4fetch) 代替 AWS sdk，最多可以减少 300ms 的冷启动时间。需要 `OpenNext v3.0.3+`。以下是启用它的方法：
 </Callout>
 
 ```ts
@@ -77,7 +72,7 @@ const config = {
 export default config;
 ```
 
-## Running in Lambda@Edge
+## 在 Lambda@Edge 中运行
 
 ```ts
 import type { OpenNextConfig } from "@opennextjs/aws/types/open-next.js";
@@ -93,35 +88,35 @@ const config = {
 export default config;
 ```
 
-## Bundle for a classic Node server (With function splitting)
+## 为经典 Node 服务器打包（带有函数拆分）
 
 <Callout type="info" emoji="i">
-This is not implemented in SST yet. You'll have to use your own IAC construct to deploy this.
+这在 SST 中尚未实现。你必须使用自己的 IAC 构造来部署它。
 
-Be aware that this uses the exact same system for ISR/SSG as the default lambda setup. So it will have to have all the proper permissions and env variable to interact with S3, DynamoDB and SQS (Or whatever you override it with). You can see [here](/aws/inner_workings/components/server/node#special-overrides) for more details
+请注意，这与默认 lambda 设置使用完全相同的 ISR/SSG 系统。因此它必须拥有所有适当的权限和环境变量才能与 S3、DynamoDB 和 SQS 交互（或者你覆盖使用的任何服务）。你可以查看 [这里](/aws/inner_workings/components/server/node#special-overrides) 了解更多详情
 
 </Callout>
 
 ```ts
 import type { OpenNextConfig } from "@opennextjs/aws/types/open-next.js";
 const config = {
-  // In this case, the default server is meant to run as a classic Node server
-  // To execute the server you need to run `node index.mjs` inside `.open-next/server-functions/default`
+  // 在这种情况下，默认服务器旨在作为经典 Node 服务器运行
+  // 要执行服务器，你需要在 `.open-next/server-functions/default` 内运行 `node index.mjs`
   default: {
     override: {
       wrapper: "node",
       converter: "node",
-      // This is necessary to generate a simple dockerfile and for the generated output to know that it needs to deploy on docker
-      // You can also provide a string here (i.e. the content of your Dockerfile) which will be used to create the dockerfile
-      // You don't have to provide this if you plan on not using docker, or if you plan on using your own custom dockerfile
+      // 这是生成简单 dockerfile 所必需的，以便生成的输出知道它需要部署在 docker 上
+      // 你也可以在这里提供一个字符串（即你的 Dockerfile 的内容），它将用于创建 dockerfile
+      // 如果你计划不使用 docker，或者计划使用自己的自定义 dockerfile，则不必提供此项
       generateDockerfile: true,
     },
   },
-  // You can define multiple functions here, each with its own routes, patterns and overrides
+  // 你可以在这里定义多个函数，每个函数都有自己的 routes、patterns 和 overrides
   functions: {
-    // In this case both the api route is in lambda and the rest is in node
+    // 在这种情况下，api 路由都在 lambda 中，其余都在 node 中
     myFn: {
-      // Patterns needs to use the glob pattern
+      // Patterns 需要使用 glob 模式
       patterns: ["api/*"],
       routes: ["app/api/test/route", "app/api/test2/route"],
     },
@@ -131,11 +126,11 @@ const config = {
 export default config;
 ```
 
-## Edge runtime splitted function
+## Edge runtime 拆分函数
 
-This will generate 2 server functions, the default one and the edge one. The edge one will still be deployed as a lambda function, but it will be deployed in the edge runtime.
+这将生成 2 个服务器函数，默认函数和 edge 函数。edge 函数仍将作为 lambda 函数部署，但它将部署在 edge runtime 中。
 
-Edge runtime function have less cold start time, but you can only deploy one route per function. They also do not have the middleware bundled in the function, so you need to use external middleware if you need it in front of the edge function.
+Edge runtime 函数具有更少的冷启动时间，但你每个函数只能部署一个路由。它们也没有将 middleware 捆绑在函数中，因此如果你需要在 edge 函数前面使用它，则需要使用外部 middleware。
 
 ```ts
 import type { OpenNextConfig } from "@opennextjs/aws/types/open-next.js";
@@ -144,7 +139,7 @@ const config = {
   functions: {
     edge: {
       runtime: "edge",
-      //placement: "global", If you want your function to be deployed globally (i.e. lambda@edge) uncomment this line. Otherwise it will be deployed in the region specified in the stack
+      //placement: "global", 如果你希望你的函数全局部署（即 lambda@edge），请取消注释此行。否则它将部署在堆栈中指定的区域
       routes: ["app/api/test/route"],
       patterns: ["api/test"],
     },
@@ -154,11 +149,11 @@ const config = {
 export default config;
 ```
 
-## External middleware
+## 外部 middleware
 
-In some cases (edge runtime, function splitting with some middleware rewrites, etc) you might want to use external middleware.
-With the default middleware configuration, it is bundled for a deployment in lambda@edge.
-This is how you can do it:
+在某些情况下（edge runtime、带有某些 middleware 重写的函数拆分等），你可能想要使用外部 middleware。
+使用默认 middleware 配置时，它是为 lambda@edge 部署捆绑的。
+以下是操作方法：
 
 ```ts
 import type { OpenNextConfig } from "@opennextjs/aws/types/open-next.js";

@@ -1,176 +1,176 @@
-## Recommended infrastructure on AWS
+## AWS 上的推荐基础设施
 
-OpenNext does not create the underlying infrastructure. You can create the infrastructure for your app with your preferred tool — SST, AWS CDK, Terraform, Serverless Framework, etc.
+OpenNext 不会创建底层基础设施。你可以使用首选工具为应用创建基础设施——SST、AWS CDK、Terraform、Serverless Framework 等。
 
-This is the recommended setup.
+这是推荐的设置。
 
 <p align="center">
-  <img alt="Architecture" src="/architecture.png" width="800" />
+  <img alt="架构" src="/architecture.png" width="800" />
 </p>
 
-Here are the recommended configurations for each AWS resource.
+以下是每个 AWS 资源的推荐配置。
 
-#### Asset files
+#### 资源文件
 
-Create an S3 bucket and upload the content in the `.open-next/assets` folder to the root of the bucket. For example, the file `.open-next/assets/favicon.ico` should be uploaded to `/favicon.ico` at the root of the bucket. If you need to upload the files to a subfolder within the bucket, [refer to this section](options#reusing-same-bucket-for-asset-and-cache).
+创建一个 S3 存储桶，并将 `.open-next/assets` 文件夹中的内容上传到存储桶的根目录。例如，文件 `.open-next/assets/favicon.ico` 应上传到存储桶根目录的 `/favicon.ico`。如果你需要将文件上传到存储桶内的子文件夹，[参考本节](options#reusing-same-bucket-for-asset-and-cache)。
 
-There are two types of files in the `.open-next/assets` folder:
+`.open-next/assets` 文件夹中有两种类型的文件：
 
-**Hashed files**
+**哈希文件**
 
-These are files with a hash component in the file name. Hashed files are be found in the `.open-next/assets/_next` folder, such as `.open-next/assets/_next/static/css/0275f6d90e7ad339.css`. The hash values in the filenames are guaranteed to change when the content of the files is modified. Therefore, hashed files should be cached both at the CDN level and at the browser level. When uploading the hashed files to S3, the recommended cache control setting is
+这些是文件名中包含哈希组件的文件。哈希文件位于 `.open-next/assets/_next` 文件夹中，例如 `.open-next/assets/_next/static/css/0275f6d90e7ad339.css`。当文件内容被修改时，文件名中的哈希值保证会更改。因此，哈希文件应在 CDN 级别和浏览器级别都进行缓存。将哈希文件上传到 S3 时，推荐的缓存控制设置是
 
 ```
 public,max-age=31536000,immutable
 ```
 
-**Un-hashed files**
+**非哈希文件**
 
-Other files inside the `.open-next/assets` folder are copied from your app's `public/` folder, such as `.open-next/assets/favicon.ico`. The filename for un-hashed files may remain unchanged when the content is modified. Un-hashed files should be cached at the CDN level, but not at the browser level. When the content of un-hashed files is modified, the CDN cache should be invalidated on deploy. When uploading the un-hashed files to S3, the recommended cache control setting is
+`.open-next/assets` 文件夹中的其他文件是从应用的 `public/` 文件夹复制的，例如 `.open-next/assets/favicon.ico`。当内容被修改时，非哈希文件的文件名可能保持不变。非哈希文件应在 CDN 级别缓存，但不在浏览器级别缓存。当非哈希文件的内容被修改时，部署时应使 CDN 缓存失效。将非哈希文件上传到 S3 时，推荐的缓存控制设置是
 
 ```
 public,max-age=0,s-maxage=31536000,must-revalidate
 ```
 
-#### Cache files
+#### 缓存文件
 
-Create an S3 bucket and upload the content in the `.open-next/cache` folder to the root of the bucket. If you need to upload the files to a subfolder within the bucket, [refer to this section](options#reusing-same-bucket-for-asset-and-cache).
+创建一个 S3 存储桶，并将 `.open-next/cache` 文件夹中的内容上传到存储桶的根目录。如果你需要将文件上传到存储桶内的子文件夹，[参考本节](options#reusing-same-bucket-for-asset-and-cache)。
 
-There are two types of caches in the `.open-next/cache` folder:
+`.open-next/cache` 文件夹中有两种类型的缓存：
 
-- Route cache: This cache includes `html` and `json` files that are prerendered during the build. They are used to seed the revalidation cache.
-- Fetch cache: This cache includes fetch call responses, which might contain sensitive information. Make sure these files are not publicly accessible.
+- 路由缓存：此缓存包括构建期间预渲染的 `html` 和 `json` 文件。它们用于种子重新验证缓存。
+- Fetch 缓存：此缓存包括 fetch 调用响应，其中可能包含敏感信息。确保这些文件不可公开访问。
 
-#### Revalidation Table
+#### 重新验证表
 
-Create a DynamoDB table with the following configuration:
+创建一个具有以下配置的 DynamoDB 表：
 
-- Partition key: `tag` (String)
-- Sort key: `path` (String)
-- An index named `revalidate` with the following configuration:
-  - Partition key: `path` (String)
-  - Sort key: `revalidatedAt` (Number)
+- 分区键：`tag` (String)
+- 排序键：`path` (String)
+- 一个名为 `revalidate` 的索引，具有以下配置：
+  - 分区键：`path` (String)
+  - 排序键：`revalidatedAt` (Number)
 
-#### Image optimization function
+#### 图像优化函数
 
-Create a Lambda function using the code in the `.open-next/image-optimization-function` folder, with the handler `index.mjs`. Also, ensure that the function is configured as follows:
+使用 `.open-next/image-optimization-function` 文件夹中的代码创建一个 Lambda 函数，处理程序为 `index.mjs`。此外，确保函数配置如下：
 
-- Set the architecture to `arm64`.
-- Set the `BUCKET_NAME` environment variable with the value being the name of the S3 bucket where the original images are stored.
-- Set the `BUCKET_KEY_PREFIX` environment variable if the asset files are uploaded to a subfolder in the S3 bucket. The value is the path to the folder. This is Optional.
-- Grant `s3:GetObject` permission.
+- 将架构设置为 `arm64`。
+- 设置 `BUCKET_NAME` 环境变量，值为存储原始图像的 S3 存储桶的名称。
+- 如果资源文件上传到 S3 存储桶中的子文件夹，则设置 `BUCKET_KEY_PREFIX` 环境变量。值为文件夹的路径。这是可选的。
+- 授予 `s3:GetObject` 权限。
 
-This function handles image optimization requests when the Next.js `<Image>` component is used. The [sharp](https://www.npmjs.com/package/sharp) library, which is bundled with the function, is used to convert the image. The library is compiled against the `arm64` architecture and is intended to run on AWS Lambda Arm/Graviton2 architecture. [Learn about the better cost-performance offered by AWS Graviton2 processors.](https://aws.amazon.com/blogs/aws/aws-lambda-functions-powered-by-aws-graviton2-processor-run-your-functions-on-arm-and-get-up-to-34-better-price-performance/)
+当使用 Next.js `<Image>` 组件时，此函数处理图像优化请求。函数捆绑的 [sharp](https://www.npmjs.com/package/sharp) 库用于转换图像。该库针对 `arm64` 架构编译，旨在运行在 AWS Lambda Arm/Graviton2 架构上。[了解 AWS Graviton2 处理器提供的更佳性价比。](https://aws.amazon.com/blogs/aws/aws-lambda-functions-powered-by-aws-graviton2-processor-run-your-functions-on-arm-and-get-up-to-34-better-price-performance/)
 
-Note that the image optimization function responds with the `Cache-Control` header, so the image will be cached both at the CDN level and at the browser level.
+请注意，图像优化函数响应 `Cache-Control` 标头，因此图像将在 CDN 级别和浏览器级别都进行缓存。
 
-#### Server Lambda function
+#### Server Lambda 函数
 
-Create a Lambda function using the code in the `.open-next/server-function` folder, with the handler `index.mjs`. Also, ensure that the function is configured as follows:
+使用 `.open-next/server-function` 文件夹中的代码创建一个 Lambda 函数，处理程序为 `index.mjs`。此外，确保函数配置如下：
 
-- Set the `CACHE_BUCKET_NAME` environment variable with the value being the name of the S3 bucket where the cache files are stored.
-- Set the `CACHE_BUCKET_KEY_PREFIX` environment variable if the cache files are uploaded to a subfolder in the S3 bucket. The value is the path to the folder. This is optional.
-- Set the `CACHE_BUCKET_REGION` environment variable with the value being the region of the S3 bucket.
-- Set the `REVALIDATION_QUEUE_URL` environment variable with the value being the URL of the revalidation queue.
-- Set the `REVALIDATION_QUEUE_REGION` environment variable with the value being the region of the revalidation queue.
-- Set the `CACHE_DYNAMO_TABLE` environment variable with the value being the name of the revalidation table.
-- Grant `s3:GetObject`, `s3:PutObject`, and `s3:ListObjects` permission.
-- Grant `sqs:SendMessage` permission.
+- 设置 `CACHE_BUCKET_NAME` 环境变量，值为存储缓存文件的 S3 存储桶的名称。
+- 如果缓存文件上传到 S3 存储桶中的子文件夹，则设置 `CACHE_BUCKET_KEY_PREFIX` 环境变量。值为文件夹的路径。这是可选的。
+- 设置 `CACHE_BUCKET_REGION` 环境变量，值为 S3 存储桶的区域。
+- 设置 `REVALIDATION_QUEUE_URL` 环境变量，值为重新验证队列的 URL。
+- 设置 `REVALIDATION_QUEUE_REGION` 环境变量，值为重新验证队列的区域。
+- 设置 `CACHE_DYNAMO_TABLE` 环境变量，值为重新验证表的名称。
+- 授予 `s3:GetObject`、`s3:PutObject` 和 `s3:ListObjects` 权限。
+- 授予 `sqs:SendMessage` 权限。
 
-This function handles all other types of requests from the Next.js app, including Server-side Rendering (SSR) requests and API requests. OpenNext builds the Next.js app in **standalone** mode. The standalone mode generates a `.next` folder containing the **NextServer** class that handles requests and a `node_modules` folder with **all the dependencies** needed to run the `NextServer`. The structure looks like this:
+此函数处理来自 Next.js 应用的所有其他类型的请求，包括服务器端渲染 (SSR) 请求和 API 请求。OpenNext 以 **standalone** 模式构建 Next.js 应用。standalone 模式生成一个 `.next` 文件夹，其中包含处理请求的 **NextServer** 类，以及一个 `node_modules` 文件夹，其中包含运行 `NextServer` 所需的**所有依赖项**。结构如下：
 
 ```
   .next/                -> NextServer
-  node_modules/         -> dependencies
+  node_modules/         -> 依赖项
 ```
 
-The server function adapter wraps around `NextServer` and exports a handler function that supports the Lambda request and response. The `server-function` bundle looks like this:
+服务器函数适配器包装了 `NextServer` 并导出一个支持 Lambda 请求和响应的处理函数。`server-function` bundle 如下所示：
 
 ```diff
   .next/                -> NextServer
 + .open-next/
-  node_modules/         -> dependencies
-+ index.mjs             -> server function adapter
+  node_modules/         -> 依赖项
++ index.mjs             -> 服务器函数适配器
 ```
 
 **Monorepo**
 
-In the case of a monorepo, the build output looks slightly different. For example, if the app is located in `packages/web`, the build output looks like this:
+在 monorepo 的情况下，构建输出看起来略有不同。例如，如果应用位于 `packages/web`，则构建输出如下所示：
 
 ```
   packages/
     web/
       .next/            -> NextServer
-      node_modules/     -> dependencies from root node_modules (optional)
-  node_modules/         -> dependencies from package node_modules
+      node_modules/     -> 来自根 node_modules 的依赖项 (可选)
+  node_modules/         -> 来自 package node_modules 的依赖项
 ```
 
-In this case, the server function adapter needs to be created inside `packages/web` next to `.next/`. This is to ensure that the adapter can import dependencies from both `node_modules` folders. It is not a good practice to have the Lambda configuration coupled with the project structure, so instead of setting the Lambda handler to `packages/web/index.mjs`, we will add a wrapper `index.mjs` at the `server-function` bundle root that re-exports the adapter. The resulting structure looks like this:
+在这种情况下，服务器函数适配器需要在 `.next/` 旁边的 `packages/web` 内部创建。这是为了确保适配器可以从两个 `node_modules` 文件夹导入依赖项。将 Lambda 配置与项目结构耦合并不是一个好的做法，因此我们不会将 Lambda 处理程序设置为 `packages/web/index.mjs`，而是在 `server-function` bundle 根目录添加一个包装器 `index.mjs` 来重新导出适配器。结果结构如下所示：
 
 ```diff
   packages/
     web/
       .next/                -> NextServer
 +     .open-next/
-      node_modules/          -> dependencies from root node_modules (optional)
-+     index.mjs              -> server function adapter
-  node_modules/              -> dependencies from package node_modules
-+ index.mjs                  -> adapter wrapper
+      node_modules/          -> 来自根 node_modules 的依赖项 (可选)
++     index.mjs              -> 服务器函数适配器
+  node_modules/              -> 来自 package node_modules 的依赖项
++ index.mjs                  -> 适配器包装器
 ```
 
-This ensures that the Lambda handler remains at `index.mjs`.
+这确保 Lambda 处理程序保持在 `index.mjs`。
 
-#### CloudFront distribution
+#### CloudFront 分发
 
-Create a CloudFront distribution, and dispatch requests to their corresponding handlers (behaviors). The following behaviors are configured:
+创建一个 CloudFront 分发，并将请求分发到相应的处理程序（行为）。配置了以下行为：
 
-| Behavior                                                                                                                                | Requests            | CloudFront Function                                                                                                                                                                                | Origin                      |
-| --------------------------------------------------------------------------------------------------------------------------------------- | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------- |
-| `/_next/static/*`                                                                                                                       | Hashed static files | -                                                                                                                                                                                                  | S3 bucket                   |
-| `/favicon.ico`<br />`/my-images/*`<br />[see why](workaround#workaround-public-static-files-served-out-by-server-function-aws-specific) | public assets       | -                                                                                                                                                                                                  | S3 bucket                   |
-| `/_next/image`                                                                                                                          | Image optimization  | -                                                                                                                                                                                                  | image optimization function |
-| `/_next/data/*`                                                                                                                         | data requests       | set `x-forwarded-host`<br />[see why](workaround#workaround-set-x-forwarded-host-header-aws-specific)                                                                                              | server function             |
-| `/api/*`                                                                                                                                | API                 | set `x-forwarded-host`<br />[see why](workaround#workaround-set-x-forwarded-host-header-aws-specific)                                                                                              | server function             |
-| `/*`                                                                                                                                    | catch all           | set `x-forwarded-host`<br />[see why](workaround#workaround-set-x-forwarded-host-header-aws-specific). Also [see this](workaround#workaround-nextserver-does-not-set-cache-headers-for-html-pages) | server function             |
+| 行为                                                                                                                                  | 请求            | CloudFront Function                                                                                                                                                                                | 源                      |
+| ------------------------------------------------------------------------------------------------------------------------------------- | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------- |
+| `/_next/static/*`                                                                                                                     | 哈希静态文件 | -                                                                                                                                                                                                  | S3 存储桶                   |
+| `/favicon.ico`<br />`/my-images/*`<br />[查看原因](workaround#workaround-public-static-files-served-out-by-server-function-aws-specific) | 公共资源       | -                                                                                                                                                                                                  | S3 存储桶                   |
+| `/_next/image`                                                                                                                        | 图像优化  | -                                                                                                                                                                                                  | 图像优化函数 |
+| `/_next/data/*`                                                                                                                       | 数据请求       | 设置 `x-forwarded-host`<br />[查看原因](workaround#workaround-set-x-forwarded-host-header-aws-specific)                                                                                              | 服务器函数             |
+| `/api/*`                                                                                                                              | API                 | 设置 `x-forwarded-host`<br />[查看原因](workaround#workaround-set-x-forwarded-host-header-aws-specific)                                                                                              | 服务器函数             |
+| `/*`                                                                                                                                  | 捕获所有           | 设置 `x-forwarded-host`<br />[查看原因](workaround#workaround-set-x-forwarded-host-header-aws-specific)。另外 [参见此处](workaround#workaround-nextserver-does-not-set-cache-headers-for-html-pages) | 服务器函数             |
 
-#### Running at edge
+#### 在边缘运行
 
-The server function can also run at edge locations by configuring it as Lambda@Edge on Origin Request. The server function can accept both regional request events (API payload version 2.0) and edge request events (CloudFront Origin Request payload). Depending on the shape of the Lambda event object, the function will process the request accordingly.
+通过将其配置为 Origin Request 上的 Lambda@Edge，服务器函数也可以在边缘位置运行。服务器函数可以接受区域请求事件（API payload 版本 2.0）和边缘请求事件（CloudFront Origin Request payload）。根据 Lambda 事件对象的形状，函数将相应地处理请求。
 
-To configure the CloudFront distribution:
+要配置 CloudFront 分发：
 
-| Behavior                                                                                                                                | Requests            | CloudFront Function                                                                                   | Lambda@Edge     | Origin                      |
-| --------------------------------------------------------------------------------------------------------------------------------------- | ------------------- | ----------------------------------------------------------------------------------------------------- | --------------- | --------------------------- |
-| `/_next/static/*`                                                                                                                       | Hashed static files | -                                                                                                     | -               | S3 bucket                   |
-| `/favicon.ico`<br />`/my-images/*`<br />[see why](workaround#workaround-public-static-files-served-out-by-server-function-aws-specific) | public assets       | -                                                                                                     | -               | S3 bucket                   |
-| `/_next/image`                                                                                                                          | Image optimization  | -                                                                                                     | -               | image optimization function |
-| `/_next/data/*`                                                                                                                         | data requests       | set `x-forwarded-host`<br />[see why](workaround#workaround-set-x-forwarded-host-header-aws-specific) | server function | -                           |
-| `/api/*`                                                                                                                                | API                 | set `x-forwarded-host`<br />[see why](workaround#workaround-set-x-forwarded-host-header-aws-specific) | server function | -                           |
-| `/*`                                                                                                                                    | catch all           | set `x-forwarded-host`<br />[see why](workaround#workaround-set-x-forwarded-host-header-aws-specific) | server function | -                           |
+| 行为                                                                                                                                  | 请求            | CloudFront Function                                                                                   | Lambda@Edge     | 源                      |
+| ------------------------------------------------------------------------------------------------------------------------------------- | ------------------- | ----------------------------------------------------------------------------------------------------- | --------------- | --------------------------- |
+| `/_next/static/*`                                                                                                                     | 哈希静态文件 | -                                                                                                     | -               | S3 存储桶                   |
+| `/favicon.ico`<br />`/my-images/*`<br />[查看原因](workaround#workaround-public-static-files-served-out-by-server-function-aws-specific) | 公共资源       | -                                                                                                     | -               | S3 存储桶                   |
+| `/_next/image`                                                                                                                        | 图像优化  | -                                                                                                     | -               | 图像优化函数 |
+| `/_next/data/*`                                                                                                                       | 数据请求       | 设置 `x-forwarded-host`<br />[查看原因](workaround#workaround-set-x-forwarded-host-header-aws-specific) | 服务器函数 | -                           |
+| `/api/*`                                                                                                                              | API                 | 设置 `x-forwarded-host`<br />[查看原因](workaround#workaround-set-x-forwarded-host-header-aws-specific) | 服务器函数 | -                           |
+| `/*`                                                                                                                                  | 捕获所有           | 设置 `x-forwarded-host`<br />[查看原因](workaround#workaround-set-x-forwarded-host-header-aws-specific) | 服务器函数 | -                           |
 
-#### Revalidation function
+#### 重新验证函数
 
-Create a Lambda function using the code in the `.open-next/revalidation-function` folder, with the handler `index.mjs`.
+使用 `.open-next/revalidation-function` 文件夹中的代码创建一个 Lambda 函数，处理程序为 `index.mjs`。
 
-Also, create an SQS FIFO queue, and set it as the event source for this function.
+此外，创建一个 SQS FIFO 队列，并将其设置为该函数的事件源。
 
-This function polls the queue for revalidation messages. Upon receiving a message, the function sends a HEAD request to the specified route for its revalidation.
+此函数轮询队列以获取重新验证消息。收到消息后，函数向指定路由发送 HEAD 请求以进行重新验证。
 
-#### Warmer function
+#### 预热函数
 
-Create a Lambda function using the code in the `.open-next/warmer-function` folder, with the handler `index.mjs`. Ensure the function is configured as follows:
+使用 `.open-next/warmer-function` 文件夹中的代码创建一个 Lambda 函数，处理程序为 `index.mjs`。确保函数配置如下：
 
-- Set the `FUNCTION_NAME` environment variable with the value being the name of the server Lambda function.
-- Set the `CONCURRENCY` environment variable with the value being the number of server functions to warm.
-- Grant `lambda:InvokeFunction` permission to allow the warmer to invoke the server function.
+- 设置 `FUNCTION_NAME` 环境变量，值为服务器 Lambda 函数的名称。
+- 设置 `CONCURRENCY` 环境变量，值为要预热的服务器函数数量。
+- 授予 `lambda:InvokeFunction` 权限以允许预热器调用服务器函数。
 
-Also, create an EventBridge scheduled rule to invoke the warmer function every 5 minutes.
+此外，创建一个 EventBridge 计划规则，每 5 分钟调用一次预热函数。
 
-Read more on [how warming works](/aws/v2/inner_workings/warming).
+阅读更多关于 [预热工作原理](/aws/v2/inner_workings/warming) 的信息。
 
-#### Dynamo Provider Function
+#### Dynamo Provider 函数
 
-This function is used to populate the revalidation table. It is a custom resource handler from the cdk see [here](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.custom_resources.AwsCustomResource.html). Ensure the function is configured as follows:
+此函数用于填充重新验证表。它是来自 cdk 的自定义资源处理程序，参见 [此处](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.custom_resources.AwsCustomResource.html)。确保函数配置如下：
 
-- Set the `CACHE_DYNAMO_TABLE` environment variable with the value being the name of the DynamoDB table where the revalidation table is stored.
-- Grant `dynamodb:PutItem` permission to allow the function to write to the DynamoDB table.
+- 设置 `CACHE_DYNAMO_TABLE` 环境变量，值为存储重新验证表的 DynamoDB 表的名称。
+- 授予 `dynamodb:PutItem` 权限以允许函数写入 DynamoDB 表。

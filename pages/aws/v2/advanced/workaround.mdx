@@ -1,15 +1,15 @@
-#### WORKAROUND: Create one cache behavior per top-level file and folder in `public/` (AWS specific)
+#### 变通方案：为 `public/` 中的每个顶级文件和文件夹创建一个缓存行为（AWS 特定）
 
-As mentioned in the [Asset files](./architecture#asset-files) section, files in your app's `public/` folder are static and are uploaded to the S3 bucket. And requests for these files are handled by the S3 bucket, like so:
+正如 [资产文件](./architecture#asset-files) 部分所述，你应用的 `public/` 文件夹中的文件是静态的，并上传到 S3 存储桶。对这些文件的请求由 S3 存储桶处理，如下所示：
 
 ```
 https://my-nextjs-app.com/favicon.ico
 https://my-nextjs-app.com/my-images/avatar.png
 ```
 
-Ideally, we would create a single cache behavior that routes all requests for `public/` files to the S3 bucket. Unfortunately, CloudFront does not support regex or advanced string patternss for cache behaviors (ie. `/favicon.ico|my-images\/*/` ).
+理想情况下，我们会创建一个单一的缓存行为，将所有对 `public/` 文件的请求路由到 S3 存储桶。不幸的是，CloudFront 不支持缓存行为的正则表达式或高级字符串模式（即 `/favicon.ico|my-images\/*/` ）。
 
-To work around this limitation, we create a separate cache behavior for each top-level file and folder in `public/`. For example, if your folder structure is:
+为了克服这个限制，我们为 `public/` 中的每个顶级文件和文件夹创建一个单独的缓存行为。例如，如果你的文件夹结构是：
 
 ```
 public/
@@ -21,9 +21,9 @@ public/
     bar.png
 ```
 
-You would create three cache behaviors: `/favicon.ico`, `/my-images/*`, and `/foo/*`. Each of these behaviors points to the S3 bucket.
+你将创建三个缓存行为：`/favicon.ico`、`/my-images/*` 和 `/foo/*`。这些行为中的每一个都指向 S3 存储桶。
 
-One thing to be aware of is that CloudFront has a [default limit of 25 behaviors per distribution](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/cloudfront-limits.html#limits-web-distributions). If you have a lot of top-level files and folders, you may reach this limit. To avoid this, consider moving some or all files and folders into a subdirectory:
+需要注意的一点是，CloudFront 每个分发 [默认限制为 25 个行为](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/cloudfront-limits.html#limits-web-distributions)。如果你有很多顶级文件和文件夹，可能会达到这个限制。为了避免这种情况，考虑将部分或所有文件和文件夹移动到一个子目录中：
 
 ```
 public/
@@ -36,17 +36,17 @@ public/
       bar.png
 ```
 
-In this case, you only need to create one cache behavior: `/files/*`.
+在这种情况下，你只需要创建一个缓存行为：`/files/*`。
 
-Make sure to update your code accordingly to reflect the new file paths.
+确保相应地更新你的代码以反映新的文件路径。
 
-Alternatively, you can [request an increase to the limit through AWS Support](https://console.aws.amazon.com/support/home#/case/create?issueType=service-limit-increase&limitType=service-code-cloudfront-distributions).
+或者，你可以 [通过 AWS 支持请求增加限制](https://console.aws.amazon.com/support/home#/case/create?issueType=service-limit-increase&limitType=service-code-cloudfront-distributions)。
 
-#### WORKAROUND: Set `x-forwarded-host` header (AWS specific)
+#### 变通方案：设置 `x-forwarded-host` 标头（AWS 特定）
 
-When the server function receives a request, the `host` value in the Lambda request header is set to the hostname of the AWS Lambda service instead of the actual frontend hostname. This creates an issue for the server function (middleware, SSR routes, or API routes) when it needs to know the frontend host.
+当服务器函数收到请求时，Lambda 请求标头中的 `host` 值被设置为 AWS Lambda 服务的主机名，而不是实际的前端主机名。当服务器函数（中间件、SSR 路由或 API 路由）需要知道前端主机时，这会产生问题。
 
-To work around the issue, a CloudFront function is run on Viewer Request, which sets the frontend hostname as the `x-forwarded-host` header. The function code looks like this:
+为解决此问题，会在查看器请求（Viewer Request）上运行 CloudFront 函数，该函数将前端主机名设置为 `x-forwarded-host` 标头。函数代码如下所示：
 
 ```ts
 function handler(event) {
@@ -56,11 +56,11 @@ function handler(event) {
 }
 ```
 
-The server function would then sets the `host` header of the request to the value of the `x-forwarded-host` header when sending the request to the `NextServer`.
+然后，服务器函数在向 `NextServer` 发送请求时，会将请求的 `host` 标头设置为 `x-forwarded-host` 标头的值。
 
-#### WORKAROUND: Set `NextRequest` geolocation data
+#### 变通方案：设置 `NextRequest` 地理位置数据
 
-When your application is hosted on Vercel, you can access a user's geolocation inside your middleware through the `NextRequest` object.
+当你的应用程序托管在 Vercel 上时，你可以通过 `NextRequest` 对象在中间件中访问用户的地理位置。
 
 ```ts
 export function middleware(request: NextRequest) {
@@ -69,9 +69,9 @@ export function middleware(request: NextRequest) {
 }
 ```
 
-When your application is hosted on AWS, you can [obtain the geolocation data from CloudFront request headers](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/adding-cloudfront-headers.html#cloudfront-headers-viewer-location). However, there is no way to set this data on the `NextRequest` object passed to the middleware function.
+当你的应用程序托管在 AWS 上时，你可以 [从 CloudFront 请求标头获取地理位置数据](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/adding-cloudfront-headers.html#cloudfront-headers-viewer-location)。但是，没有办法将此数据设置在传递给中间件函数的 `NextRequest` 对象上。
 
-To work around the issue, the `NextRequest` constructor is modified to initialize geolocation data from CloudFront headers, instead of using the default empty object.
+为解决此问题，`NextRequest` 构造函数被修改为从 CloudFront 标头初始化地理位置数据，而不是使用默认的空对象。
 
 ```diff
 - geo: init.geo || {}
@@ -89,18 +89,18 @@ To work around the issue, the `NextRequest` constructor is modified to initializ
 + }
 ```
 
-CloudFront provides more detailed geolocation information, such as postal code and timezone. Here is a complete list of `geo` properties available in your middleware:
+CloudFront 提供更详细的地理位置信息，例如邮政编码和时区。以下是你的中间件中可用的 `geo` 属性的完整列表：
 
 ```ts
 export function middleware(request: NextRequest) {
-  // Supported by Next.js
+  // Next.js 支持
   request.geo.country;
   request.geo.region;
   request.geo.city;
   request.geo.latitude;
   request.geo.longitude;
 
-  // Also supported by OpenNext
+  // OpenNext 也支持
   request.geo.countryName;
   request.geo.regionName;
   request.geo.postalCode;
@@ -109,38 +109,38 @@ export function middleware(request: NextRequest) {
 }
 ```
 
-#### WORKAROUND: `NextServer` does not set cache headers for HTML pages
+#### 变通方案：`NextServer` 不为 HTML 页面设置缓存标头
 
-As mentioned in the [Server function](./architecture#server-lambda-function) section, the server function uses the `NextServer` class from Next.js' build output to handle requests. However, `NextServer` does not seem to set the correct `Cache Control` headers.
+正如 [服务器函数](./architecture#server-lambda-function) 部分所述，服务器函数使用 Next.js 构建输出中的 `NextServer` 类来处理请求。但是，`NextServer` 似乎没有设置正确的 `Cache Control` 标头。
 
-To work around the issue, the server function checks if the request is for a fully static HTML page from page router (i.e. without `getStaticProps`), and sets the `Cache Control` header to:
+为解决此问题，服务器函数检查请求是否来自页面路由器的完全静态 HTML 页面（即没有 `getStaticProps`），并将 `Cache Control` 标头设置为：
 
 ```
 public, max-age=0, s-maxage=31536000, must-revalidate
 ```
 
-If you plan on using fully static HTML pages, you should also add the `x-middleware-prefetch` header to cloudfront cache headers to avoid cloudfront caching an empty response when this header is set.
-You can also just add an empty `getStaticProps` function to your page, which will set the correct cache headers.
+如果你计划使用完全静态的 HTML 页面，你还应该将 `x-middleware-prefetch` 标头添加到 CloudFront 缓存标头中，以避免当设置此标头时 CloudFront 缓存空响应。
+你也可以只是在页面中添加一个空的 `getStaticProps` 函数，这将设置正确的缓存标头。
 
-#### WORKAROUND: `NextServer` does not set correct SWR cache headers
+#### 变通方案：`NextServer` 未设置正确的 SWR 缓存标头
 
-`NextServer` does not seem to set an appropriate value for the `stale-while-revalidate` cache header. For example, the header might look like this:
+`NextServer` 似乎没有为 `stale-while-revalidate` 缓存标头设置合适的值。例如，标头可能如下所示：
 
 ```
 s-maxage=600 stale-while-revalidate
 ```
 
-This prevents CloudFront from caching the stale data.
+这会阻止 CloudFront 缓存陈旧数据。
 
-To work around the issue, the server function checks if the response includes the `stale-while-revalidate` header. If found, it sets the value to 30 days:
+为解决此问题，服务器函数检查响应是否包含 `stale-while-revalidate` 标头。如果找到，则将其值设置为 30 天：
 
 ```
 s-maxage=600 stale-while-revalidate=2592000
 ```
 
-#### WORKAROUND: Set `NextServer` working directory (AWS specific)
+#### 变通方案：设置 `NextServer` 工作目录（AWS 特定）
 
-Next.js recommends using `process.cwd()` instead of `__dirname` to get the app directory. For example, consider a `posts` folder in your app with markdown files:
+Next.js 建议使用 `process.cwd()` 而不是 `__dirname` 来获取应用目录。例如，考虑你的应用中有一个包含 markdown 文件的 `posts` 文件夹：
 
 ```
 pages/
@@ -151,25 +151,25 @@ next.config.js
 package.json
 ```
 
-You can build the file path like this:
+你可以这样构建文件路径：
 
 ```ts
 path.join(process.cwd(), "posts", "my-post.md");
 ```
 
-As mentioned in the [Server function](./architecture#server-lambda-function) section, in a non-monorepo setup, the `server-function` bundle looks like:
+正如 [服务器函数](./architecture#server-lambda-function) 部分所述，在非 monorepo 设置中，`server-function` 包看起来像：
 
 ```
 .next/
 node_modules/
 posts/
-  my-post.md    <- path is "posts/my-post.md"
+  my-post.md    <- 路径为 "posts/my-post.md"
 index.mjs
 ```
 
-In this case, `path.join(process.cwd(), "posts", "my-post.md")` resolves to the correct path.
+在这种情况下，`path.join(process.cwd(), "posts", "my-post.md")` 解析为正确的路径。
 
-However, when the user's app is inside a monorepo (ie. at `/packages/web`), the `server-function` bundle looks like:
+但是，当用户的应用位于 monorepo 内部时（即在 `/packages/web`），`server-function` 包看起来像：
 
 ```
 packages/
@@ -177,31 +177,31 @@ packages/
     .next/
     node_modules/
     posts/
-      my-post.md    <- path is "packages/web/posts/my-post.md"
+      my-post.md    <- 路径为 "packages/web/posts/my-post.md"
     index.mjs
 node_modules/
 index.mjs
 ```
 
-In this case, `path.join(process.cwd(), "posts", "my-post.md")` cannot be resolved.
+在这种情况下，`path.join(process.cwd(), "posts", "my-post.md")` 无法解析。
 
-To work around the issue, we change the working directory for the server function to where `.next/` is located, ie. `packages/web`.
+为解决此问题，我们将服务器函数的工作目录更改为 `.next/` 所在的位置，即 `packages/web`。
 
-#### WORKAROUND: Set `__NEXT_PRIVATE_PREBUNDLED_REACT` to use prebundled React
+#### 变通方案：设置 `__NEXT_PRIVATE_PREBUNDLED_REACT` 以使用预捆绑的 React
 
-For Next.js 13.2 and later versions, you need to explicitly set the `__NEXT_PRIVATE_PREBUNDLED_REACT` environment variable. Although this environment variable isn't documented at the time of writing, you can refer to the Next.js source code to understand its usage:
+对于 Next.js 13.2 及更高版本，你需要显式设置 `__NEXT_PRIVATE_PREBUNDLED_REACT` 环境变量。虽然在撰写本文时未记录此环境变量，但你可以参考 Next.js 源代码来了解其用法：
 
-> In standalone mode, we don't have separated render workers so if both app and pages are used, we need to resolve to the prebundled React to ensure the correctness of the version for app.
+> 在 standalone 模式下，我们没有分离的渲染 worker，因此如果同时使用了 app 和 pages，我们需要解析到预捆绑的 React 以确保 app 版本的正确性。
 
-> Require these modules with static paths to make sure they are tracked by NFT when building the app in standalone mode, as we are now conditionally aliasing them it's tricky to track them in build time.
+> 使用静态路径要求这些模块，以确保它们在 standalone 模式下构建应用时被 NFT 跟踪，因为我们现在是有条件地别名化它们，所以在构建时跟踪它们很棘手。
 
-On every request, we try to detect whether the route is using the Pages Router or the App Router. If the Pages Router is being used, we set `__NEXT_PRIVATE_PREBUNDLED_REACT` to `undefined`, which means the React version from the `node_modules` is used. However, if the App Router is used, `__NEXT_PRIVATE_PREBUNDLED_REACT` is set, and the prebundled React version is used.
+在每个请求上，我们尝试检测路由是使用 Pages Router 还是 App Router。如果使用 Pages Router，我们将 `__NEXT_PRIVATE_PREBUNDLED_REACT` 设置为 `undefined`，这意味着使用 `node_modules` 中的 React 版本。但是，如果使用 App Router，`__NEXT_PRIVATE_PREBUNDLED_REACT` 会被设置，并使用预捆绑的 React 版本。
 
-#### WORKAROUND: 13.4.13+ breaking changes (middleware, redirect, rewrites)
+#### 变通方案：13.4.13+ 破坏性变更（middleware, redirect, rewrites）
 
-Nextjs 13.4.13 refactored the middleware logic so that it no longer runs in the server handler. Instead they are executed as workers in child threads, which introduces a non-acceptable latency of ~5 seconds. In order to circumvent this issue, open-next needs to implement the middleware handler before processing the server handler ourselves.
+Next.js 13.4.13 重构了中间件逻辑，使其不再在服务器处理程序中运行。相反，它们作为子线程中的 worker 执行，这引入了约 5 秒的不可接受的延迟。为了规避此问题，open-next 需要在处理服务器处理程序之前自己实现中间件处理程序。
 
-We've introduced a custom esbuild plugin to conditionally inject and override code to properly handle the breaking changes.
+我们引入了一个自定义的 esbuild 插件，以有条件地注入和覆盖代码来正确处理破坏性变更。
 
-The default request handler is in `adapters/plugins/default.ts`
-When open-next needs to override that implementation due to NextJs breaking compatibility, the `createServerBundle` in `build.ts` determines the proper overrides to replace the code of the `default.ts` file.
+默认请求处理程序位于 `adapters/plugins/default.ts`
+当 open-next 需要由于 Next.js 破坏兼容性而覆盖该实现时，`build.ts` 中的 `createServerBundle` 会确定适当的覆盖内容以替换 `default.ts` 文件的代码。

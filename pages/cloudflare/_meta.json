@@ -1,15 +1,15 @@
 {
-  "index": "Overview",
-  "get-started": "",
-  "cli": "CLI (opennextjs-cloudflare)",
-  "bindings": "",
-  "caching": "",
-  "howtos": "How-Tos",
-  "examples": "",
-  "perf": "Performance Tips",
-  "community": "Community projects",
-  "known-issues": "Known issues",
-  "troubleshooting": "",
-  "migrate-from-0.6-to-1.0.0-beta": "Migrate from 0.6 to 1.0.0-beta",
-  "former-releases": "Former releases"
+  "index": "概览",
+  "get-started": "开始使用",
+  "cli": "CLI",
+  "bindings": "绑定",
+  "caching": "缓存",
+  "howtos": "操作指南",
+  "examples": "示例",
+  "perf": "性能提示",
+  "community": "社区项目",
+  "known-issues": "已知问题",
+  "troubleshooting": "故障排除",
+  "migrate-from-0.6-to-1.0.0-beta": "从 0.6 迁移到 1.0.0-beta",
+  "former-releases": "历史版本"
 }

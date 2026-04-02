@@ -1,6 +1,6 @@
-The warmer backend is used to warm up the server lambda in case of serverless. This is useful to avoid cold starts.
+warmer 后端用于在无服务器架构中预热服务器 lambda。这有助于避免冷启动。
 
-### Special Event and Result
+### 特殊事件和结果
 
 ```typescript
 interface WarmerEvent {
@@ -17,11 +17,11 @@ interface WarmerResponse {
 }
 ```
 
-### Special Overrides
+### 特殊覆盖
 
-#### Invoke function
+#### 调用函数
 
-You can customize the `invoke` function to handle the `warmer` event. By default it uses lambda invoke command. The default invoke needs a `WARM_PARAMS` environment variable that is a stringified version of this
+您可以自定义 `invoke` 函数来处理 `warmer` 事件。默认情况下它使用 lambda invoke 命令。默认调用需要一个 `WARM_PARAMS` 环境变量，它是此内容的字符串化版本
 
 ```typescript
 {

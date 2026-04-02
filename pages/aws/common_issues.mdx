@@ -1,28 +1,28 @@
-#### Debug mode
+#### 调试模式
 
-OpenNext can be executed in debug mode by setting the environment variable `OPEN_NEXT_DEBUG=true`.
+可以通过设置环境变量 `OPEN_NEXT_DEBUG=true` 以调试模式执行 OpenNext。
 
-This will output **A LOT** of additional logs to the console.This also disable minifying in esbuild, and add source maps to the output. This can result in code that might be up to 2-3X larger than the production build. **Do not enable this in production**
+这将向控制台输出 **大量** 额外日志。这还会禁用 esbuild 中的压缩，并向输出添加源地图。这可能导致代码大小达到生产构建的 2-3 倍。**不要在生产环境中启用此功能**
 
 ```bash
 OPEN_NEXT_DEBUG=true npx open-next@latest build
 ```
 
-#### Cannot find module next
+#### 找不到模块 next
 
-You might stumble upon this error inside cloudwatch logs: `Cannot find module 'next'`. It is likely that you are in a monorepo and you have several lock files. **Just make sure that you have a single lock file in the root of your project.**
+你可能会在 CloudWatch 日志中遇到此错误：`Cannot find module 'next'`。很可能你处于一个 monorepo 中，并且有多个 lock 文件。**只需确保在项目根目录下只有一个 lock 文件。**
 
-#### Reducing bundle size
+#### 减小 bundle 大小
 
-Next might incorrectly include some dependencies in the bundle. To remove them you can use this configuration inside `next.config.js`:
+Next 可能会错误地将某些依赖项包含在 bundle 中。要移除它们，你可以在 `next.config.js` 中使用此配置：
 
 ```javascript
-outputFileTracingExcludes: { // or experimental.outputFileTracingExcludes on Next < 15
+outputFileTracingExcludes: { // 或在 Next < 15 上使用 experimental.outputFileTracingExcludes
   "*": ["node_modules/the-unwanted-package"],
 },
 ```
 
-You should also not add sharp as a dependency unless absolutely necessary, the image optimization already has it's own version of sharp. By default OpenNext excludes these packages:
+除非绝对必要，否则也不应将 sharp 添加为依赖项，图像优化已经拥有自己的 sharp 版本。默认情况下，OpenNext 排除以下包：
 
 - `caniuse-lite`
 - `sharp`
@@ -32,12 +32,12 @@ You should also not add sharp as a dependency unless absolutely necessary, the i
 - `next/dist/compiled/babel-packages`
 - `next/dist/compiled/amphtml-validator`
 
-##### Remove sourcemaps
+##### 移除 sourcemaps
 
-Source maps could add a lot to the bundle, excluding them from standalone output could be worth it.
-For example, Sentry does not remove server side sourcemaps, only client ones, even if "deleteSourcemapsAfterUpload" is true. [See the Sentry source code](https://github.com/getsentry/sentry-javascript/blob/develop/packages/nextjs/src/config/webpackPluginOptions.ts#L83).
+Source maps 可能会大幅增加 bundle 大小，将它们从 standalone 输出中排除可能是值得的。
+例如，Sentry 不会移除服务器端 sourcemaps，只移除客户端的，即使 "deleteSourcemapsAfterUpload" 为 true。[查看 Sentry 源代码](https://github.com/getsentry/sentry-javascript/blob/develop/packages/nextjs/src/config/webpackPluginOptions.ts#L83)。
 
-You could exclude sourcemaps similarly:
+你可以类似地排除 sourcemaps：
 
 ```javascript
 outputFileTracingExcludes: {
@@ -49,10 +49,10 @@ outputFileTracingExcludes: {
 },
 ```
 
-#### Patch fetch behaviour for ISR. Only for next@13.5.1+
+#### 修补 ISR 的 fetch 行为。仅适用于 next@13.5.1+
 
-If you use ISR and fetch in your app, you may encounter a bug that makes your revalidate values inconsistent.
-The issue is that it revalidates using the lowest revalidate of all fetch calls in your page, regardless of their individual values. To fix this bug, you need to modify the fetch function in your root layout component with the following code snippet
+如果你在应用中使用 ISR 和 fetch，可能会遇到一个导致 revalidate 值不一致的 bug。
+问题在于它使用页面中所有 fetch 调用的最低 revalidate 值进行重新验证，不管它们各自的值如何。要修复此 bug，你需要使用以下代码片段修改根布局组件中的 fetch 函数
 
 ```ts
 export default function RootLayout() {
@@ -68,10 +68,10 @@ export default function RootLayout() {
 }
 ```
 
-#### Access Denied errors on routes during page refresh and direct URL access
+#### 页面刷新和直接 URL 访问时路由上的 Access Denied 错误
 
-If you are refreshing a dynamic/static route or going to that route directly from an URL. Like this route f.ex:
-`/profile/[userId]/[id]`, and you are getting an `Access Denied` error in XML:
+如果你正在刷新动态/静态路由或直接从 URL 进入该路由。例如此路由：
+`/profile/[userId]/[id]`，并且你在 XML 中收到 `Access Denied` 错误：
 
 ```xml
 <Error>
@@ -82,19 +82,19 @@ If you are refreshing a dynamic/static route or going to that route directly fro
 </Error>
 ```
 
-This can also happen in app router when a client navigates via NextJS `<Link>` component.
+当客户端通过 NextJS `<Link>` 组件导航时，这也可能发生在 app router 中。
 
-The issue might be that your having a folder or file in your `public` directory with an overlapping between the name and your route. In this case, you should rename that to something else.
+问题可能是你的 `public` 目录中有一个文件夹或文件，其名称与你的路由重叠。在这种情况下，你应该将其重命名为其他名称。
 
-#### `cannot find module './chunks/xxxx.js'` error
+#### `cannot find module './chunks/xxxx.js'` 错误
 
-Dynamic imports in `instrumentation.ts` will cause this error at runtime. Remove dynamic imports to resolve.
+`instrumentation.ts` 中的动态导入将在运行时导致此错误。移除动态导入以解决。
 
-#### Sentry server side setup
+#### Sentry 服务器端设置
 
-The config recommended by Sentry docs uses dynamic imports in `instrumentation.ts`, which causes the above error.
+Sentry 文档推荐的配置在 `instrumentation.ts` 中使用动态导入，这会导致上述错误。
 
-Here's a working Sentry config which resolves the error:
+这是一个可以解决错误的可用 Sentry 配置：
 
 `instrumentation.ts`
 
@@ -118,37 +118,37 @@ export const initSentry = (runtime: "nodejs" | "edge") => {
   Sentry.init({
     dsn: "https://...",
 
-    //...rest of your config
+    //...配置的其余部分
   });
 };
 ```
 
-#### Empty body in response when streaming in AWS Lambda
+#### 在 AWS Lambda 中流式传输时响应体为空
 
-We have seen trouble in the past with streaming hanging in AWS Lambda when the response body is empty.
-We currently have a workaround in OpenNext for this by setting the environment variable `OPEN_NEXT_FORCE_NON_EMPTY_RESPONSE` to `true`.
-This will write something to the stream to make sure it is not empty.
+我们过去曾遇到当响应体为空时，AWS Lambda 中的流式传输挂起的问题。
+我们目前在 OpenNext 中有一个变通方法，即将环境变量 `OPEN_NEXT_FORCE_NON_EMPTY_RESPONSE` 设置为 `true`。
+这将向流中写入一些内容以确保其不为空。
 
-#### The Yarn Plug'n'Play manifest forbids importing "xxx" here because it's not listed as a dependency of this package
+#### Yarn Plug'n'Play manifest 禁止在此处导入 "xxx"，因为它未列为此包的依赖项
 
-This error is usually resolved by removing all yarn files in your repo. You should also look in your `package.json` and see if you have `yarn` set as `packageManager` there. Removing it will solve the issue.
-If you use `yarn` there is a workaround [here](https://stackoverflow.com/a/76902985).
+此错误通常通过移除仓库中的所有 yarn 文件来解决。你还应该查看 `package.json`，看看是否将 `yarn` 设置为 `packageManager`。移除它将解决问题。
+如果你使用 `yarn`，有一个变通方法 [在此处](https://stackoverflow.com/a/76902985)。
 
-If you are not using `yarn` and you see `yarn` related errors it might be solved by running `corepack disable` or updating `nvm` to `0.40.2`.
+如果你没有使用 `yarn` 却看到 `yarn` 相关错误，可以通过运行 `corepack disable` 或将 `nvm` 更新到 `0.40.2` 来解决。
 
-#### A file/dependency is missing from my bundle
+#### 我的 bundle 中缺少文件/依赖项
 
-Sometimes there might be a file missing from your server functions bundle. An example could be `sentry.server.config.ts`. It can be any file or directory and it also accept globs. In Next there is an option to include files that were not picked up by tracing.
-Its called `outputFileTracingIncludes`. Here is an example on how to use it in `next.config.ts`:
+有时你的服务器函数 bundle 中可能会缺少文件。例如可能是 `sentry.server.config.ts`。它可以是任何文件或目录，也接受通配符。在 Next 中有一个选项可以包含未被 tracing 拾取的文件。
+它叫做 `outputFileTracingIncludes`。以下是在 `next.config.ts` 中如何使用它的示例：
 
 ```ts
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  /* 这里的配置选项 */
   outputFileTracingIncludes: {
     "*": ["sentry.server.config.ts"],
-    // can also be a glob pattern
+    // 也可以是通配符模式
     "/api/*": ["node_modules/.prisma/client/**/*"],
   },
 };
@@ -156,11 +156,11 @@ const nextConfig: NextConfig = {
 export default nextConfig;
 ```
 
-This will copy the file to `.open-next/server-functions/default/sentry.server.config.ts`, or every splitted function in this case.
-To read more about `outputFileTracingIncludes` you can refer to the [Next.js documentation](https://nextjs.org/docs/pages/api-reference/config/next-config-js/output#caveats).
+这将把文件复制到 `.open-next/server-functions/default/sentry.server.config.ts`，或者在本例中复制到每个分割的函数。
+要了解更多关于 `outputFileTracingIncludes` 的信息，你可以参考 [Next.js 文档](https://nextjs.org/docs/pages/api-reference/config/next-config-js/output#caveats)。
 
-It works with function splitting in OpenNext aswell. If your key corresponds to a specific route (i.e: `api/test`), it will be included only in the function bundle for that route.
-Using `*` as a key, however, will include it in every function bundle. Here is an example with function splitting:
+它也适用于 OpenNext 中的函数分割。如果你的键对应于特定路由（即：`api/test`），它将仅包含在该路由的函数 bundle 中。
+然而，使用 `*` 作为键将其包含在每个函数 bundle 中。这是一个带有函数分割的示例：
 
 ```ts
 // open-next.config.ts
@@ -170,7 +170,7 @@ const config = {
   functions: {
     extraFunction: {
       patterns: ["api/test"],
-      // this is the route that will be used in this function
+      // 这是将在此函数中使用的路由
       routes: ["app/api/test/route"],
       override: {
         wrapper: "aws-lambda-streaming",
@@ -184,10 +184,10 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
-    // these files will be copied only to the extraFunction bundle
+    // 这些文件将仅复制到 extraFunction bundle
     "/api/test": ["sentry.config.ts", "node_modules/.prisma/client/**/*"],
   },
 };
 ```
 
-It will also work in a monorepo. Lets say you have your Next app in `packages/web`, the files will be written to: `packages/web/.open-next/server-functions/default/packages/web/*`
+它也适用于 monorepo。假设你的 Next 应用在 `packages/web` 中，文件将被写入：`packages/web/.open-next/server-functions/default/packages/web/*`

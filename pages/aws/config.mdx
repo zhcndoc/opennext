@@ -1,17 +1,17 @@
-### Build Arguments
+### 构建参数
 
-There is two build arguments that you can pass to the `open-next build` command:
+您可以向 `open-next build` 命令传递两个构建参数：
 
-- `--config-path` - This is the path to the configuration file that you want to use. By default, it will look for `open-next.config.ts` in the current working directory. This needs to be relative to the current working directory.
-- `--node-externals` - You can configure externals for the esbuild compilation of the `open-next.config.ts` file (i.e `--node-externals @aws-sdk/*,open-next/dist/queue/*`)
+- `--config-path` - 这是您要使用的配置文件的路径。默认情况下，它会在当前工作目录中查找 `open-next.config.ts`。此路径需要相对于当前工作目录。
+- `--node-externals` - 您可以为 `open-next.config.ts` 文件的 esbuild 编译配置外部依赖（即 `--node-externals @aws-sdk/*,open-next/dist/queue/*`）
 
-### Configuration File
+### 配置文件
 
-For personalization you need to create a file `open-next.config.ts` at the same place as your `next.config.js`, and export a default object that satisfies the `OpenNextConfig` interface. It is possible to not have an `open-next.config.ts` file, the default configuration will then be applied automatically.
+为了进行个性化配置，您需要在与 `next.config.js` 相同的位置创建一个 `open-next.config.ts` 文件，并导出一个满足 `OpenNextConfig` 接口的默认对象。也可以没有 `open-next.config.ts` 文件，届时将自动应用默认配置。
 
-This file needs to be placed at the same level as your `next.config.js` file.
+此文件需要放置在与您的 `next.config.js` 文件相同的层级。
 
-If you have an `open-next.config.ts` file, make sure you have atleast this:
+如果您有 `open-next.config.ts` 文件，请确保至少包含以下内容：
 
 ```ts
 export default {
@@ -19,15 +19,15 @@ export default {
 };
 ```
 
-If you want to take a look at some simple configuration examples, you can check the [simple example](/aws/config/simple_example).
+如果您想查看一些简单的配置示例，可以查看 [简单示例](/aws/config/simple_example)。
 
-For more advanced use cases, you can check [how to implement custom overrides](/aws/config/custom_overrides).
+对于更高级的用例，您可以查看 [如何实现自定义覆盖](/aws/config/custom_overrides)。
 
-If you want to look at a full example, you can check [the full example](/aws/config/full_example).
+如果您想查看完整示例，可以查看 [完整示例](/aws/config/full_example)。
 
-### Opt out of default poweredByHeader
+### 退出默认的 poweredByHeader
 
-By default Next.js will add the [`x-powered-by`](https://nextjs.org/docs/app/api-reference/config/next-config-js/poweredByHeader) header. OpenNext will also add a header `x-opennext`. To opt-out of this, open `next.config.js` and disable the poweredByHeader property in the configuration:
+默认情况下，Next.js 会添加 [`x-powered-by`](https://nextjs.org/docs/app/api-reference/config/next-config-js/poweredByHeader) 头。OpenNext 也会添加一个 `x-opennext` 头。要退出此功能，请打开 `next.config.js` 并在配置中禁用 poweredByHeader 属性：
 
 ```ts
 module.exports = {

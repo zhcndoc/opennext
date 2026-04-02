@@ -1,7 +1,7 @@
 import { SITE } from "../../config";
 import { Callout } from "nextra/components";
 
-# Next.js on Netlify
+# Netlify 上的 Next.js
 
 <a href="https://runtime-e2e-report.netlify.app/" target="_blank">
   <img
@@ -9,91 +9,91 @@ import { Callout } from "nextra/components";
     width="185"
     height="25"
     style={{ borderRadius: 0, marginTop: "1rem" }}
-    alt="Netlify Next.js adapter v5 test status"
+    alt="Netlify Next.js 适配器 v5 测试状态"
   />
 </a>
 
-Netlify's Next.js adapter automatically configures Netlify sites with key functionality, including cache control, on-demand revalidation, and image optimization.
+Netlify 的 Next.js 适配器会自动配置 Netlify 站点的关键功能，包括缓存控制、按需重新验证和图像优化。
 
-The adapter provisions Netlify Functions to handle your site’s server-side functionality (such as SSR, ISR and PPR pages, API endpoints, Server Actions, etc.), and Netlify Edge Functions for Edge Middleware, ensuring that functionality works out-of-the-box.
+该适配器配置 Netlify 函数来处理站点的服务器端功能（如 SSR、ISR 和 PPR 页面、API 端点、Server Actions 等），以及用于边缘 Middleware 的 Netlify 边缘函数，确保功能开箱即用。
 
-We automatically verify compatibility with the latest stable version of Next.js, using the comprehensive end-to-end tests of the framework itself. To access up-to-date test results, use the badge above.
+我们使用框架本身的全面端到端测试，自动验证与最新稳定版 Next.js 的兼容性。要获取最新的测试结果，请使用上方的徽章。
 
-## Get started
+## 开始使用
 
-The easiest way to get started is to deploy our Next.js platform starter template to your Netlify account. Use the button below to get started.
+最简单的开始方式是将我们的 Next.js 平台 starter 模板部署到您的 Netlify 账户。使用下面的按钮开始。
 
-[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/netlify-templates/next-platform-starter)
+[![部署到 Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/netlify-templates/next-platform-starter)
 
-### Prerequisites
+### 先决条件
 
-- Next.js version 13.5 and later (up to the latest stable version)
-- [Node 18.x or later](https://docs.netlify.com/configure-builds/manage-dependencies/#node-js-and-javascript)
-- The latest version of [Netlify CLI](https://docs.netlify.com/cli/get-started/)
+- Next.js 13.5 及更高版本（直至最新稳定版）
+- [Node 18.x 或更高版本](https://docs.netlify.com/configure-builds/manage-dependencies/#node-js-and-javascript)
+- 最新版本的 [Netlify CLI](https://docs.netlify.com/cli/get-started/)
 
-## Key features
+## 主要功能
 
-- **App Router:** Netlify fully supports the Next.js App Router, which supports more powerful nested layouts and React’s latest features, such as Server Components and Streaming.
+- **App Router：** Netlify 完全支持 Next.js App Router，它支持更强大的嵌套布局和 React 的最新功能，如 Server Components 和 Streaming。
 
-- **Automatic fine-grained caching:** the adapter uses fine-grained caching on Netlify to support the Next.js Full Route Cache and Data Cache. This means that static page responses are automatically cached at the edge and can be revalidated by path or by tag.
+- **自动细粒度缓存：** 适配器在 Netlify 上使用细粒度缓存来支持 Next.js 全路由缓存和数据缓存。这意味着静态页面响应会自动缓存到边缘，并且可以按路径或按标签重新验证。
 
-- **On-demand and time-based revalidation:** both the App Router and Pages Router support on-demand and time-based revalidation, allowing you to revalidate and regenerate content at any time after a deploy.
+- **按需和基于时间的重新验证：** App Router 和 Pages Router 都支持按需和基于时间的重新验证，允许您在部署后的任何时间重新验证和生成内容。
 
-- **Image optimization:** the `next/image` component uses [Netlify Image CDN](https://docs.netlify.com/image-cdn/overview/) by default to ensure your images are optimized and served in the most efficient format.
+- **图像优化：** `next/image` 组件默认使用 [Netlify Image CDN](https://docs.netlify.com/image-cdn/overview/) 以确保您的图像得到优化并以最高效的格式提供服务。
 
-Note that while we also generally support experimental features (for example, Partial Prerendering) from their early stages, such features are not considered stable yet at the framework level.
+请注意，虽然我们通常也从早期阶段支持实验性功能（例如，Partial Prerendering），但这些功能在框架层面尚未被视为稳定功能。
 
-## Automatic framework detection
+## 自动框架检测
 
-Netlify automatically detects that you're using Next.js and provisions your site with the most up-to-date adapter.
+Netlify 会自动检测到您正在使用 Next.js，并为您的站点配置最新的适配器。
 
-### Pin a specific adapter version
+### 固定特定适配器版本
 
-To pin the Netlify Next.js adapter to a specific version, read [the Netlify docs](https://docs.netlify.com/frameworks/next-js/overview/).
+要将 Netlify Next.js 适配器固定到特定版本，请参阅 [Netlify 文档](https://docs.netlify.com/frameworks/next-js/overview/)。
 
-### Suggested configuration values
+### 建议的配置值
 
-When you [link a repository](https://docs.netlify.com/welcome/add-new-site/#import-from-an-existing-repository) for a Next.js project, Netlify provides a suggested build command and publish directory: `next build` and `.next`.
+当您为 Next.js 项目 [链接仓库](https://docs.netlify.com/welcome/add-new-site/#import-from-an-existing-repository) 时，Netlify 会提供建议的构建命令和发布目录：`next build` 和 `.next`。
 
-If you’re using the CLI to run [Netlify Dev](https://docs.netlify.com/cli/local-development/) for a local development environment, Netlify suggests a dev command and port: `next` and `3000`.
+如果您使用 CLI 运行 [Netlify Dev](https://docs.netlify.com/cli/local-development/) 进行本地开发环境，Netlify 会建议一个开发命令和端口：`next` 和 `3000`。
 
-You can override suggested values or set them in a configuration file instead, but suggested values from automatic framework detection may help simplify the process of setting up a Next.js site on Netlify.
+您可以覆盖建议的值或在配置文件中设置它们，但自动框架检测的建议值可能有助于简化在 Netlify 上设置 Next.js 站点的过程。
 
-For manual configuration, check out the [typical build settings](https://docs.netlify.com/frameworks/#next-js) for Next.js.
+对于手动配置，请查看 Next.js 的 [典型构建设置](https://docs.netlify.com/frameworks/#next-js)。
 
-## Limitations
+## 限制
 
-Currently, Netlify's Next.js adapter has the following limitations:
+目前，Netlify 的 Next.js 适配器有以下限制：
 
-- **SSR pages set to the `edge` runtime will run in your [functions region](https://docs.netlify.com/functions/optional-configuration/#region).** If edge-level performance is critical, we advise that you use static pages with edge functions instead. They are rendered at the origin, but are then cached at the edge and can be revalidated on demand.
+- **设置为 `edge` 运行时的 SSR 页面将在您的 [函数区域](https://docs.netlify.com/functions/optional-configuration/#region) 中运行。** 如果边缘级性能至关重要，我们建议您改用带有边缘函数的静态页面。它们在源站渲染，然后缓存到边缘，并可按需重新验证。
 
-- **Rewrites in your Next.js configuration can’t point to static files in the `public` directory.** If you create `beforeFiles` rewrites in your `next.config.js`, they can’t point to static files in your site’s `public` directory. You can use middleware rewrites as an alternative.
+- **Next.js 配置中的 Rewrites 不能指向 `public` 目录中的静态文件。** 如果在 `next.config.js` 中创建 `beforeFiles` rewrites，它们不能指向站点 `public` 目录中的静态文件。您可以使用 middleware rewrites 作为替代方案。
 
-- **Headers and Redirects are evaluated after middleware.** If you need to maintain the execution order specified in the Next.js [docs](https://nextjs.org/docs/app/building-your-application/routing/middleware#matching-paths) you will need to configure your [headers](https://docs.netlify.com/routing/headers/) and [redirects](https://docs.netlify.com/routing/redirects/) outside of Next.js using our platform primitives.
+- **Headers 和 Redirects 在 middleware 之后评估。** 如果您需要维持 Next.js [文档](https://nextjs.org/docs/app/building-your-application/routing/middleware#matching-paths) 中指定的执行顺序，您将需要使用我们的平台原语在 Next.js 之外配置 [headers](https://docs.netlify.com/routing/headers/) 和 [redirects](https://docs.netlify.com/routing/redirects/)。
 
-- **Netlify Forms compatibility:** Using Netlify Forms with the current adapter [requires a workaround](/netlify/forms).
+- **Netlify Forms 兼容性：** 使用当前适配器使用 Netlify Forms [需要变通方法](/netlify/forms)。
 
-### pnpm support
+### pnpm 支持
 
-If you’re planning to use pnpm with Next.js to manage dependencies, you must do one of the following:
+如果您计划使用 pnpm 与 Next.js 一起管理依赖项，您必须执行以下操作之一：
 
-- Set a `PNPM_FLAGS` [environment variable](https://docs.netlify.com/environment-variables/get-started/#create-environment-variables) with a value of `--shamefully-hoist`. This appends a `--shamefully-hoist` argument to the `pnpm install` command that Netlify runs.
-- [Enable public hoisting](https://pnpm.io/npmrc#public-hoist-pattern) by adding an `.npmrc` file in the root of your project with this content:
+- 设置一个值为 `--shamefully-hoist` 的 `PNPM_FLAGS` [环境变量](https://docs.netlify.com/environment-variables/get-started/#create-environment-variables)。这会将 `--shamefully-hoist` 参数附加到 Netlify 运行的 `pnpm install` 命令中。
+- 通过在项目根目录添加一个包含以下内容的 `.npmrc` 文件来 [启用公共提升](https://pnpm.io/npmrc#public-hoist-pattern)：
 
   ```bash
   public-hoist-pattern[]=*
   ```
 
-Learn more about using [pnpm on Netlify](https://docs.netlify.com/configure-builds/manage-dependencies/#pnpm).
+了解更多关于在 [Netlify 上使用 pnpm](https://docs.netlify.com/configure-builds/manage-dependencies/#pnpm) 的信息。
 
-## Troubleshooting
+## 故障排除
 
-The OpenNext docs are specifically about using Netlify's Next.js adapter v5 and later. For older versions of the adapter, refer to the [Netlify docs](https://docs.netlify.com/frameworks/next-js/overview/).
+OpenNext 文档专门关于使用 Netlify 的 Next.js 适配器 v5 及更高版本。对于旧版本的适配器，请参阅 [Netlify 文档](https://docs.netlify.com/frameworks/next-js/overview/)。
 
-If you need help with any version of the adapter, visit [our support page](https://www.netlify.com/support) for various methods of finding answers and getting help.
+如果您需要任何版本适配器的帮助，请访问 [我们的支持页面](https://www.netlify.com/support) 以查找各种获取答案和帮助的方法。
 
-### More resources
+### 更多资源
 
-- [Typical Next.js build settings](https://docs.netlify.com/frameworks/#next-js)
-- [Next.js framework documentation](https://nextjs.org/docs/getting-started)
-- [Connect JavaScript client](https://docs.netlify.com/connect/access-data/#use-the-connect-client) - the recommended library for querying Connect data layer APIs in Next.js cached SSR sites.
+- [典型 Next.js 构建设置](https://docs.netlify.com/frameworks/#next-js)
+- [Next.js 框架文档](https://nextjs.org/docs/getting-started)
+- [Connect JavaScript 客户端](https://docs.netlify.com/connect/access-data/#use-the-connect-client) - 推荐的库，用于在 Next.js 缓存的 SSR 站点中查询 Connect 数据层 API。

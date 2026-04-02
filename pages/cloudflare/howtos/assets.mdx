@@ -1,16 +1,16 @@
-## Static assets (public folder)
+## 静态资源（public 文件夹）
 
-The [static assets of Next located in the public folder](https://nextjs.org/docs/app/api-reference/file-conventions/public-folder) are served using [Workers Static Assets](https://developers.cloudflare.com/workers/static-assets/).
+位于 [public 文件夹中的 Next 静态资源](https://nextjs.org/docs/app/api-reference/file-conventions/public-folder) 使用 [Workers 静态资源](https://developers.cloudflare.com/workers/static-assets/) 提供服务。
 
-Workers Static Assets can intercept requests to the application ([`run_worker_first=false`](https://developers.cloudflare.com/workers/static-assets/) which is the default). This is the most cost efficient option as asset requests will not be billed in that case.
+Workers 静态资源可以拦截指向应用程序的请求（[`run_worker_first=false`](https://developers.cloudflare.com/workers/static-assets/)，这是默认值）。这是最具成本效益的选项，因为在这种情况下静态资源请求不会被计费。
 
-Another option is to run the Worker first (`run_worker_first=true`) to offer more flexibility at the expense of a higher cost.
+另一个选项是先运行 Worker（`run_worker_first=true`），以更高的成本为代价提供更大的灵活性。
 
-Note that `run_worker_first` could also be set to a list of patterns - this is a great option if you need more flexibility for only a subset of the static assets.
+请注意，`run_worker_first` 也可以设置为模式列表——如果您只需要为部分静态资源提供更大的灵活性，这是一个很好的选择。
 
 ### run_worker_first=false
 
-When `run_worker_first` is set to `false`, requests are intercepted before reaching the worker and are not billed:
+当 `run_worker_first` 设置为 `false` 时，请求在到达 Worker 之前被拦截，并且不会被计费：
 
 ```jsonc
 // wrangler.jsonc
@@ -20,20 +20,20 @@ When `run_worker_first` is set to `false`, requests are intercepted before reach
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS",
-    // Optional as false is the default value
+    // 可选，因为 false 是默认值
     "run_worker_first": false,
   },
   // ...
 }
 ```
 
-This is the most cost efficient option to use when you do not need to serve assets behind the middleware or Next rewrites and headers from [the Next config](https://nextjs.org/docs/app/api-reference/config/next-config-js).
+当您不需要在中间件后面提供静态资源，或使用 [Next 配置](https://nextjs.org/docs/app/api-reference/config/next-config-js) 中的 Next 重写和头部信息时，这是最具成本效益的选项。
 
-When `run_worker_first=false` you can still configure [headers](https://developers.cloudflare.com/workers/static-assets/headers/) and [redirects](https://developers.cloudflare.com/workers/static-assets/redirects/) via Worker Static Assets.
+当 `run_worker_first=false` 时，您仍然可以通过 Workers 静态资源配置 [头部信息](https://developers.cloudflare.com/workers/static-assets/headers/) 和 [重定向](https://developers.cloudflare.com/workers/static-assets/redirects/)。
 
 ### run_worker_first=true
 
-When `run_worker_first` is set to `true`, all the requests will reach the Worker and be billed:
+当 `run_worker_first` 设置为 `true` 时，所有请求都将到达 Worker 并被计费：
 
 ```jsonc
 // wrangler.jsonc
@@ -49,8 +49,8 @@ When `run_worker_first` is set to `true`, all the requests will reach the Worker
 }
 ```
 
-The Open Next asset resolver will be used to retrieve the assets from the Worker.
+Open Next 静态资源解析器将用于从 Worker 检索静态资源。
 
-When `run_worker_first=true`, assets are served behind the middleware and Next rewrites and headers from [the Next config](https://nextjs.org/docs/app/api-reference/config/next-config-js). The [headers](https://developers.cloudflare.com/workers/static-assets/headers/) and [redirects](https://developers.cloudflare.com/workers/static-assets/redirects/) configured for the Worker Static Assets do not apply in this case.
+当 `run_worker_first=true` 时，静态资源在中间件后面提供服务，并使用 [Next 配置](https://nextjs.org/docs/app/api-reference/config/next-config-js) 中的 Next 重写和头部信息。在这种情况下，为 Workers 静态资源配置的 [头部信息](https://developers.cloudflare.com/workers/static-assets/headers/) 和 [重定向](https://developers.cloudflare.com/workers/static-assets/redirects/) 不适用。
 
-`run_worker_first=true` should be used if you plan to use skew protection.
+如果您计划使用倾斜保护（skew protection），则应使用 `run_worker_first=true`。

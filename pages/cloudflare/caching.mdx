@@ -1,45 +1,44 @@
 import { Callout } from "nextra/components";
 import { Tabs } from "nextra/components";
 
-## Caching
+## 缓存
 
-Next.js offers multiple ways to improve an application's performance by [caching](https://nextjs.org/docs/app/building-your-application/data-fetching/fetching-caching-and-revalidating#caching-data) routes and network requests. An application will try to pre-render and cache as much data as possible during build-time to reduce the amount of work required when serving a response to a user.
+Next.js 提供了多种方法，通过 [缓存](https://nextjs.org/docs/app/building-your-application/data-fetching/fetching-caching-and-revalidating#caching-data) 路由和网络请求来提高应用程序的性能。应用程序将尝试在构建时尽可能多地预渲染和缓存数据，以减少向用户提供响应时所需的工作量。
 
-The cache data are updated using revalidation, either periodically or on-demand:
+缓存数据使用重新验证进行更新，可以是定期更新或按需更新：
 
-- "[Time-based revalidation](https://nextjs.org/docs/app/building-your-application/data-fetching/incremental-static-regeneration#time-based-revalidation)" updates the cache data after the revalidation delay specified by the applications expires
-- "[On-demand revalidation](https://nextjs.org/docs/app/building-your-application/data-fetching/incremental-static-regeneration#on-demand-revalidation-with-revalidatetag)" allows to invalid cache entries with a specific tag (via `revalidateTag`) or at a given path (via `revalidatePath`). You can also use `res.revalidate` in Pages router API route.
+- "[基于时间的重新验证](https://nextjs.org/docs/app/building-your-application/data-fetching/incremental-static-regeneration#time-based-revalidation)" 在应用程序指定的重新验证延迟过期后更新缓存数据
+- "[按需重新验证](https://nextjs.org/docs/app/building-your-application/data-fetching/incremental-static-regeneration#on-demand-revalidation-with-revalidatetag)" 允许使用特定标签（通过 `revalidateTag`）或给定路径（通过 `revalidatePath`）使缓存条目失效。您也可以在 Pages 路由 API 路线中使用 `res.revalidate`。
 
-The `@opennextjs/cloudflare` caching supports rely on 3 components:
+`@opennextjs/cloudflare` 缓存支持依赖于 3 个组件：
 
-- An **Incremental Cache** to store the cache data
-- A **Queue** to synchronize and deduplicate time-based revalidations
-- A **Tag Cache** for On-demand revalidations via [`revalidateTag`](https://nextjs.org/docs/app/api-reference/functions/revalidateTag) and [`revalidatePath`](https://nextjs.org/docs/app/api-reference/functions/revalidatePath).
+- 一个 **增量缓存** 用于存储缓存数据
+- 一个 **队列** 用于同步和去重基于时间的重新验证
+- 一个 **标签缓存** 用于通过 [`revalidateTag`](https://nextjs.org/docs/app/api-reference/functions/revalidateTag) 和 [`revalidatePath`](https://nextjs.org/docs/app/api-reference/functions/revalidatePath) 进行按需重新验证。
 
-You can also enable cache interception, to avoid calling the `NextServer` and thus loading the javascript associated with the page. It can slightly improve cold start performance for ISR/SSG route on cached routes.
-As of now, cache interception does not work with PPR and is not enabled by default.
+您还可以启用缓存拦截，以避免调用 `NextServer` 从而加载与页面相关的 javascript。它可以略微提高缓存路由上 ISR/SSG 路由的冷启动性能。
+截至目前，缓存拦截不适用于 PPR，并且默认未启用。
 
-Additionally some components uses the [Cache Api](https://developers.cloudflare.com/workers/runtime-apis/cache/) to improve the performance of these different components.
-If you're planning on using On-Demand revalidation, you should also use the [Cache Purge component](#automatic-cache-purge) to automatically purge the cache when a page is revalidated.
+此外，某些组件使用 [Cache Api](https://developers.cloudflare.com/workers/runtime-apis/cache/) 来提高这些不同组件的性能。
+如果您计划使用按需重新验证，您还应该使用 [缓存清除组件](#automatic-cache-purge) 以便在页面重新验证时自动清除缓存。
 
-The adapter provides several implementations for each of those components configured in `open-next.config.ts`.
+适配器为 `open-next.config.ts` 中配置的每个组件提供了多种实现。
 
-This guide provides guidelines for common use cases before detailing all the configuration options.
+本指南提供了常见用例的指南，然后详细介绍了所有配置选项。
 
 <Callout type="info">
-  Everything in this page only concerns SSG/ISR and the data cache, SSR route will work out of the box without
-  any caching config.
+  本页所有内容仅涉及 SSG/ISR 和数据缓存，SSR 路由无需任何缓存配置即可开箱即用。
 </Callout>
 
-### Guidelines
+### 指南
 
-#### Small site using revalidation
+#### 使用重新验证的小型站点
 
-You should use the following implementation for a small site:
+对于小型站点，您应该使用以下实现：
 
-- Incremental Cache: use R2 to store the data
-- Queue: use a Queue backed by Durable Objects
-- Tag Cache: `D1NextModeTagCache`
+- 增量缓存：使用 R2 存储数据
+- 队列：使用由 Durable Objects 支持的队列
+- 标签缓存：`D1NextModeTagCache`
 
 <Tabs items={["wrangler.jsonc", "open-next.config.ts"]}>
 <Tabs.Tab>
@@ -56,7 +55,7 @@ You should use the following implementation for a small site:
     },
   ],
 
-  // R2 incremental cache
+  // R2 增量缓存
   "r2_buckets": [
     {
       "binding": "NEXT_INC_CACHE_R2_BUCKET",
@@ -64,7 +63,7 @@ You should use the following implementation for a small site:
     },
   ],
 
-  // DO Queue
+  // DO 队列
   "durable_objects": {
     "bindings": [
       {
@@ -80,8 +79,8 @@ You should use the following implementation for a small site:
     },
   ],
 
-  // D1 Tag Cache (Next mode)
-  // This is only required if you use On-demand revalidation
+  // D1 标签缓存 (Next 模式)
+  // 仅当您使用按需重新验证时才需要此项
   "d1_databases": [
     {
       "binding": "NEXT_TAG_CACHE_D1",
@@ -105,14 +104,14 @@ import doQueue from "@opennextjs/cloudflare/overrides/queue/do-queue";
 export default defineCloudflareConfig({
   incrementalCache: r2IncrementalCache,
   queue: doQueue,
-  // This is only required if you use On-demand revalidation
+  // 仅当您使用按需重新验证时才需要此项
   tagCache: d1NextTagCache,
-  //If you don't use `revalidatePath`, you can also filter internal soft tags using the `softTagFilter`
+  // 如果您不使用 `revalidatePath`，也可以使用 `softTagFilter` 过滤内部软标签
   // tagCache: withFilter({
   //   tagCache: d1NextTagCache,
   //   filterFn: softTagFilter,
   // }),
-  // Disable this if you want to use PPR
+  // 如果您想使用 PPR，请禁用此项
   enableCacheInterception: true,
 });
 ```
@@ -120,9 +119,9 @@ export default defineCloudflareConfig({
 </Tabs.Tab>
 </Tabs>
 
-#### Large site using revalidation
+#### 使用重新验证的大型站点
 
-For a larger site, you should use the `ShardedDOTagCache` that can handle a higher load than the `D1NextModeTagCache`:
+对于大型站点，您应该使用 `ShardedDOTagCache`，它可以比 `D1NextModeTagCache` 处理更高的负载：
 
 <Tabs items={["wrangler.jsonc", "open-next.config.ts"]}>
 <Tabs.Tab>
@@ -139,7 +138,7 @@ For a larger site, you should use the `ShardedDOTagCache` that can handle a high
     },
   ],
 
-  // R2 incremental cache
+  // R2 增量缓存
   "r2_buckets": [
     {
       "binding": "NEXT_INC_CACHE_R2_BUCKET",
@@ -147,14 +146,14 @@ For a larger site, you should use the `ShardedDOTagCache` that can handle a high
     },
   ],
 
-  // DO Queue and DO Sharded Tag Cache
+  // DO 队列和 DO 分片标签缓存
   "durable_objects": {
     "bindings": [
       {
         "name": "NEXT_CACHE_DO_QUEUE",
         "class_name": "DOQueueHandler",
       },
-      // This is only required if you use On-demand revalidation
+      // 仅当您使用按需重新验证时才需要此项
       {
         "name": "NEXT_TAG_CACHE_DO_SHARDED",
         "class_name": "DOShardedTagCache",
@@ -170,7 +169,7 @@ For a larger site, you should use the `ShardedDOTagCache` that can handle a high
       "tag": "v1",
       "new_sqlite_classes": [
         "DOQueueHandler",
-        // This is only required if you use On-demand revalidation
+        // 仅当您使用按需重新验证时才需要此项
         "DOShardedTagCache",
         "BucketCachePurge",
       ],
@@ -193,16 +192,16 @@ import { purgeCache } from "@opennextjs/cloudflare/overrides/cache-purge/index";
 export default defineCloudflareConfig({
   incrementalCache: withRegionalCache(r2IncrementalCache, {
     mode: "long-lived",
-    // Setting `bypassTagCacheOnCacheHit` to `true` requires enabling cache purge
+    // 将 `bypassTagCacheOnCacheHit` 设置为 `true` 需要启用缓存清除
     bypassTagCacheOnCacheHit: true,
   }),
   queue: doQueue,
-  // This is only required if you use On-demand revalidation
+  // 仅当您使用按需重新验证时才需要此项
   tagCache: doShardedTagCache({
     baseShardSize: 12,
-    regionalCache: true, // Enable regional cache to reduce the load on the DOs
-    regionalCacheTtlSec: 5, // The TTL for the regional cache
-    regionalCacheDangerouslyPersistMissingTags: true, // Enable this to persist missing tags in the regional cache
+    regionalCache: true, // 启用区域缓存以减少 DO 的负载
+    regionalCacheTtlSec: 5, // 区域缓存的 TTL
+    regionalCacheDangerouslyPersistMissingTags: true, // 启用此项以在区域缓存中持久化缺失的标签
     shardReplication: {
       numberOfSoftReplicas: 4,
       numberOfHardReplicas: 2,
@@ -211,9 +210,9 @@ export default defineCloudflareConfig({
       },
     },
   }),
-  // Disable this if you want to use PPR
+  // 如果您想使用 PPR，请禁用此项
   enableCacheInterception: true,
-  // you can also use the `durableObject` option to use a durable object as a cache purge
+  // 您也可以使用 `durableObject` 选项将 durable object 用作缓存清除
   cachePurge: purgeCache({ type: "direct" }),
 });
 ```
@@ -221,9 +220,9 @@ export default defineCloudflareConfig({
 </Tabs.Tab>
 </Tabs>
 
-#### SSG site
+#### SSG 站点
 
-If your site is static, you do not need a Queue nor a Tag Cache. You can use a read-only Workers Static Assets-based incremental cache for the prerendered routes.
+如果您的站点是静态的，您不需要队列或标签缓存。您可以使用基于 Workers 静态资源的只读增量缓存来服务于预渲染的路由。
 
 <Tabs items={["open-next.config.ts"]}>
 <Tabs.Tab>
@@ -241,50 +240,49 @@ export default defineCloudflareConfig({
 </Tabs.Tab>
 </Tabs>
 
-#### Staging
+#### 预发布
 
-For staging, when your site receives low traffic from a single IP, you can replace the DO queue with a memory queue.
+对于预发布环境，当您的站点接收来自单个 IP 的低流量时，您可以将 DO 队列替换为内存队列。
 
-### References
+### 参考
 
-#### Static Assets Caching
+#### 静态资源缓存
 
 <Callout type="info">
-  The worker doesn't run **in front** of static assets, so the `headers` option of `next.config.ts` doesn't
-  apply to public files (`public`) and immutable build files (like `_next/static`).
+  Worker 不在静态资源**之前**运行，因此 `next.config.ts` 的 `headers` 选项不适用于公共文件 (`public`) 和不可变的构建文件（如 `_next/static`）。
 </Callout>
 
-By default, Cloudflare [Static Assets headers](https://developers.cloudflare.com/workers/static-assets/headers/#default-headers) use `max-age=0` with `must-revalidate`, allowing the browser to cache assets but with a revalidation request. This is the [same default behavior as the `public` folder on Next.js](https://nextjs.org/docs/app/api-reference/file-conventions/public-folder#caching).
+默认情况下，Cloudflare [静态资源头](https://developers.cloudflare.com/workers/static-assets/headers/#default-headers) 使用 `max-age=0` 和 `must-revalidate`，允许浏览器缓存资源但需要进行重新验证请求。这与 [Next.js 上 `public` 文件夹的默认行为相同](https://nextjs.org/docs/app/api-reference/file-conventions/public-folder#caching)。
 
-Next.js also generates _immutable_ files that don't change between builds. Those files will also be served from Static Assets. To match the [default cache behavior of immutable assets in Next.js](https://nextjs.org/docs/app/guides/self-hosting#automatic-caching), avoiding unnecessary revalidation requests, add the following header to the [`public/_headers`](https://developers.cloudflare.com/workers/static-assets/headers/#custom-headers) file:
+Next.js 还会生成在构建之间不会更改的_不可变_文件。这些文件也将通过静态资源提供。为了匹配 [Next.js 中不可变资产的默认缓存行为](https://nextjs.org/docs/app/guides/self-hosting#automatic-caching)，避免不必要的重新验证请求，请将以下头添加到 [`public/_headers`](https://developers.cloudflare.com/workers/static-assets/headers/#custom-headers) 文件：
 
 ```txt
 /_next/static/*
   Cache-Control: public,max-age=31536000,immutable
 ```
 
-#### Incremental Static Regeneration (ISR)
+#### 增量静态再生 (ISR)
 
-There are 3 storage options for the incremental cache:
+增量缓存有 3 种存储选项：
 
-- **R2 Object Storage:** A [cost-effective](https://developers.cloudflare.com/r2/pricing/) S3-compatible object storage option for large amounts of unstructured data. Data is stored in a single region, meaning cache interactions may be slower - this can be mitigated with a regional cache.
-- **Workers KV:** A [fast](https://blog.cloudflare.com/faster-workers-kv) key value store, it uses Cloudflare's [Tiered Cache](https://developers.cloudflare.com/cache/how-to/tiered-cache/) to increase cache hit rates. When you write cached data to Workers KV, you write to storage that can be read by any Cloudflare location. This means your app can fetch data, cache it in KV, and then subsequent requests anywhere around the world can read from this cache. We do not recommend using KV because it is eventually consistent.
-- **Workers Static Assets:** A read-only store for the incremental cache, serving build-time values from [Workers Static Assets](https://developers.cloudflare.com/workers/static-assets/). Revalidation is not supported with this cache.
+- **R2 对象存储：** 一种 [具有成本效益](https://developers.cloudflare.com/r2/pricing/) 的 S3 兼容对象存储选项，适用于大量非结构化数据。数据存储在单个区域中，这意味着缓存交互可能较慢 - 这可以通过区域缓存来缓解。
+- **Workers KV：** 一个 [快速](https://blog.cloudflare.com/faster-workers-kv) 键值存储，它使用 Cloudflare 的 [分层缓存](https://developers.cloudflare.com/cache/how-to/tiered-cache/) 来提高缓存命中率。当您向 Workers KV 写入缓存数据时，您写入的是任何 Cloudflare 位置都可以读取的存储。这意味着您的应用程序可以获取数据，将其缓存到 KV 中，然后随后世界各地的请求都可以从此缓存中读取。我们不推荐使用 KV，因为它是最终一致的。
+- **Workers 静态资源：** 增量缓存的只读存储，从 [Workers 静态资源](https://developers.cloudflare.com/workers/static-assets/) 提供构建时值。此缓存不支持重新验证。
 
-<Tabs items={["R2 Object Storage", "Workers KV", "Workers Static Assets"]}>
+<Tabs items={["R2 对象存储", "Workers KV", "Workers 静态资源"]}>
 <Tabs.Tab>
 
-##### 1. Create an R2 Bucket
+##### 1. 创建 R2 存储桶
 
 ```sh
 npx wrangler@latest r2 bucket create <YOUR_BUCKET_NAME>
 ```
 
-##### 2. Add the R2 Bucket and Service Binding to your Worker
+##### 2. 将 R2 存储桶和服务绑定添加到您的 Worker
 
-The binding name used in your app's worker is `NEXT_INC_CACHE_R2_BUCKET`. The service binding should be a self reference to your worker where `<WORKER_NAME>` is the name in your wrangler configuration file.
+您的应用程序 worker 中使用的绑定名称是 `NEXT_INC_CACHE_R2_BUCKET`。服务绑定应该是对您的 worker 的自引用，其中 `<WORKER_NAME>` 是您的 wrangler 配置文件中的名称。
 
-The prefix used by the R2 bucket can be configured with the `NEXT_INC_CACHE_R2_PREFIX` environment variable, and defaults to `incremental-cache`.
+R2 存储桶使用的前缀可以通过 `NEXT_INC_CACHE_R2_PREFIX` 环境变量进行配置，默认为 `incremental-cache`。
 
 ```jsonc
 // wrangler.jsonc
@@ -306,21 +304,21 @@ The prefix used by the R2 bucket can be configured with the `NEXT_INC_CACHE_R2_P
 }
 ```
 
-##### 3. Configure the cache
+##### 3. 配置缓存
 
-In your project's OpenNext config, enable the R2 cache.
+在您项目的 OpenNext 配置中，启用 R2 缓存。
 
-You can optionally setup a regional cache to use with the R2 incremental cache. This will enable faster retrieval of cache entries and reduce the amount of requests being sent to object storage.
+您可以选择设置一个区域缓存以与 R2 增量缓存一起使用。这将启用更快的缓存条目检索，并减少发送到对象存储的请求量。
 
-The regional cache has two modes:
+区域缓存有两种模式：
 
-- `short-lived`: Responses are re-used for up to a minute.
-- `long-lived`: Fetch responses are re-used until revalidated, and ISR/SSG responses are re-used for up to 30 minutes.
+- `short-lived`：响应最多可重用一分钟。
+- `long-lived`：获取的响应可重用直到重新验证，ISR/SSG 响应最多可重用 30 分钟。
 
-Additionally there are options you can use to customize the behavior of the regional cache:
+此外，您可以使用以下选项来自定义区域缓存的行为：
 
-- `shouldLazilyUpdateOnCacheHit`: Instructs the cache to be lazily updated, meaning that when requesting data from the cache, a background request is sent to the R2 bucket to get the latest entry. This is enabled by default for the `long-lived` mode.
-- `bypassTagCacheOnCacheHit`: Instructs the cache not to check the tag cache when there is a regional cache hit. This enables reducing response times. When this option is used you need to make sure that the cache gets correctly purged either by enabling the [automatic cache purge](#automatic-cache-purge) or purging the cache manually. Defaults to `false`.
+- `shouldLazilyUpdateOnCacheHit`：指示缓存惰性更新，意味着当从缓存请求数据时，会向 R2 存储桶发送后台请求以获取最新条目。这对于 `long-lived` 模式默认启用。
+- `bypassTagCacheOnCacheHit`：指示缓存在区域缓存命中时不检查标签缓存。这有助于减少响应时间。使用此选项时，您需要确保缓存被正确清除， either by enabling the [automatic cache purge](#automatic-cache-purge) or purging the cache manually. 默认为 `false`。
 
 ```ts
 // open-next.config.ts
@@ -329,7 +327,7 @@ import r2IncrementalCache from "@opennextjs/cloudflare/overrides/incremental-cac
 import { withRegionalCache } from "@opennextjs/cloudflare/overrides/incremental-cache/regional-cache";
 // ...
 
-// With regional cache enabled:
+// 启用区域缓存：
 export default defineCloudflareConfig({
   incrementalCache: withRegionalCache(r2IncrementalCache, {
     mode: "long-lived",
@@ -338,7 +336,7 @@ export default defineCloudflareConfig({
   // ...
 });
 
-// Without regional cache:
+// 不使用区域缓存：
 export default defineCloudflareConfig({
   incrementalCache: r2IncrementalCache,
   // ...
@@ -349,22 +347,21 @@ export default defineCloudflareConfig({
 <Tabs.Tab>
 
 <Callout>
-  Workers KV is eventually consistent, which means that it can take up to 60 seconds for updates to be
-  reflected globally, when using the default TTL of 60 seconds.
+  Workers KV 是最终一致的，这意味着在使用默认的 60 秒 TTL 时，更新可能需要长达 60 秒才能在全球范围内反映出来。
 </Callout>
 
-**Create a KV namespace**
+**创建 KV 命名空间**
 
 ```sh
 npx wrangler@latest kv namespace create <YOUR_NAMESPACE_NAME>
 ```
 
-**Add the KV namespace and Service Binding to your Worker**
+**将 KV 命名空间和服务绑定添加到您的 Worker**
 
-The binding name used in your app's worker is `NEXT_INC_CACHE_KV`.
-The `WORKER_SELF_REFERENCE` service binding should be a self reference to your worker where `<WORKER_NAME>` is the name in your wrangler configuration file.
+您的应用程序 worker 中使用的绑定名称是 `NEXT_INC_CACHE_KV`。
+`WORKER_SELF_REFERENCE` 服务绑定应该是对您的 worker 的自引用，其中 `<WORKER_NAME>` 是您的 wrangler 配置文件中的名称。
 
-The prefix used by the cache keys can be configured with the `NEXT_INC_CACHE_KV_PREFIX` environment variable, and defaults to `incremental-cache`.
+缓存键使用的前缀可以通过 `NEXT_INC_CACHE_KV_PREFIX` 环境变量进行配置，默认为 `incremental-cache`。
 
 ```jsonc
 // wrangler.jsonc
@@ -386,9 +383,9 @@ The prefix used by the cache keys can be configured with the `NEXT_INC_CACHE_KV_
 }
 ```
 
-**Configure the cache**
+**配置缓存**
 
-In your project's OpenNext config, enable the KV cache.
+在您项目的 OpenNext 配置中，启用 KV 缓存。
 
 ```ts
 // open-next.config.ts
@@ -407,12 +404,12 @@ export default defineCloudflareConfig({
 <Tabs.Tab>
 
 <Callout>
-  The Workers Static Assets cache is read-only. Requests that attempt to modify it will be ignored.
+  Workers 静态资源缓存是只读的。尝试修改它的请求将被忽略。
 </Callout>
 
-**Configure the cache**
+**配置缓存**
 
-In your project's OpenNext config, enable the static assets cache.
+在您项目的 OpenNext 配置中，启用静态资源缓存。
 
 ```ts
 // open-next.config.ts
@@ -427,17 +424,17 @@ export default defineCloudflareConfig({
 </Tabs.Tab>
 </Tabs>
 
-#### Queue
+#### 队列
 
-A queue must be setup for projects using Time-Based revalidation.
-It is not needed when revalidation is not used nor only On-Demand revalidation is used.
+对于使用基于时间的重新验证的项目，必须设置队列。
+当不使用重新验证或仅使用按需重新验证时，不需要它。
 
-**Configure the queue**
+**配置队列**
 
-In your project's OpenNext config, enable the cache and set up a queue.
+在您项目的 OpenNext 配置中，启用缓存并设置队列。
 
-The Durable Object Queue will send revalidation requests to a page when needed, and offers support for de-duplicating requests.
-By default there will be a maximum of 10 instance of the Durables Object Queue and they can each process up to 5 requests in parallel, for up to 50 concurrent ISR revalidations.
+Durable Object 队列将在需要时向页面发送重新验证请求，并提供对请求去重的支持。
+默认情况下，最多将有 10 个 Durable Object 队列实例，它们每个可以并行处理最多 5 个请求，最多支持 50 个并发 ISR 重新验证。
 
 ```ts
 // open-next.config.ts
@@ -453,7 +450,7 @@ export default defineCloudflareConfig({
 });
 ```
 
-You will also need to add some binding to your `wrangler.jsonc` file.
+您还需要在 `wrangler.jsonc` 文件中添加一些绑定。
 
 ```jsonc
 "durable_objects": {
@@ -472,28 +469,26 @@ You will also need to add some binding to your `wrangler.jsonc` file.
   ],
 ```
 
-You can customize the behaviors of the queue with environment variables:
+您可以使用环境变量自定义队列的行为：
 
-- The max number of revalidations that can be processed by an instance of durable object at the same time (`NEXT_CACHE_DO_QUEUE_MAX_REVALIDATION`)
-- The max time in milliseconds that a revalidation can take before being considered as failed (`NEXT_CACHE_DO_QUEUE_REVALIDATION_TIMEOUT_MS`)
-- The amount of time after which a revalidation will be attempted again if it failed. If it fails again it will exponentially back off until it reaches the max retry interval (`NEXT_CACHE_DO_QUEUE_RETRY_INTERVAL_MS`)
-- The maximum number of attempts that can be made to revalidate a path (`NEXT_CACHE_DO_QUEUE_MAX_RETRIES`)
-- Disable SQLite for this durable object. It should only be used if your incremental cache is not eventually consistent (`NEXT_CACHE_DO_QUEUE_DISABLE_SQLITE`)
+- 一个 durable object 实例同时可以处理的最大重新验证数量 (`NEXT_CACHE_DO_QUEUE_MAX_REVALIDATION`)
+- 重新验证在被视为失败之前可以花费的最大毫秒数 (`NEXT_CACHE_DO_QUEUE_REVALIDATION_TIMEOUT_MS`)
+- 如果重新验证失败，多长时间后将再次尝试。如果再次失败，它将指数退避直到达到最大重试间隔 (`NEXT_CACHE_DO_QUEUE_RETRY_INTERVAL_MS`)
+- 可以尝试重新验证路径的最大次数 (`NEXT_CACHE_DO_QUEUE_MAX_RETRIES`)
+- 为此 durable object 禁用 SQLite。仅当您的增量缓存不是最终一致时才应使用 (`NEXT_CACHE_DO_QUEUE_DISABLE_SQLITE`)
 
 <Callout>
-  There is 2 additional modes that you can use for the queue `direct` and the memory queue
+  队列还有 2 种额外模式供您使用：`direct` 和内存队列
 
-- The memory queue will dedupe request but only on a per isolate basis. It is not fully suitable for production deployments, you
-  can use it at your own risk!
+- 内存队列将去重请求，但仅在每个 isolate 基础上。它不完全适合生产部署，您可以自担风险使用！
 
-- The `direct` mode for the queue is intended for debugging purposes and is not recommended for use in
-  production. It only works in preview mode (i.e. `wrangler dev`)
+- 队列的 `direct` 模式旨在用于调试目的，不建议在生产中使用。它仅在预览模式下工作（即 `wrangler dev`）
 
-  For apps using the Page Router, `res.revalidate` requires to provide a self reference service binding named `WORKER_SELF_REFERENCE`.
+  对于使用 Page Router 的应用，`res.revalidate` 需要提供名为 `WORKER_SELF_REFERENCE` 的自引用服务绑定。
 
 </Callout>
 
-In certain situations, you may encounter the limits of what the Durable Object queue can manage for a single page or route. In such cases, you can utilize the queueCache to minimize the number of stale requests sent to the queue. This is achieved by adding and verifying a cache entry via the Cache API before dispatching a request to the queue. If a cache entry already exists, the request will not be sent to the queue, as it will be considered already in process.
+在某些情况下，您可能会遇到 Durable Object 队列可以为单个页面或路由管理的限制。在这种情况下，您可以利用 queueCache 来减少发送到队列的陈旧请求数量。这是通过在将请求分派到队列之前通过 Cache API 添加和验证缓存条目来实现的。如果缓存条目已存在，则请求不会发送到队列，因为它将被视为已在处理中。
 
 ```ts
 // open-next.config.ts
@@ -507,41 +502,41 @@ export default defineCloudflareConfig({
   // ...
   incrementalCache: r2IncrementalCache,
   queue: queueCache(doQueue, {
-    regionalCacheTtlSec: 5, // The TTL for the regional cache, defaults to 5 seconds
+    regionalCacheTtlSec: 5, // 区域缓存的 TTL，默认为 5 秒
 
-    // Whether to wait for the queue to acknowledge the request before returning
-    // When set to false, the cache will be populated asap and the queue will be called after.
-    // When set to true, the cache will be populated only after the queue ack is received.
+    // 是否在返回之前等待队列确认请求
+    // 当设置为 false 时，缓存将尽快填充，队列将在之后调用。
+    // 当设置为 true 时，缓存仅在收到队列确认后才填充。
     waitForQueueAck: true,
   }),
 });
 ```
 
-#### Tag Cache for On-Demand Revalidation
+#### 用于按需重新验证的标签缓存
 
-The tag revalidation mechanism can use either a [Cloudflare D1](https://developers.cloudflare.com/d1/) database or [Durable Objects](https://developers.cloudflare.com/durable-objects/) with `SqliteStorage` as its backing store for information about tags, paths, and revalidation times.
+标签重新验证机制可以使用 [Cloudflare D1](https://developers.cloudflare.com/d1/) 数据库或 [Durable Objects](https://developers.cloudflare.com/durable-objects/) 与 `SqliteStorage` 作为其支持存储，用于存储有关标签、路径和重新验证时间的信息。
 
-To use on-demand revalidation, you should also follow the [ISR setup steps](#incremental-static-regeneration-isr).
+要使用按需重新验证，您还应该遵循 [ISR 设置步骤](#incremental-static-regeneration-isr)。
 
 <Callout>
-  If your app **only** uses the pages router, it does not need to have a tag cache and should skip this step.
-  You can also skip this step if your app doesn't use `revalidateTag` nor `revalidatePath`.
+  如果您的应用**仅**使用 pages router，则不需要标签缓存，应跳过此步骤。
+  如果您的应用不使用 `revalidateTag` 也不使用 `revalidatePath`，您也可以跳过此步骤。
 </Callout>
 
-There are 2 different options to choose from for the tag cache: `d1NextTagCache`, `doShardedTagCache`.
-Which one to choose should be based on two key factors:
+标签缓存有 2 种不同的选项可供选择：`d1NextTagCache`、`doShardedTagCache`。
+选择哪一个应基于两个关键因素：
 
-1. **Expected Load**: Consider the volume of traffic or data you anticipate.
-2. **Usage of** `revalidateTag` / `revalidatePath`: Evaluate how frequently these features will be utilized.
+1. **预期负载**：考虑您预期的流量或数据量。
+2. **`revalidateTag` / `revalidatePath` 的使用**：评估这些功能的使用频率。
 
-If either of these factors is significant, opting for a sharded database is recommended. Additionally, incorporating a regional cache can further enhance performance.
+如果这些因素中的任何一个很大，建议使用分片数据库。此外，结合区域缓存可以进一步提高性能。
 
 <Tabs items={["D1NextTagCache", "doShardedTagCache", "withFilter"]}>
 <Tabs.Tab>
 
-**Create a D1 database and Service Binding**
+**创建 D1 数据库和服务绑定**
 
-The binding name used in your app's worker is `NEXT_TAG_CACHE_D1`. The `WORKER_SELF_REFERENCE` service binding should be a self reference to your worker where `<WORKER_NAME>` is the name in your wrangler configuration file.
+您的应用程序 worker 中使用的绑定名称是 `NEXT_TAG_CACHE_D1`。`WORKER_SELF_REFERENCE` 服务绑定应该是对您的 worker 的自引用，其中 `<WORKER_NAME>` 是您的 wrangler 配置文件中的名称。
 
 ```jsonc
 // wrangler.jsonc
@@ -563,13 +558,13 @@ The binding name used in your app's worker is `NEXT_TAG_CACHE_D1`. The `WORKER_S
 }
 ```
 
-**Create table for tag revalidations**
+**为标签重新验证创建表**
 
-The D1 tag cache requires a `revalidations` table that tracks On-Demand revalidation times.
+D1 标签缓存需要一个 `revalidations` 表来跟踪按需重新验证时间。
 
-**Configure the cache**
+**配置缓存**
 
-In your project's OpenNext config, enable the R2 cache and set up a queue (see above). The queue will send a revalidation request to a page when needed, but it will not dedupe requests.
+在您项目的 OpenNext 配置中，启用 R2 缓存并设置队列（见上文）。队列将在需要时向页面发送重新验证请求，但它不会对请求去重。
 
 ```ts
 // open-next.config.ts
@@ -585,18 +580,18 @@ export default defineCloudflareConfig({
 });
 ```
 
-##### 4. Initialize the cache during deployments
+##### 4. 在部署期间初始化缓存
 
-In order for the cache to be properly initialized with the build-time revalidation data, you need to run a command as part of your deploy step. This should be run as part of each deployment to ensure that the cache is being populated with each build's data.
+为了使缓存正确初始化构建时重新验证数据，您需要作为部署步骤的一部分运行命令。这应作为每次部署的一部分运行，以确保缓存填充了每个构建的数据。
 
-To populate remote bindings and create a new [version](https://developers.cloudflare.com/workers/configuration/versions-and-deployments/#versions) of your application at the same time, you can use either the [`deploy`](/cloudflare/cli#deploy-command) command or the [`upload`](/cloudflare/cli#upload-command) command. Similarly, the [`preview`](/cloudflare/cli#preview-command) command will populate your local bindings and start a Wrangler dev server.
+为了同时填充远程绑定并创建应用程序的新 [版本](https://developers.cloudflare.com/workers/configuration/versions-and-deployments/#versions)，您可以使用 [`deploy`](/cloudflare/cli#deploy-command) 命令或 [`upload`](/cloudflare/cli#upload-command) 命令。同样，[`preview`](/cloudflare/cli#preview-command) 命令将填充您的本地绑定并启动 Wrangler 开发服务器。
 
 </Tabs.Tab>
 <Tabs.Tab>
 
-**Create a Durable Object and Service Binding**
+**创建 Durable Object 和服务绑定**
 
-The service binding should be a self reference to your worker where `<WORKER_NAME>` is the name in your wrangler configuration file.
+服务绑定应该是对您的 worker 的自引用，其中 `<WORKER_NAME>` 是您的 wrangler 配置文件中的名称。
 
 ```jsonc
 // wrangler.jsonc
@@ -629,9 +624,9 @@ The service binding should be a self reference to your worker where `<WORKER_NAM
 }
 ```
 
-**Configure the cache**
+**配置缓存**
 
-In your project's OpenNext config, enable the R2 cache and set up a queue.
+在您项目的 OpenNext 配置中，启用 R2 缓存并设置队列。
 
 ```ts
 // open-next.config.ts
@@ -647,27 +642,27 @@ export default defineCloudflareConfig({
 });
 ```
 
-doShardedTagCache takes the following options:
+doShardedTagCache 接受以下选项：
 
-- `baseShardSize`: The number of shards to use for the cache. The more shards you have, the more evenly the cache will be distributed across the shards. The default is 4. Soft (internal next tags used for `revalidatePath`) and hard tags (the ones you define in your app) will be split in different shards
-- `regionalCache`: Whether to use regional cache for the cache. The default is false. This option is useful when you want to reduce the stress on the durable object
-- `regionalCacheTtlSec`: The TTL for the regional cache. The default is 5 seconds. Increasing this value will increase the time it takes for the cache to be invalidated across regions
-- `regionalCacheDangerouslyPersistMissingTags`: This option allows you to persist missing tags in the regional cache. Without this option, only tags that have been revalidated at least once will be persisted in the regional cache. This option should only be used if you also purge the cache using the [Cache Purge component](#automatic-cache-purge) (or any similar methods). It is disabled by default.
-- `shardReplication`: Enable replicating the Shard. Shard replication will duplicate each shards into replicas to spread the load even more
-  - `numberOfSoftReplicas`: Number of replicas for the soft tag shards
-  - `numberOfHardReplicas`: Number of replicas for the hard tag shards
-  - `regionalReplicationOptions` : This setting enables you to replicate shards across different regions, thereby reducing read latency and distributing the load more evenly. By enabling this option, each shard will be replicated in all available regions. Please note that this will increase the number of Durable Objects (DOs) created and the volume of write requests sent to the DOs.
-    - `defaultRegion`: The default region to use for the replication.
-- `maxWriteRetries`: The number of retries to perform when writing tags
+- `baseShardSize`: 用于缓存的分片数量。您拥有的分片越多，缓存将在分片之间分布得越均匀。默认值为 4。软标签（用于 `revalidatePath` 的内部 next 标签）和硬标签（您在应用中定义的标签）将拆分到不同的分片中
+- `regionalCache`: 是否对缓存使用区域缓存。默认值为 false。当您想减少 durable object 的压力时，此选项很有用
+- `regionalCacheTtlSec`: 区域缓存的 TTL。默认值为 5 秒。增加此值将增加缓存跨区域失效所需的时间
+- `regionalCacheDangerouslyPersistMissingTags`: 此选项允许您在区域缓存中持久化缺失的标签。 without this option, only tags that have been revalidated at least once will be persisted in the regional cache. 此选项仅当您还使用 [缓存清除组件](#automatic-cache-purge)（或任何类似方法）清除缓存时才应使用。默认禁用。
+- `shardReplication`: 启用复制分片。分片复制将把每个分片复制成副本以进一步分散负载
+  - `numberOfSoftReplicas`: 软标签分片的副本数量
+  - `numberOfHardReplicas`: 硬标签分片的副本数量
+  - `regionalReplicationOptions` : 此设置使您能够跨不同区域复制分片，从而减少读取延迟并更均匀地分布负载。通过启用此选项，每个分片将在所有可用区域中复制。请注意，这将增加创建的 Durable Objects (DOs) 数量和发送到 DOs 的写入请求量。
+    - `defaultRegion`: 用于复制的默认地区。
+- `maxWriteRetries`: 写入标签时执行的重试次数
 
 </Tabs.Tab>
 <Tabs.Tab>
 <Callout>
-  The `withFilter` option is a specialized configuration that enhances your `tagCache` by layering an additional filter. It requires another tag cache to be passed in as the tagCache (e.g., `d1NextTagCache`, `doShardedTagCache` or your own).
+  `withFilter` 选项是一个专门的配置，通过分层额外的过滤器来增强您的 `tagCache`。它需要传入另一个标签缓存作为 tagCache（例如 `d1NextTagCache`、`doShardedTagCache` 或您自己的）。
 </Callout>
-This enhanced tag cache selectively filters which tags trigger revalidations, allowing you to focus on a specific subset and reduce unnecessary load on the underlying tag cache. For convenience, we provide the ready-to-use `softTagFilter` that automatically filters out tags used by the `revalidatePath` function making it a no-op.
+此增强型标签缓存选择性地过滤哪些标签触发重新验证，允许您专注于特定子集并减少对底层标签缓存的不必要负载。为了方便起见，我们提供了即开即用的 `softTagFilter`，它自动过滤掉 `revalidatePath` 函数使用的标签，使其成为无操作。
 
-Its primary purpose is to filter out soft tags (i.e., those used by `revalidatePath`) from the tag cache, which are not relevant for your application. It could also be used to filter out hard tags (i.e., those you define in your app) if one of your dependencies uses them.
+其主要目的是从标签缓存中过滤掉软标签（即那些由 `revalidatePath` 使用的标签），这些标签与您的应用无关。如果您的某个依赖项使用硬标签（即您在应用中定义的标签），它也可用于过滤掉硬标签。
 
 ```ts
 // open-next.config.ts
@@ -687,31 +682,31 @@ export default defineCloudflareConfig({
 });
 ```
 
-You can also create your own custom filter function. This function must return a boolean value indicating whether a tag should be included. It will be invoked with a single tag (as a string) as its argument. Please note that "soft tags" (i.e., those used by revalidatePath) always start with the prefix `_N_T`.
+您还可以创建自己的自定义过滤函数。此函数必须返回一个布尔值，指示是否应包含标签。它将使用单个标签（作为字符串）作为其参数被调用。请注意，“软标签”（即那些由 revalidatePath 使用的标签）始终以 `_N_T` 前缀开头。
 
 </Tabs.Tab>
 </Tabs>
 
-#### Automatic Cache Purge
+#### 自动缓存清除
 
 <Callout>
 
-You can only enable cache purge functionality on a zone (e.g., when using a custom domain).
+您只能在区域上启用缓存清除功能（例如，使用自定义域名时）。
 
 </Callout>
 
-The cache purge component automatically clears the cache when a page is revalidated. It is only necessary if you use On-Demand revalidation along with one of the cache components that leverage the Cache API.
+缓存清除组件在页面重新验证时自动清除缓存。仅当您使用按需重新验证以及利用 Cache API 的缓存组件之一时，才需要它。
 
-This component can either call the Cache API's purge function directly or route the purge request through an intermediate durable object. Using a durable object helps buffer requests and avoid reaching [API rate limits](https://developers.cloudflare.com/cache/how-to/purge-cache/#hostname-tag-prefix-url-and-purge-everything-limits).
+此组件可以直接调用 Cache API 的清除函数，或者通过中间 durable object 路由清除请求。使用 durable object 有助于缓冲请求并避免达到 [API 速率限制](https://developers.cloudflare.com/cache/how-to/purge-cache/#hostname-tag-prefix-url-and-purge-everything-limits)。
 
-Cache purge are only called when you call `revalidateTag`, `revalidatePath` or `res.revalidate` in the pages router. It is not called for ISR revalidation.
+仅当您调用 `revalidateTag`、`revalidatePath` 或 pages router 中的 `res.revalidate` 时，才会调用缓存清除。它不适用于 ISR 重新验证。
 
-To use cache purge, you need to define the following wrangler secrets:
+要使用缓存清除，您需要定义以下 wrangler 密钥：
 
-- `CACHE_PURGE_API_TOKEN` should be set to [an API token](https://developers.cloudflare.com/fundamentals/api/get-started/create-token/) with the `Cache Purge` permission
-- `CACHE_PURGE_ZONE_ID` should be set to the [zone ID of your deployment domain](https://developers.cloudflare.com/fundamentals/account/find-account-and-zone-ids/)
+- `CACHE_PURGE_API_TOKEN` 应设置为具有 `Cache Purge` 权限的 [API 令牌](https://developers.cloudflare.com/fundamentals/api/get-started/create-token/)
+- `CACHE_PURGE_ZONE_ID` 应设置为您的部署域名的 [区域 ID](https://developers.cloudflare.com/fundamentals/account/find-account-and-zone-ids/)
 
-Below is an example configuration for integrating the cache purge component in your `open-next.config.ts`:
+以下是将缓存清除组件集成到您的 `open-next.config.ts` 中的示例配置：
 
 ```ts
 import { defineCloudflareConfig } from "@opennextjs/cloudflare";
@@ -724,16 +719,16 @@ import { purgeCache } from "@opennextjs/cloudflare/overrides/cache-purge/index";
 export default defineCloudflareConfig({
   incrementalCache: withRegionalCache(r2IncrementalCache, { mode: "long-lived" }),
   queue: doQueue,
-  // This is only required if you use On-demand revalidation
+  // 仅当您使用按需重新验证时才需要此项
   tagCache: doShardedTagCache({ baseShardSize: 12 }),
-  // Disable this if you want to use PPR
+  // 如果您想使用 PPR，请禁用此项
   enableCacheInterception: true,
-  // you can also use the `durableObject` option to use a durable object as a cache purge
+  // 您也可以使用 `durableObject` 选项将 durable object 用作缓存清除
   cachePurge: purgeCache({ type: "direct" }),
 });
 ```
 
-If you want to use the durable object option, you will need to add the following binding to your `wrangler.jsonc` file:
+如果您想使用 durable object 选项，您需要在 `wrangler.jsonc` 文件中添加以下绑定：
 
 ```jsonc
 {
@@ -754,10 +749,10 @@ If you want to use the durable object option, you will need to add the following
 }
 ```
 
-You can customize the duration of the cache purge buffering with the `NEXT_CACHE_DO_PURGE_BUFFER_TIME_IN_SECONDS` environment variable. The default is 5 seconds. It works by buffering the purge requests for a given amount of time and then sending them all at once. This is useful to avoid hitting the API rate limits.
+您可以使用 `NEXT_CACHE_DO_PURGE_BUFFER_TIME_IN_SECONDS` 环境变量自定义缓存清除缓冲的持续时间。默认值为 5 秒。它的工作原理是在给定时间内缓冲清除请求，然后一次性发送它们。这有助于避免触及 API 速率限制。
 
-### Debugging
+### 调试
 
-You can add `NEXT_PRIVATE_DEBUG_CACHE=1` to your app `.env` file to debug any cache issue.
-The app will output logs whenever the cache is accessed - those logs are generated by both Next and the cache adapter.
-You can find more details in [the Next documentation](https://nextjs.org/docs/app/guides/incremental-static-regeneration#verifying-correct-production-behavior)
+您可以将 `NEXT_PRIVATE_DEBUG_CACHE=1` 添加到您的应用 `.env` 文件以调试任何缓存问题。
+每当访问缓存时，应用将输出日志 - 这些日志由 Next 和缓存适配器生成。
+您可以在 [Next 文档](https://nextjs.org/docs/app/guides/incremental-static-regeneration#verifying-correct-production-behavior) 中找到更多详细信息

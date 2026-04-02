@@ -1,108 +1,108 @@
-This is the main entrypoint for SSR, ISR or SSG routes.
-This docs only apply for the node runtime.
+这是 SSR、ISR 或 SSG 路由的主要入口点。
+本文档仅适用于 node 运行时。
 
 ### ISR/SSG
 
-In standalone mode, Next.js prebuilds the ISR/SSG cache during the build process. And at runtime, **NextServer** expects this cache locally on the server. This works effectively when the server is run on a single web server machine, sharing the cache across all requests. In a serverless environment, the cache needs to be housed centrally in a location accessible by all server Lambda function instances.By default S3 serves as this central location.
+在 standalone 模式下，Next.js 会在构建过程中预构建 ISR/SSG 缓存。而在运行时，**NextServer** 期望此缓存位于服务器本地。当服务器运行在单个 Web 服务器机器上，在所有请求之间共享缓存时，这非常有效。在无服务器环境中，缓存需要集中存放在所有服务器 Lambda 函数实例均可访问的位置。默认情况下，S3 充当此中心位置。
 
-To facilitate this:
+为了促进这一点：
 
-- ISR cache files are excluded from the `server-function` bundle and instead are uploaded to the cache bucket.
-- The default cache handler is replaced with a custom cache handler by configuring the [`incrementalCacheHandlerPath`](https://nextjs.org/docs/app/api-reference/next-config-js/incrementalCacheHandlerPath) field in `next.config.js`.
-- The custom cache handler manages the cache files on S3 by default, handling both reading and writing operations.
-- Since we're using FIFO queue, if we want to process more than one revalidation at a time, we need to have separate Message Group IDs. We generate a Message Group ID for each revalidation request based on the route path. This ensures that revalidation requests for the same route are processed only once. You can use `MAX_REVALIDATE_CONCURRENCY` environment variable to control the number of revalidation requests processed at a time. By default, it is set to 10.
-- The `revalidation-function` polls the message from the queue and makes a `HEAD` request to the route with the `x-prerender-revalidate` header.
-- The `server-function` receives the `HEAD` request and revalidates the cache.
-- Tags are handled differently in a dynamodb table. We use a separate table to store the tags for each route. The custom cache handler will update the tags in the table when it updates the cache.
+- ISR 缓存文件被排除在 `server-function` bundle 之外，而是上传到缓存 bucket。
+- 通过在 `next.config.js` 中配置 [`incrementalCacheHandlerPath`](https://nextjs.org/docs/app/api-reference/next-config-js/incrementalCacheHandlerPath) 字段，默认缓存处理程序被自定义缓存处理程序替换。
+- 自定义缓存处理程序默认管理 S3 上的缓存文件，处理读取和写入操作。
+- 由于我们使用的是 FIFO 队列，如果我们想一次处理多个重新验证，我们需要拥有单独的消息组 ID。我们基于路由路径为每个重新验证请求生成一个消息组 ID。这确保了对同一路线的重新验证请求只被处理一次。你可以使用 `MAX_REVALIDATE_CONCURRENCY` 环境变量来控制一次处理的重新验证请求数量。默认情况下，它设置为 10。
+- `revalidation-function` 从队列中轮询消息，并向带有 `x-prerender-revalidate` 头部的路由发出 `HEAD` 请求。
+- `server-function` 接收 `HEAD` 请求并重新验证缓存。
+- 标签在 dynamodb 表中的处理方式不同。我们使用单独的表来存储每条路线的标签。自定义缓存处理程序在更新缓存时会更新表中的标签。
 
-#### Lifetime of an ISR request for a stale page
+#### stale 页面的 ISR 请求生命周期
 
-1. Cloudfront receives a request for a page. Let's assume the page is stale in Cloudfront.
-2. Cloudfront forwards the request to the `server-function` in the background but still returns the cached version.
-3. The `server-function` checks in the incremental cache. If the page is stale, it sends the stale response back to Cloudfront while sending a message to the revalidation queue to trigger background revalidation. It will also change the cache-control header to `s-maxage=2, stale-while-revalidate=2592000`
-4. A new request comes in for the same page after 2 seconds. Cloudfront sends the cached version back to the user and forwards the request to the `server-function`.
-5. If the revalidation is done, the `server-function` will update the cache and send the updated response back to Cloudfront. Subsequent request will then get the updated version. Otherwise, we go back to step 3.
+1. Cloudfront 接收页面请求。假设页面在 Cloudfront 中已 stale。
+2. Cloudfront 在后台将请求转发给 `server-function`，但仍返回缓存版本。
+3. `server-function` 检查增量缓存。如果页面已 stale，它将把 stale 响应发送回 Cloudfront，同时向重新验证队列发送消息以触发后台重新验证。它还会将 cache-control 头部更改为 `s-maxage=2, stale-while-revalidate=2592000`
+4. 2 秒后同一页面传来新请求。Cloudfront 将缓存版本发送回用户，并将请求转发给 `server-function`。
+5. 如果重新验证完成，`server-function` 将更新缓存并将更新的响应发送回 Cloudfront。后续请求将获得更新版本。否则，我们回到步骤 3。
 
-#### Lifetime of an SSG request for a page revalidated using `revalidateTag`
+#### 使用 `revalidateTag` 重新验证的页面的 SSG 请求生命周期
 
-1. You revalidate the page using `revalidateTag` or `revalidatePath`. You should also invalidate the cache in Cloudfront
-2. Cloudfront receives a request for a page.
-3. Cloudfront forwards the request to the `server-function`.
-4. The `server-function` checks in the incremental cache, then in the tag cache. If the page is stale in the tag cache, it will trigger an immediate revalidation and send the updated response back to Cloudfront.
-5. The user will receive the updated version of the page with the `x-next-cache` header set to `MISS`.
+1. 你使用 `revalidateTag` 或 `revalidatePath` 重新验证页面。你也应该使 Cloudfront 中的缓存失效
+2. Cloudfront 接收页面请求。
+3. Cloudfront 将请求转发给 `server-function`。
+4. `server-function` 检查增量缓存，然后检查标签缓存。如果页面在标签缓存中已 stale，它将触发立即重新验证并将更新的响应发送回 Cloudfront。
+5. 用户将收到页面的更新版本，`x-next-cache` 头部设置为 `MISS`。
 
-### Special Overrides
+### 特殊覆盖
 
-All these overrides apply on a per function basis. You need to specify them for each function you want to override.
+所有这些覆盖都基于每个函数应用。你需要为每个想要覆盖的函数指定它们。
 
-#### Incremental Cache
+#### 增量缓存
 
-The Incremental Cache is a cache that is used to store the results of the ISR **and** SSG pages as well as the fetch cache.
-By default, OpenNext uses S3 as the default incremental cache.
+增量缓存是用于存储 ISR **和** SSG 页面结果以及 fetch 缓存的缓存。
+默认情况下，OpenNext 使用 S3 作为默认增量缓存。
 
-You can override the default cache by setting the `override.incrementalCache` property in the `open-next.config.ts` file.
-You can look at the expected types [here](https://github.com/sst/open-next/blob/f1b2b78ce622ceae496ee566abf74f07018619f4/packages/open-next/src/cache/incremental/types.ts#L38)
+你可以通过在 `open-next.config.ts` 文件中设置 `override.incrementalCache` 属性来覆盖默认缓存。
+你可以查看预期的类型 [这里](https://github.com/sst/open-next/blob/f1b2b78ce622ceae496ee566abf74f07018619f4/packages/open-next/src/cache/incremental/types.ts#L38)
 
-##### Default S3 Incremental Cache
+##### 默认 S3 增量缓存
 
-The default S3 Incremental Cache uses the `@aws-sdk/client-s3` to interact with the S3 bucket. It needs to have the proper permissions to read and write to the bucket.
+默认 S3 增量缓存使用 `@aws-sdk/client-s3` 与 S3 bucket 交互。它需要具有读取和写入 bucket 的适当权限。
 
-File in S3 should follow the following structure:
+S3 中的文件应遵循以下结构：
 
-- `Key_Prefix/BUILD_ID/path/to/page.cache` - For the cache of a page
-- `Key_Prefix/__fetch/BUILD_ID/fetch-cache-key` - For the fetch cache
+- `Key_Prefix/BUILD_ID/path/to/page.cache` - 用于页面的缓存
+- `Key_Prefix/__fetch/BUILD_ID/fetch-cache-key` - 用于 fetch 缓存
 
-The default S3 Incremental Cache can be configured using the following environment variables:
+默认 S3 增量缓存可以使用以下环境变量进行配置：
 
-###### Environment Variables
+###### 环境变量
 
-- CACHE_BUCKET_REGION: The region of the S3 bucket
-- CACHE_BUCKET_NAME: The name of the S3 bucket
-- CACHE_BUCKET_KEY_PREFIX: The prefix of the keys in the S3 bucket - Optional
-- AWS_SDK_S3_MAX_ATTEMPTS: The maximum number of attempts to make to the S3 bucket - Optional
+- CACHE_BUCKET_REGION: S3 bucket 的区域
+- CACHE_BUCKET_NAME: S3 bucket 的名称
+- CACHE_BUCKET_KEY_PREFIX: S3 bucket 中键的前缀 - 可选
+- AWS_SDK_S3_MAX_ATTEMPTS: 对 S3 bucket 进行尝试的最大次数 - 可选
 
-#### Tag Cache
+#### 标签缓存
 
-The Tag Cache is a cache that is used to store the tags for the ISR/SSG pages as well as the fetch cache.
-By default, OpenNext uses DynamoDB as the default incremental cache.
+标签缓存是用于存储 ISR/SSG 页面以及 fetch 缓存的标签的缓存。
+默认情况下，OpenNext 使用 DynamoDB 作为默认标签缓存。
 
-You can override the default cache by setting the `override.tagCache` property in the `open-next.config.ts` file.
-You can look at the expected types [here](https://github.com/sst/open-next/blob/f1b2b78ce622ceae496ee566abf74f07018619f4/packages/open-next/src/cache/tag/types.ts#L1)
+你可以通过在 `open-next.config.ts` 文件中设置 `override.tagCache` 属性来覆盖默认缓存。
+你可以查看预期的类型 [这里](https://github.com/sst/open-next/blob/f1b2b78ce622ceae496ee566abf74f07018619f4/packages/open-next/src/cache/tag/types.ts#L1)
 
-##### Default DynamoDB Tag Cache
+##### 默认 DynamoDB 标签缓存
 
-The default DynamoDB Tag Cache uses the `@aws-sdk/client-dynamodb` to interact with the DynamoDB table. It needs to have the proper permissions to read and write to the table.
+默认 DynamoDB 标签缓存使用 `@aws-sdk/client-dynamodb` 与 DynamoDB 表交互。它需要具有读取和写入表的适当权限。
 
-Tags in DynamoDB should follow the following structure:
+DynamoDB 中的标签应遵循以下结构：
 
 ```typescript
 type Tag = {
-  path: string; // The path of the page
-  tag: string; // The tag of the page
-  revalidatedAt: number; // The time at which the page has been revalidated
+  path: string; // 页面的路径
+  tag: string; // 页面的标签
+  revalidatedAt: number; // 页面被重新验证的时间
 };
 ```
 
-We use an index called `revalidate` with `path` as a partition key and `revalidatedAt` as the sort key.
-It needs to be pre-populated with the tags of the pages that are being generated.
+我们使用一个名为 `revalidate` 的索引，其中 `path` 作为分区键，`revalidatedAt` 作为排序键。
+它需要预填充正在生成的页面的标签。
 
-The default DynamoDB Tag Cache can be configured using the following environment variables:
+默认 DynamoDB 标签缓存可以使用以下环境变量进行配置：
 
-###### Environment Variables
+###### 环境变量
 
-- CACHE_BUCKET_REGION: The region of the DynamoDB table
-- CACHE_DYNAMO_TABLE: The name of the DynamoDB table
-- AWS_SDK_DYNAMODB_MAX_ATTEMPTS: The maximum number of attempts to make to the DynamoDB table - Optional
-- DYNAMO_BATCH_WRITE_COMMAND_CONCURRENCY: The number of concurrent batch write commands to make to the DynamoDB table - Optional Default to 4
+- CACHE_BUCKET_REGION: DynamoDB 表的区域
+- CACHE_DYNAMO_TABLE: DynamoDB 表的名称
+- AWS_SDK_DYNAMODB_MAX_ATTEMPTS: 对 DynamoDB 表进行尝试的最大次数 - 可选
+- DYNAMO_BATCH_WRITE_COMMAND_CONCURRENCY: 对 DynamoDB 表进行的并发批量写入命令的数量 - 可选 默认为 4
 
-#### Revalidation queue
+#### 重新验证队列
 
-The revalidation queue is a queue that is used to store the pages that need to be revalidated.
-By default, OpenNext uses SQS as the default revalidation queue.
+重新验证队列是用于存储需要重新验证的页面的队列。
+默认情况下，OpenNext 使用 SQS 作为默认重新验证队列。
 
-You can override the default queue by setting the `override.queue` property in the `open-next.config.ts` file.
+你可以通过在 `open-next.config.ts` 文件中设置 `override.queue` 属性来覆盖默认队列。
 
-Here is the expected type for the queue override:
+以下是队列覆盖的预期类型：
 
 ```ts
 interface QueueMessage {
@@ -120,19 +120,19 @@ export interface Queue {
 }
 ```
 
-The send function will be called when a page is marked as `STALE`. You don't have to use a queue here, you can use any other mechanism to send the message to the revalidation worker or even do the revalidation in the same process.
+当页面被标记为 `STALE` 时，将调用 send 函数。你不必在这里使用队列，你可以使用任何其他机制将消息发送给重新验证工作器，甚至在同一进程中执行重新验证。
 
-#### Shared Environment Variables
+#### 共享环境变量
 
-- MAX_REVALIDATE_CONCURRENCY: The number of revalidation requests processed at a time. - Optional Default to 10
+- MAX_REVALIDATE_CONCURRENCY: 一次处理的重新验证请求数量。 - 可选 默认为 10
 
-##### Default SQS Revalidation Queue
+##### 默认 SQS 重新验证队列
 
-The default SQS Revalidation Queue uses the `@aws-sdk/client-sqs` to interact with the SQS queue. It needs to have the proper permissions to send messages to the queue.
+默认 SQS 重新验证队列使用 `@aws-sdk/client-sqs` 与 SQS 队列交互。它需要具有向队列发送消息的适当权限。
 
-The default SQS Revalidation Queue can be configured using the following environment variables:
+默认 SQS 重新验证队列可以使用以下环境变量进行配置：
 
-###### Environment Variables
+###### 环境变量
 
-- REVALIDATION_QUEUE_REGION: The region of the SQS queue
-- REVALIDATION_QUEUE_URL: The URL of the SQS queue
+- REVALIDATION_QUEUE_REGION: SQS 队列的区域
+- REVALIDATION_QUEUE_URL: SQS 队列的 URL

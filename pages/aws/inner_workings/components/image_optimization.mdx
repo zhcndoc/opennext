@@ -1,22 +1,22 @@
-The image optimization backend is used to transform images to the desired format and quality.
-It should be accessible at `/_next/image?url=URL_OF_THE_IMAGE&q=QUALITY&w=WIDTH` and should be used as a proxy to the image source.
+图像优化后端用于将图像转换为所需的格式和质量。
+它应该可以通过 `/_next/image?url=URL_OF_THE_IMAGE&q=QUALITY&w=WIDTH` 访问，并应用作图像源的代理。
 
-Streaming is **useless** for this backend, as we have to wait for the image to be transformed even for the headers. In the future this backend might be enhanced to support streaming.
+流式传输对此后端**无用**，因为即使在获取头信息时，我们也必须等待图像转换完成。未来此后端可能会增强以支持流式传输。
 
-### Environment Variables
+### 环境变量
 
-- BUCKET_NAME: The name of the bucket where the images are stored
-- BUCKET_KEY_PREFIX: The prefix of the key where the images are stored
-- OPENNEXT_STATIC_ETAG: If set to `true`, the ETag header will be set to the hash of the properties of the image (href, width, quality, buildId). This will allow us to return 304 responses when the image properties has not changed.
+- BUCKET_NAME：存储图像的存储桶名称
+- BUCKET_KEY_PREFIX：存储图像的键的前缀
+- OPENNEXT_STATIC_ETAG：如果设置为 `true`，ETag 头将被设置为图像属性（href、width、quality、buildId）的哈希值。这将允许我们在图像属性未更改时返回 304 响应。
 
-### Special Overrides
+### 特殊覆盖
 
-#### Loader
+#### 加载器
 
-It is used to load **internal** images. By default, it uses S3 API to load the images from the bucket.
+它用于加载**内部**图像。默认情况下，它使用 S3 API 从存储桶加载图像。
 
-You can customize the loader by providing a custom loader function to the `loader` prop.
-It should return
+你可以通过向 `loader` 属性提供自定义加载器函数来自定义加载器。
+它应该返回
 
 ```typescript
 type ImageLoader = BaseOverride & {

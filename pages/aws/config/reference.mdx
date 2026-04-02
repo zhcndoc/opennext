@@ -1,85 +1,85 @@
-Every option that you can use in `open-next.config.ts` will be listed here. This is the configuration file that you can use to customize the build.
-You can look at the [full example](full_example) to see how you can use these options.
+`open-next.config.ts` 中可使用的所有选项都将在此列出。这是可用于自定义构建的配置文件。
+你可以查看 [完整示例](full_example) 以了解如何使用这些选项。
 
 <br />
 
 import { Tabs } from "nextra/components";
 
-<Tabs items={['Server Options', 'General Build Options']}>
+<Tabs items={['服务器选项', '常规构建选项']}>
 <Tabs.Tab>
-  Servers here refers to all the different build outputs (Lambda, Node, Deno etc). Each server can have its own options. This also includes some server/function that only need to run at build time.
+  这里的服务器指的是所有不同的构建输出（Lambda、Node、Deno 等）。每个服务器都可以有自己的选项。这也包括一些只需要在构建时运行的服务器/函数。
 
-Each server config will be under it's own key in the config object. Here are all the servers that you can configure:
+每个服务器配置将在配置对象中拥有自己的键。以下是您可以配置的所有服务器：
 
-- Default Server - Key: `default` This is the default server, similar to the server-function in open-next v2
-- Splitted Server - Key: `functions` This is only used if you want to split the server into multiple servers. This is a special case, under this key you will define every splitted server.
-- External middleware - Key: `middleware` If you want to deploy your middleware separately from the default servers or functions, you can use this key.
-- Revalidate Function - Key: `revalidate` This is a special server that will handle the revalidation queue.
-- Image Optimization Server - Key: `imageOptimization` This server will handle `_next/image` optimization.
-- Warmer Function - Key: `warmer` This server is meant to be used as a warmer for the lambda function.
-- Initialization Function - Key: `initializationFunction` This is a special server that will run at build time to initialize the cache. By default it only initialize the tag cache.
+- 默认服务器 - 键：`default` 这是默认服务器，类似于 open-next v2 中的 server-function
+- 拆分服务器 - 键：`functions` 仅当您想将服务器拆分为多个服务器时使用。这是一个特殊情况，在此键下您将定义每个拆分的服务器。
+- 外部中间件 - 键：`middleware` 如果您想将中间件与默认服务器或函数分开部署，可以使用此键。
+- 重新验证函数 - 键：`revalidate` 这是一个特殊的服务器，将处理重新验证队列。
+- 图片优化服务器 - 键：`imageOptimization` 此服务器将处理 `_next/image` 优化。
+- 预热函数 - 键：`warmer` 此服务器旨在用作 lambda 函数的预热。
+- 初始化函数 - 键：`initializationFunction` 这是一个特殊的服务器，将在构建时运行以初始化缓存。默认情况下，它只初始化标签缓存。
 
-<Tabs items={['Common Options','Default Server', 'Splitted Server', 'External middleware','Image Optimization server', 'Revalidate function', 'Warmer function', 'Initialization Function']}>
+<Tabs items={['通用选项','默认服务器', '拆分服务器', '外部中间件','图片优化服务器', '重新验证函数', '预热函数', '初始化函数']}>
   <Tabs.Tab>
-      All these servers share some common options that you can use to customize them.
+      所有这些服务器共享一些通用选项，您可以使用它们来自定义服务器。
 
       ### `minify`
 
-      This will try to minify the output of the server including `node_modules`. It is a boolean and by default, it is set to `false`.
-      It could lead to some issues with some packages, so it is recommended to test your app with this option before deploying it.
+      这将尝试压缩服务器的输出，包括 `node_modules`。它是一个布尔值，默认设置为 `false`。
+      这可能会导致某些包出现问题，因此建议在部署之前使用此选项测试您的应用。
 
-      We will likely not fix issues related to this option, as it is usually library specific.
+      我们可能不会修复与此选项相关的问题，因为它通常是特定于库的。
 
       ### `override`
 
-      This is where you will be able to override some part of the server. For all of them you can provide what we call a `LazyLoadedOverride` which is a function that will return the override. For some example look at some [Custom overrides](custom_overrides).
-      All servers have some default override that you can override. You can look at the types [here](https://github.com/opennextjs/opennextjs-aws/blob/5b314b13b2907a4510e7f0cca6959f8da4eab310/packages/open-next/src/types/overrides.ts).
+      在这里您将能够覆盖服务器的某些部分。对于所有选项，您可以提供我们称为 `LazyLoadedOverride` 的内容，这是一个将返回覆盖内容的函数。有关示例，请参阅一些 [自定义覆盖](custom_overrides)。
+      所有服务器都有一些您可以覆盖的默认覆盖。您可以 [在此处](https://github.com/opennextjs/opennextjs-aws/blob/5b314b13b2907a4510e7f0cca6959f8da4eab310/packages/open-next/src/types/overrides.ts) 查看类型。
 
       #### [`wrapper`](overrides/wrapper)
 
-      This is the entrypoint of the server.
-      Be aware that it might not be enough to change this to make it work on said platform. This is only the entrypoint, you might need to change other parts of the server to make it work on the platform.
+      这是服务器的入口点。
+      请注意，仅更改此选项可能不足以使其在该平台上工作。这只是入口点，您可能需要更改服务器的其他部分才能使其在该平台上工作。
 
-      Possible values are: `aws-lambda`, `aws-lambda-streaming`, `cloudflare-edge`, `cloudflare-node`, `node`, `express-dev`, `dummy` or a `LazyLoadedOverride` that will return the wrapper.
+      可能的值有：`aws-lambda`、`aws-lambda-streaming`、`cloudflare-edge`、`cloudflare-node`、`node`、`express-dev`、`dummy` 或一个将返回包装器的 `LazyLoadedOverride`。
 
       #### [`converter`](overrides/converter)
 
-      This is the converter that will be used to convert the input and output for the server.
+      这是将用于转换服务器输入和输出的转换器。
 
-      Possible values are: `aws-apigw-v2`, `aws-apigw-v1`, `aws-cloudfront`, `edge`, `node`, `sqs-revalidate`, `dummy` or a `LazyLoadedOverride` that will return the converter.
+      可能的值有：`aws-apigw-v2`、`aws-apigw-v1`、`aws-cloudfront`、`edge`、`node`、`sqs-revalidate`、`dummy` 或一个将返回转换器的 `LazyLoadedOverride`。
 
       #### `install`
 
-      Install options for the server. This is used to install additional packages. It is an object with the options below.
+      服务器的安装选项。用于安装额外的包。它是一个包含以下选项的对象。
 
-      For image optimization, it will install sharp by default
+      对于图片优化，默认情况下将安装 sharp
 
-      ##### `packages` - Mandatory
+      ##### `packages` - 必填
 
-      This is an array of packages that will be installed in the server. It is an array of string.
-      Installing stuff on the default server (or one of the splitted one) might require some extra config on Next side to avoid duplicates
+      这是将在服务器中安装的包数组。它是一个字符串数组。
+      在默认服务器（或拆分服务器之一）上安装内容可能需要在 Next 端进行一些额外配置以避免重复
 
       ##### `arch`
 
-      This is the architecture of the server. It is a string and by default, it is set to `x64`.
+      这是服务器的架构。它是一个字符串，默认设置为 `x64`。
 
-      Possible values are: `x64`, `arm64`
+      可能的值有：`x64`、`arm64`
 
       ##### `nodeVersion`
 
-      This option will be passed to the postinstall script of sharp. It is used by `node-gyp`.
+      此选项将传递给 sharp 的 postinstall 脚本。它由 `node-gyp` 使用。
 
       ##### `libc`
 
-      Override libc of native modules to install.
+      覆盖要安装的原生模块的 libc。
 
-      Possible values are: `glibc`, `musl`
+      可能的值有：`glibc`、`musl`
 
       ##### `additionalArgs`
 
-      Additional arguments to pass to the install command (npm install). It is a string that will get appended to the `npm install` command.
+      传递给安装命令 (npm install) 的额外参数。它是一个字符串，将附加到 `npm install` 命令的末尾。
 
-      Here is an example of how to install sharp on your default server function with ARM64 architecture:
+      以下是如何在默认服务器函数上安装带有 ARM64 架构的 sharp 的示例：
 
       ```ts
       import type { OpenNextConfig } from '@opennextjs/aws/types/open-next';
@@ -100,88 +100,88 @@ Each server config will be under it's own key in the config object. Here are all
   <Tabs.Tab>
       ### `runtime`
 
-      Runtime used for the server. The default server only support `node` or `deno`.
+      服务器使用的运行时。默认服务器仅支持 `node` 或 `deno`。
 
-      The `edge` runtime can only be used for splitted server and only support one route per server.
-      This also requires the route to be using the edge runtime from Next.js.
+      `edge` 运行时仅可用于拆分服务器，并且每个服务器仅支持一条路由。
+      这也要求路由使用 Next.js 的 edge 运行时。
 
-      Possible values are: `node`, `deno`, `edge`
+      可能的值有：`node`、`deno`、`edge`
 
       ### `placement`
 
-      Option to determine where the server will be deployed. On a single region or on multiple regions at the edge.
+      确定服务器将部署在哪里的选项。是在单个区域还是在边缘的多个区域。
 
-      This options does not have any effect on the build output, but is just an indication for IAC tools to know where to deploy the server.
+      此选项对构建输出没有任何影响，但只是指示 IAC 工具知道在哪里部署服务器。
 
-      Possible values are: `regional`, `global`
+      可能的值有：`regional`、`global`
 
       ### `experimentalBundledNextServer`
-      Bundle Next server into a single file.
-      This results in a way smaller bundle but it might break for some cases.
+      将 Next 服务器打包到单个文件中。
+      这会导致打包体积小得多，但在某些情况下可能会破坏功能。
 
-      This option is deprecated and doesn't work for Next 14.2+.
+      此选项已弃用，不适用于 Next 14.2+。
 
       ### `override`
 
-      For both default and splitted server, in addition to `override` in the common options, you can also use the following options:
+      对于默认服务器和拆分服务器，除了通用选项中的 `override` 外，您还可以使用以下选项：
 
       #### [`incrementalCache`](overrides/incremental_cache)
 
-      Add possibility to override the default s3 cache. Used for fetch cache and html/rsc/json cache.
+      添加覆盖默认 s3 缓存的可能性。用于 fetch 缓存和 html/rsc/json 缓存。
 
-      Possible values are: `s3`, `s3-lite`, `multi-tier-ddb-s3`, `fs-dev`, `dummy` or a `LazyLoadedOverride` that will return the incremental cache.
+      可能的值有：`s3`、`s3-lite`、`multi-tier-ddb-s3`、`fs-dev`、`dummy` 或一个将返回增量缓存的 `LazyLoadedOverride`。
 
       #### [`tagCache`](overrides/tag_cache)
 
-      Add possibility to override the default tag cache. Used for revalidateTags and revalidatePath.
+      添加覆盖默认标签缓存的可能性。用于 revalidateTags 和 revalidatePath。
 
-      Possible values are: `dynamodb`, `dynamodb-lite`, `fs-dev`, `dummy` or a `LazyLoadedOverride` that will return the tag cache.
+      可能的值有：`dynamodb`、`dynamodb-lite`、`fs-dev`、`dummy` 或一个将返回标签缓存的 `LazyLoadedOverride`。
 
       #### [`queue`](overrides/queue)
 
-      Add possibility to override the default queue. Used for ISR revalidation requests.
+      添加覆盖默认队列的可能性。用于 ISR 重新验证请求。
 
-      Possible values are: `sqs`, `sqs-lite`, `dummy` or a `LazyLoadedOverride` that will return the queue.
+      可能的值有：`sqs`、`sqs-lite`、`dummy` 或一个将返回队列的 `LazyLoadedOverride`。
 
       #### [`proxyExternalRequest`](overrides/proxy_external_request)
 
-      Add possibility to override the default proxy for external request (i.e. next config external rewrites or middleware rewrites). Used in the external middleware or one of the server function.
+      添加覆盖外部请求默认代理的可能性（即 next config 外部重写或中间件重写）。用于外部中间件或服务器函数之一。
 
-      Possible values are: `node`, `fetch`, `dummy` or a `LazyLoadedOverride` that will return the proxy. Default is `node`
+      可能的值有：`node`、`fetch`、`dummy` 或一个将返回代理的 `LazyLoadedOverride`。默认是 `node`
 
       #### [`cdnInvalidation`](overrides/automatic_cdn_invalidation)
 
-      Add possibility to override the CDN invalidation override. Used for on-demand invalidation with `revalidatePath()`, `revalidateTag()` and `res.revalidate()`.
+      添加覆盖 CDN 失效覆盖的可能性。用于 `revalidatePath()`、`revalidateTag()` 和 `res.revalidate()` 的按需失效。
 
-      Possible values are: `cloudfront`, `dummy` or a `LazyLoadedOverride` that will return the invalidatePaths. This override is disabled by default.
+      可能的值有：`cloudfront`、`dummy` 或一个将返回 invalidatePaths 的 `LazyLoadedOverride`。此覆盖默认禁用。
 
   </Tabs.Tab>
 
   <Tabs.Tab>
-      Every splitted server will have the same options as the default server. In addition to that, you can use the following options:
+      每个拆分服务器都将具有与默认服务器相同的选项。除此之外，您可以使用以下选项：
 
-      ### `routes` - Mandatory
+      ### `routes` - 必填
 
-      Here you should specify all the routes you want to use.
-      For app routes, you should use the `app/${name}/route` format or `app/${name}/page` for pages.
-      For pages, you should use the `page/${name}` format.
+      在这里您应该指定所有想要使用的路由。
+      对于 app 路由，您应该使用 `app/${name}/route` 格式，对于页面使用 `app/${name}/page`。
+      对于 pages，您应该使用 `page/${name}` 格式。
 
-      For example:
+      例如：
       ```ts
       routes: ["app/api/test/route", "app/page", "pages/admin"]
       ```
 
-      ### `patterns` - Mandatory
+      ### `patterns` - 必填
 
-      Specify the patterns that will be used to match the routes. It is an array of string.
-      It needs to be cloudfront compatible.
+      指定将用于匹配路由的模式。它是一个字符串数组。
+      它需要兼容 cloudfront。
 
-      For example:
+      例如：
       ```ts
       patterns: [
-      // This one will match all the routes that start with /api/
+      // 这将匹配所有以 /api/ 开头的路由
       "/api/*",
-      // For a single route, this one will only match /page
+      // 对于单个路由，这将只匹配 /page
       "/page",
       ]
       ```
@@ -189,55 +189,55 @@ Each server config will be under it's own key in the config object. Here are all
   </Tabs.Tab>
 
   <Tabs.Tab>
-      ### `external` - Mandatory
-      Only possible value is true. This is used to specify that this server is an external middleware.
+      ### `external` - 必填
+      唯一可能的值是 true。用于指定此服务器是外部中间件。
 
       ### `override`
 
-      It uses the same options as the default server. `incrementalCache`, `tagCache` and `queue` are only used when `enableCacheInterception` is set to true.
+      它使用与默认服务器相同的选项。仅当 `enableCacheInterception` 设置为 true 时才使用 `incrementalCache`、`tagCache` 和 `queue`。
 
       ### [`originResolver`](overrides/origin_resolver)
 
-      Origin resolver is used to resolve the origin for internal rewrite. By default, it uses the pattern-env origin resolver.
+      源解析器用于解析内部重写的源。默认情况下，它使用 pattern-env 源解析器。
 
-      Possible values are: `pattern-env`, `dummy` or a `LazyLoadedOverride` that will return the origin resolver.
+      可能的值有：`pattern-env`、`dummy` 或一个将返回源解析器的 `LazyLoadedOverride`。
 
   </Tabs.Tab>
 
   <Tabs.Tab>
-      Image optimization server is a special server that will handle the `_next/image` optimization. Besides the common options, you can use the following options:
+      图片优化服务器是一个特殊的服务器，将处理 `_next/image` 优化。除了通用选项外，您可以使用以下选项：
 
       ### [`loader`](overrides/image_loader)
-      The image loader is used to load the image from the source.
+      图片加载器用于从源加载图片。
 
-      Possible values are: `s3`, `s3-lite`, `host`, `fs-dev`, `dummy` or a `LazyLoadedOverride` that will return the loader.
+      可能的值有：`s3`、`s3-lite`、`host`、`fs-dev`、`dummy` 或一个将返回加载器的 `LazyLoadedOverride`。
 
   </Tabs.Tab>
 
-<Tabs.Tab>Revalidate doesn't have any specific options. It only uses the common options.</Tabs.Tab>
+<Tabs.Tab>重新验证没有任何特定选项。它只使用通用选项。</Tabs.Tab>
 
   <Tabs.Tab>
 
-      Warmer is a special server that will be used to warm the lambda function. Besides the common options, you can use the following options:
+      预热是一个特殊的服务器，将用于预热 lambda 函数。除了通用选项外，您可以使用以下选项：
 
       ### [`invokeFunction`](overrides/invoke_function)
 
-      By default, works for lambda only.
-      If you override this, you'll need to handle the warmer event in the wrapper
+      默认情况下，仅适用于 lambda。
+      如果您覆盖此选项，您需要在包装器中处理预热事件
 
-      Possible values are: `aws-lambda`, `dummy` or a `LazyLoadedOverride` that will return the invoke function.
+      可能的值有：`aws-lambda`、`dummy` 或一个将返回调用函数的 `LazyLoadedOverride`。
 
   </Tabs.Tab>
 
   <Tabs.Tab>
 
-      Initialization function is a special server that will run at build time to initialize the cache. By default, it only initializes the tag cache. Besides the common options, you can use the following options:
+      初始化函数是一个特殊的服务器，将在构建时运行以初始化缓存。默认情况下，它只初始化标签缓存。除了通用选项外，您可以使用以下选项：
 
       ### `tagCache`
 
-      Add possibility to override the default tag cache used for the initialization function.
+      添加覆盖用于初始化函数的默认标签缓存的可能性。
 
-      Possible values are: `dynamodb`, `dynamodb-lite`, `fs-dev`, `dummy` or a `LazyLoadedOverride` that will return the tag cache.
+      可能的值有：`dynamodb`、`dynamodb-lite`、`fs-dev`、`dummy` 或一个将返回标签缓存的 `LazyLoadedOverride`。
 
   </Tabs.Tab>
 
@@ -245,71 +245,71 @@ Each server config will be under it's own key in the config object. Here are all
 
 </Tabs.Tab>
 <Tabs.Tab>
-These options are at the top level of your config object.
+这些选项位于配置对象的顶层。
 
 ### `buildCommand`
 
-This is the command that will be run to build your Next.js app. By default, it tries to find your package manager and will run `npm run build`. It supports npm, pnpm, yarn (not pnp) and bun.
+这是用于构建您的 Next.js 应用的命令。默认情况下，它尝试找到您的包管理器并将运行 `npm run build`。它支持 npm、pnpm、yarn (不支持 pnp) 和 bun。
 
-If you want to specify a different command, you can do so here.
+如果您想指定不同的命令，可以在此处进行。
 
 ### `appPath`
 
-The path to the root of the Next.js app's source code. This path is relative from the current process.cwd().
+Next.js 应用源代码根目录的路径。此路径相对于当前 process.cwd()。
 
-By default, it is set to `.`
+默认情况下，它设置为 `.`
 
 ### `buildOutputPath`
 
-The path to the target folder of build output from the `buildCommand` option (the path which will contain the `.next` and `.open-next` folders). This path is relative from the current process.cwd()
+来自 `buildCommand` 选项的构建输出目标文件夹的路径（将包含 `.next` 和 `.open-next` 文件夹的路径）。此路径相对于当前 process.cwd()
 
-By default, it is set to `.`
+默认情况下，它设置为 `.`
 
 ### `packageJsonPath`
 
-The path to the package.json file of the Next.js app. This path is relative from the current process.cwd().
+Next.js 应用的 package.json 文件的路径。此路径相对于当前 process.cwd()。
 
-### `edgeExternals` - Advanced usage
+### `edgeExternals` - 高级用法
 
-If you use the edge runtime somewhere (either in the middleware or in the functions), we compile 2 versions of the open-next.config.ts file. One for the node runtime and one for the edge runtime.
+如果您在某处使用 edge 运行时（无论是在中间件还是在函数中），我们会编译 2 个版本的 open-next.config.ts 文件。一个用于 node 运行时，一个用于 edge 运行时。
 
-This option allows you to specify the externals for the edge runtime used in esbuild for the compilation of open-next.config.ts
-It is especially useful if you use some custom overrides only in node
+此选项允许您指定用于编译 open-next.config.ts 的 esbuild 中 edge 运行时使用的外部依赖
+如果您仅在 node 中使用一些自定义覆盖，这特别有用
 
 ### `dangerous`
 
-These are options that you should only use if you know what you are doing. It can break your app at runtime if not used correctly.
-It is also the place where you could find some experimental features.
+这些是您只有在知道自己在做什么的情况下才应该使用的选项。如果未正确使用，它可能会在运行时破坏您的应用。
+这也是您可以找到一些实验性功能的地方。
 
 ---
 
 #### `disableTagCache`
 
-This will disable the tag cache. You can disable it safely if you only use page router.
-It is used for `revalidateTag` and `revalidatePath`.
-It's a boolean and by default, it is set to `false`.
+这将禁用标签缓存。如果您只使用页面路由，可以安全地禁用它。
+它用于 `revalidateTag` 和 `revalidatePath`。
+它是一个布尔值，默认设置为 `false`。
 
 #### `disableIncrementalCache`
 
-This will disable the incremental cache. It is generally not recommended, as this is necessary for ISR **AND** SSG routes as well as the fetch cache.
-It's a boolean and by default, it is set to `false`.
+这将禁用增量缓存。通常不建议这样做，因为这对于 ISR **和** SSG 路由以及 fetch 缓存都是必要的。
+它是一个布尔值，默认设置为 `false`。
 
-#### `enableCacheInterception` - Experimental
+#### `enableCacheInterception` - 实验性
 
-This will enable cache interception. It will allow you to intercept the cache system directly inside OpenNext routing layer and serve the page directly from the cache without going through `NextServer`.
+这将启用缓存拦截。它将允许您直接在 OpenNext 路由层内拦截缓存系统，并直接从缓存提供页面，而无需经过 `NextServer`。
 
-If the cache interception fail, the request will be forwarded to the `NextServer` as usual.
+如果缓存拦截失败，请求将照常转发给 `NextServer`。
 
 #### `headersAndCookiesPriority`
 
-Function to determine which headers or cookies takes precedence.
-By default, the middleware headers and cookies will override the handler headers and cookies.
+用于确定哪个头部或 cookies 具有优先级的函数。
+默认情况下，中间件头部和 cookies 将覆盖处理程序头部和 cookies。
 
-This is executed for every request and after next config headers and middleware has executed.
-Here is a very simple example of how you can use it:
+这在每个请求后执行，且在 next config 头部和中间件执行之后。
+以下是如何使用它的一个非常简单的示例：
 
 ```ts
-// In this case, if the request starts with /api, the middleware headers and cookies will take precedence otherwise the handler headers and cookies will take precedence
+// 在这种情况下，如果请求以 /api 开头，中间件头部和 cookies 将优先，否则处理程序头部和 cookies 将优先
 headersAndCookiesPriority: (event) => {
   if (event.rawPath.startsWith('/api')) {
     return 'middleware';

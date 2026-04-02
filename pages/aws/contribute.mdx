@@ -1,19 +1,19 @@
-To run `OpenNext` locally:
+要在本地运行 `OpenNext`：
 
-1. Clone [this repository](https://github.com/opennextjs/opennextjs-aws).
-2. Build `open-next`:
+1. 克隆 [此仓库](https://github.com/opennextjs/opennextjs-aws)。
+2. 构建 `open-next`：
    ```bash
    cd opennextjs-aws
    pnpm build
    ```
-3. Run `open-next` in watch mode:
+3. 以监视模式运行 `open-next`：
    ```bash
    pnpm dev
    ```
-4. Now, you can make changes in `open-next` and build your Next.js app to test the changes.
+4. 现在，您可以在 `open-next` 中进行更改，并构建您的 Next.js 应用以测试这些更改。
    ```bash
    cd path/to/my/nextjs/app
    path/to/opennextjs-aws/packages/open-next/dist/index.js build
    ```
 
-It can be a bit cumbersome to need to deploy every time you want to test changes. If your change is not dependent on the wrapper or the converter, then you can create a custom `open-next.config.ts` file, you can take a look [here](/aws/contribute/local_run) for more information.
+每次想要测试更改时都需要部署可能会有些繁琐。如果您的更改不依赖于 wrapper 或 converter，那么您可以创建一个自定义的 `open-next.config.ts` 文件，您可以查看 [此处](/aws/contribute/local_run) 获取更多信息。

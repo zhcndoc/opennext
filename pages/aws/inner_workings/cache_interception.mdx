@@ -1,19 +1,19 @@
-By default OpenNext override the cache system of Next.js to store the cache in S3(Or any other incremental cache provider defined in config) using [`cacheHandler` from `next.config.js`](https://nextjs.org/docs/app/api-reference/next-config-js/incrementalCacheHandlerPath). It also uses a queue system to handle ISR revalidation.
+默认情况下，OpenNext 会覆盖 Next.js 的缓存系统，使用 [`next.config.js` 中的 `cacheHandler`](https://nextjs.org/docs/app/api-reference/next-config-js/incrementalCacheHandlerPath) 将缓存存储在 S3（或配置中定义的任何其他增量缓存提供商）中。它还使用队列系统来处理 ISR 重新验证。
 
-This is great but it still has go through `NextServer` which by default will load the js associated with the page even if the page is cached. This is not ideal for cold start, and makes it impossible to serve ISR/SSG pages inside an external middleware.
+这很好，但它仍然需要经过 `NextServer`，默认情况下，即使页面已缓存，它也会加载与页面关联的 js。这对于冷启动来说并不理想，并且使得无法在外部中间件内提供 ISR/SSG 页面。
 
-Since OpenNext 3.1, we have added a new feature that we call Cache Interception that allows you to intercept the cache system directly inside OpenNext routing layer and serve the page directly from the cache without going through `NextServer`. If the cache interception fail, the request will be forwarded to the `NextServer` as usual.
+自 OpenNext 3.1 以来，我们添加了一个名为缓存拦截（Cache Interception）的新功能，允许你直接在 OpenNext 路由层内拦截缓存系统，并直接从缓存提供页面，而无需经过 `NextServer`。如果缓存拦截失败，请求将照常转发给 `NextServer`。
 
-Enabling this alongside external middleware means that the external middleware will need to have all the proper permissions and env variable to interact with S3, DynamoDB and SQS (Or whatever you override it with). You can see [here](/aws/inner_workings/components/server/node#special-overrides) for more details.
+与外部中间件一起启用此功能意味着外部中间件需要拥有所有适当的权限和环境变量才能与 S3、DynamoDB 和 SQS（或你覆盖使用的任何服务）交互。你可以查看 [此处](/aws/inner_workings/components/server/node#special-overrides) 了解更多详情。
 
-This has the following benefits:
+这具有以下好处：
 
-- Faster cold start (No need to load the js associated with the page if the page is cached)
-- ISR/SSG route can be served directly from an external middleware
-- If the external middleware is in front of the CDN, the middleware can be used for every route including ISR/SSG
-- This will allow PPR (Partial Prerendering) to work as intended and demonstrated by Vercel.¹ **This is not implemented yet**.
+- 更快的冷启动（如果页面已缓存，则无需加载与页面关联的 js）
+- ISR/SSG 路由可以直接从外部中间件提供
+- 如果外部中间件位于 CDN 前面，则该中间件可用于每个路由，包括 ISR/SSG
+- 这将允许 PPR（部分预渲染）按照 Vercel 演示的预期工作。¹ **这尚未实现**。
 
-To enable cache interception, you need to add `enableCacheInterception` option in the `open-next.config.ts` file.
+要启用缓存拦截，你需要在 `open-next.config.ts` 文件中添加 `enableCacheInterception` 选项。
 
 ```ts
 // open-next.config.ts
@@ -28,4 +28,4 @@ const config = {
 export default config;
 ```
 
-1. PPR outside of vercel does not work in the way they demonstrated. The reason is that the cache system is handled by `NextServer` and it has to reach the server **every single time**. PPR pages cannot be served from the CDN when using `next start` or the standalone ouput as of now. In some cases PPR without vercel can be slower than SSR (especially if your cache is not using the default filesystem).
+1. Vercel 之外的 PPR 无法按照他们演示的方式工作。原因是缓存系统由 `NextServer` 处理，它必须**每一次**都到达服务器。截至目前，使用 `next start` 或独立输出时，无法从 CDN 提供 PPR 页面。在某些情况下，不使用 Vercel 的 PPR 可能比 SSR 慢（尤其是如果你的缓存未使用默认文件系统）。

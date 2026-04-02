@@ -1,16 +1,16 @@
 import { Callout } from "nextra/components";
 
-In order to help deploying OpenNext with your own IAC implementation, we created a simple reference implementation using aws-cdk.
+为了帮助您使用自己的 IAC 实现部署 OpenNext，我们使用 aws-cdk 创建了一个简单的参考实现。
 
-If you wish to use it, just copy the code for the construct below. If you use it inside sst, make sure to use the same version of aws-cdk as sst.
+如果您想使用它，只需复制下面的 construct 代码。如果您在 sst 内部使用它，请确保使用与 sst 相同版本的 aws-cdk。
 
 <Callout type="warning" emoji="⚠️">
 
-This is a reference implementation, and it is not meant to be used in production as is.
+这是一个参考实现，并不意味着可以直接用于生产环境。
 
-    This is just here to help you understand how to use the new features of OpenNext.
+    这里只是为了帮助您了解如何使用 OpenNext 的新功能。
 
-There is some features that are not implemented like the warmer function, or everything related to lambda@edge(It requires inserting env variables which is out of scope of this implementation).
+有些功能尚未实现，例如 warmer 函数，或与 lambda@edge 相关的所有功能（它需要插入环境变量，这超出了本实现的范围）。
 
 </Callout>
 
@@ -260,7 +260,7 @@ export class OpenNextCdkReferenceImplementation extends Construct {
       REVALIDATION_QUEUE_URL: this.queue.queueUrl,
       REVALIDATION_QUEUE_REGION: Stack.of(this).region,
       CACHE_DYNAMO_TABLE: this.table.tableName,
-      // Those 2 are used only for image optimizer
+      // 这两个仅用于图像优化器
       BUCKET_NAME: this.bucket.bucketName,
       BUCKET_KEY_PREFIX: "_assets",
     };
@@ -289,8 +289,8 @@ export class OpenNextCdkReferenceImplementation extends Construct {
     return new HttpOrigin(Fn.parseDomainName(fnUrl.url));
   }
 
-  // We are using AppRunner because it is the easiest way to demonstrate the new feature.
-  // You can use any other container service like ECS, EKS, Fargate, etc.
+  // 我们使用 AppRunner 是因为它是演示新功能最简单的方法。
+  // 您可以使用任何其他容器服务，如 ECS、EKS、Fargate 等。
   private createAppRunnerOrigin(key: string, origin: OpenNextECSOrigin): HttpOrigin {
     const imageAsset = new DockerImageAsset(this, `${key}ImageAsset`, {
       directory: origin.bundle,

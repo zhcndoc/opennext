@@ -1,13 +1,13 @@
 {
   "stripeAPI": "Stripe API",
-  "db": "Database & ORM",
-  "dev-deploy": "Develop and Deploy",
-  "env-vars": "Environment Variables",
-  "image": "Image Optimization",
-  "custom-worker": "Custom Worker",
-  "keep_names": "__name issues",
-  "workerd": "workerd specific packages",
-  "skew": "Skew Protection",
-  "assets": "Static assets",
-  "multi-worker": "Multi-Worker Advanced Setup"
+  "db": "数据库与 ORM",
+  "dev-deploy": "开发与部署",
+  "env-vars": "环境变量",
+  "image": "图像优化",
+  "custom-worker": "自定义 Worker",
+  "keep_names": "__name 问题",
+  "workerd": "workerd 专项包",
+  "skew": "偏移保护",
+  "assets": "静态资源",
+  "multi-worker": "多 Worker 高级方案"
 }

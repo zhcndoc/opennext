@@ -1,14 +1,14 @@
-Available since `@opennextjs/aws` 3.7.0
+自 `@opennextjs/aws` 3.7.0 起可用
 
-This override is used by OpenNext to serve [static assets](https://nextjs.org/docs/app/api-reference/file-conventions/public-folder) from the routing layer.
+此覆盖由 OpenNext 用于从路由层提供 [静态资源](https://nextjs.org/docs/app/api-reference/file-conventions/public-folder)。
 
-It is not enabled by default as the assumption is that assets are served before reaching the Open Next server.
+默认情况下未启用，因为假设资源在到达 Open Next 服务器之前已被提供。
 
-When assets are not served before the Open Next server, you can create an Asset Resolver to serve them. It will be invoked [after the `beforeFiles` (`rewrites`) from `next.config.ts`](https://nextjs.org/docs/app/api-reference/file-conventions/middleware#execution-order).
+当资源未在 Open Next 服务器之前被提供时，您可以创建一个资源解析器来提供它们。它将在 [来自 `next.config.ts` 的 `beforeFiles` (`rewrites`) 之后](https://nextjs.org/docs/app/api-reference/file-conventions/middleware#execution-order) 被调用。
 
-## Implementation
+## 实现
 
-An Asset Resolver should implement:
+资源解析器应实现：
 
 ```ts
 export interface AssetResolver {
@@ -18,10 +18,10 @@ export interface AssetResolver {
 }
 ```
 
-`maybeGetAssetResult` is invoked with the `InternalEvent` and should return a `Promise<InternalResult>` to serve an asset when the incoming event matches one. When it returns `Promise<undefined>` or `undefined`, the routing process keeps going to try and match Next routes.
+`maybeGetAssetResult` 使用 `InternalEvent` 调用，当传入事件匹配时，应返回一个 `Promise<InternalResult>` 以提供资源。当它返回 `Promise<undefined>` 或 `undefined` 时，路由过程将继续进行以尝试匹配 Next 路由。
 
-## Included Asset Resolver
+## 包含的资源解析器
 
 ### dummy
 
-The dummy `AssetResolver` does nothing so it never serves assets. It is the default implementation.
+dummy `AssetResolver` 不执行任何操作，因此它从不提供资源。它是默认实现。

@@ -1,21 +1,25 @@
-#### Function logs
+#### 函数日志
 
-To find the **server, image optimization, and warmer log**, go to the AWS CloudWatch console in the **region you deployed to**.
+要查找 **服务器、图像优化和 warmer 日志**，请前往您**部署所在的区域**中的 AWS CloudWatch 控制台。
 
-If the server function is **deployed to Lambda@Edge**, the logs will appear in the **region you are physically close to**. For example, if you deployed your app to `us-east-1` and you are visiting the app from in London, the logs are likely to be in `eu-west-2`.
+如果服务器函数**部署到了 Lambda@Edge**，日志将出现在**您物理位置靠近的区域**。例如，如果您将应用部署到 `us-east-1`，而您从伦敦访问该应用，日志很可能位于 `eu-west-2`。
 
-#### Warmer function logs
+#### Warmer 函数日志
 
-The logs from the warmer function provide insights into the results of the warming process.
+来自 warmer 函数的日志提供了有关预热过程结果的见解。
 
 ```
 { event: 'warmer result', sent: 2, success: 2, uniqueServersWarmed: 2 }
 ```
 
-- `sent` — The number of times the warmer invoked the server function using the Lambda SDK. This value should correspond to the `CONCURRENCY` set in the warmer function.
-- `success` — The number of SDK calls that returned a 200 status code, indicating successful invocations.
-- `uniqueServersWarmed` — This helps track any instances that responded unusually quickly and served multiple warming requests. As all SDK calls are made concurrently using `await Promise.all()`, this metric is useful for monitoring the number of unique warmed instances.
+- `sent` — warmer 使用 Lambda SDK 调用服务器函数的次数。该值应对应于 warmer 函数中设置的 `CONCURRENCY`。
+- `success` — 返回 200 状态码的 SDK 调用次数，表示调用成功。
+- `uniqueServersWarmed` — 这有助于跟踪任何响应异常快速并服务于多个预热请求的实例。由于所有 SDK 调用都是使用 `await Promise.all()` 并发发出的，因此此指标对于监控唯一预热实例的数量很有用。
 
-#### Opening an issue
+#### 提交 Issue
 
-To help diagnose issues, it's always helpful to provide a reproducible setup when opening an issue. One easy way to do this is to create a pull request (PR) and add a new page to the [benchmark app](#example) located in the `example` folder, which reproduces the issue. The PR will automatically deploy the app to AWS.
+为了帮助诊断问题，在提交 Issue 时，提供可复现的设置总是很有帮助的。
+
+一种简单的方法是创建一个拉取请求 (PR)，并在位于 `example` 文件夹中的 [基准应用](#example) 添加一个新页面，以复现该问题。
+
+该 PR 将自动把应用部署到 AWS。

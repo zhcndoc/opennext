@@ -1,34 +1,34 @@
 import { Callout } from "nextra/components";
 
 <Callout type="warning">
-  This is an advanced feature and requires a good understanding of both OpenNext and Cloudflare Workers.
-  This advanced setup **cannot** be used with:
-    - Preview URLs (staging deployments)
-    - Skew protection features
-    - The standard `@opennextjs/cloudflare deploy` command
+  这是一个高级功能，需要很好地理解 OpenNext 和 Cloudflare Workers。
+  此高级设置**不能**与以下功能一起使用：
+    - 预览 URL（暂存部署）
+    - 版本倾斜保护功能
+    - 标准的 `@opennextjs/cloudflare deploy` 命令
 
-Consider these limitations carefully before proceeding.
+在继续之前请仔细考虑这些限制。
 
 </Callout>
 
-OpenNext lets you split your application into smaller, lighter parts in several workers. This can improve performance and reduce the memory footprint of your application.
-It's a more advanced feature that doesn't support deploying through the standard `@opennextjs/cloudflare deploy` command.
+OpenNext 允许您将应用程序拆分为多个 worker 中更小、更轻的部分。这可以提高性能并减少应用程序的内存占用。
+这是一个更高级的功能，不支持通过标准的 `@opennextjs/cloudflare deploy` 命令进行部署。
 
-As an example, we'll split the middleware into its own worker and the rest of the application into another worker. You could split the application further by creating additional workers for specific routes or features, but this won't be covered here.
-When referring to the middleware here, we talk about both the middleware you built, and the routing layer of OpenNext.
+例如，我们将中间件拆分到其自己的 worker 中，并将应用程序的其余部分拆分到另一个 worker 中。您可以通过为特定路由或功能创建额外的 worker 来进一步拆分应用程序，但此处不再赘述。
+当此处提到中间件时，我们指的是您构建的中间件以及 OpenNext 的路由层。
 
-You can find an example of such a deployment in the [GitBook repository](https://github.com/GitbookIO/gitbook).
+您可以在 [GitBook 仓库](https://github.com/GitbookIO/gitbook) 中找到此类部署的示例。
 
-## When to use this setup
+## 何时使用此设置
 
-This multi-worker approach is beneficial when you need:
+当您需要以下情况时，这种多 worker 方法是有益的：
 
-- Reduced memory footprint for individual workers
-- Improved cold start performance by splitting the light middleware into its own worker and serving ISR/SSG requests from there
+- 减少单个 worker 的内存占用
+- 通过将轻量级中间件拆分到其自己的 worker 并从那里提供 ISR/SSG 请求，提高冷启动性能
 
 ### `open-next.config.ts`
 
-Here we assume a configuration like that:
+这里我们假设配置如下：
 
 ```ts
 import { defineCloudflareConfig } from "@opennextjs/cloudflare";
@@ -41,12 +41,12 @@ import { purgeCache } from "@opennextjs/cloudflare/overrides/cache-purge/index";
 export default defineCloudflareConfig({
   incrementalCache: withRegionalCache(r2IncrementalCache, { mode: "long-lived" }),
   queue: doQueue,
-  // This is only required if you use On-demand revalidation
+  // 仅当您使用按需重新验证时才需要此项
   tagCache: doShardedTagCache({
     baseShardSize: 12,
-    regionalCache: true, // Enable regional cache to reduce the load on the DOs and improve speed
-    regionalCacheTtlSec: 3600, // The TTL for the regional cache of the tag cache
-    regionalCacheDangerouslyPersistMissingTags: true, // Enable this to persist missing tags in the regional cache
+    regionalCache: true, // 启用区域缓存以减少 DO 的负载并提高速度
+    regionalCacheTtlSec: 3600, // 标签缓存区域缓存的 TTL
+    regionalCacheDangerouslyPersistMissingTags: true, // 启用此项以在区域缓存中持久化缺失的标签
     shardReplication: {
       numberOfSoftReplicas: 4,
       numberOfHardReplicas: 2,
@@ -56,14 +56,14 @@ export default defineCloudflareConfig({
     },
   }),
   enableCacheInterception: true,
-  // you can also use the `durableObject` option to use a durable object as a cache purge
+  // 您也可以使用 durableObject 选项将持久化对象用作缓存清除
   cachePurge: purgeCache({ type: "direct" }),
 });
 ```
 
-### Custom workers
+### 自定义 worker
 
-You'll need 2 custom workers in order for this to work:
+为了使此功能正常工作，您需要 2 个自定义 worker：
 
 ```js
 // middleware.js
@@ -81,22 +81,22 @@ export { DOShardedTagCache } from "./.open-next/.build/durable-objects/sharded-t
 export default class extends WorkerEntrypoint {
   async fetch(request) {
     return runWithCloudflareRequestContext(request, this.env, this.ctx, async () => {
-      // Process the request through Next.js middleware layer and OpenNext routing layer
+      // 通过 Next.js 中间件层和 OpenNext 路由层处理请求
       const reqOrResp = await middlewareHandler(request, this.env, this.ctx);
 
-      // If middleware returns a Response, send it directly (e.g., redirects, blocks, ISR/SSG cache Hit)
+      // 如果中间件返回 Response，则直接发送（例如，重定向、拦截、ISR/SSG 缓存命中）
       if (reqOrResp instanceof Response) {
         return reqOrResp;
       }
 
-      // Forward the modified request to the server worker
-      // Version affinity ensures consistent worker versions
+      // 将修改后的请求转发到服务器 worker
+      // 版本亲和性确保一致的 worker 版本
       // https://developers.cloudflare.com/workers/configuration/versions-and-deployments/gradual-deployments/#version-affinity
       reqOrResp.headers.set("Cloudflare-Workers-Version-Overrides", `server="${this.env.WORKER_VERSION_ID}"`);
 
-      // Proxy to the server worker with cache disabled for dynamic content
+      // 代理到服务器 worker，禁用动态内容的缓存
       return this.env.DEFAULT_WORKER.fetch(reqOrResp, {
-        // We return redirects as is
+        // 我们原样返回重定向
         redirect: "manual",
         cf: {
           cacheEverything: false,
@@ -110,7 +110,7 @@ export default class extends WorkerEntrypoint {
 ```js
 // server.js
 
-// Replace with your actual build output directory, typically:
+// 替换为您实际的构建输出目录，通常为：
 // ./.open-next/cloudflare/init.js
 import { runWithCloudflareRequestContext } from "./.open-next/cloudflare/init.js";
 
@@ -119,33 +119,33 @@ import { handler } from "./.open-next/server-functions/default/handler.mjs";
 export default {
   async fetch(request, env, ctx) {
     return runWithCloudflareRequestContext(request, env, ctx, async () => {
-      // - `Request`s are handled by the Next server
+      // - Request 由 Next 服务器处理
       return handler(request, env, ctx);
     });
   },
 };
 ```
 
-### Wrangler configurations
+### Wrangler 配置
 
 ```jsonc
-// Middleware wrangler file
+// 中间件 wrangler 文件
 {
   "main": "middleware.js",
   "name": "middleware",
   "compatibility_date": "2025-04-14",
   "compatibility_flags": ["nodejs_compat", "allow_importable_env", "global_fetch_strictly_public"],
-  // The middleware serves the assets
+  // 中间件提供资产服务
   "assets": {
     "directory": "../../.open-next/assets",
     "binding": "ASSETS",
   },
   "vars": {
-    // This one will need to be replaced for every deployment
+    // 此项需要在每次部署时替换
     "WORKER_VERSION_ID": "TO_REPLACE",
   },
   "routes": [
-    // Define your routes here, not in server.js
+    // 在此处定义您的路由，而不是在 server.js 中
   ],
   "r2_buckets": [
     {
@@ -185,7 +185,7 @@ export default {
 ```
 
 ```jsonc
-// Server wrangler file
+// 服务器 wrangler 文件
 {
   "main": "server.js",
   "name": "main-server",
@@ -200,7 +200,7 @@ export default {
   "services": [
     {
       "binding": "WORKER_SELF_REFERENCE",
-      // Note: The middleware worker must be referenced here, *not* the server.
+      // 注意：此处必须引用中间件 worker，*而不是* 服务器。
       "service": "middleware",
     },
   ],
@@ -221,37 +221,37 @@ export default {
 }
 ```
 
-### Actual deployment
+### 实际部署
 
-You cannot use `@opennextjs/cloudflare deploy` to deploy this setup, as it will not work with the multiple workers setup.
+您不能使用 `@opennextjs/cloudflare deploy` 来部署此设置，因为它不适用于多 worker 设置。
 
-1. **Server Upload** → Get version ID
-2. **Middleware Preparation** → Update version reference
-3. **Middleware Upload** → Get version ID
-4. **Gradual Rollout** → Server (0%) → Middleware (100%) → Server (100%)
+1. **服务器上传** → 获取版本 ID
+2. **中间件准备** → 更新版本引用
+3. **中间件上传** → 获取版本 ID
+4. **逐步推出** → 服务器 (0%) → 中间件 (100%) → 服务器 (100%)
 
-In order to make this work, you need to deploy each worker separately using the `wrangler` CLI and override the `WORKER_VERSION_ID` variable in the middleware wrangler configuration for **each deployment**.
-Note that we use gradual deployments as a solution for deploying new versions without affecting the currently running ones.
+为了使此功能正常工作，您需要使用 `wrangler` CLI 分别部署每个 worker，并为**每次部署**覆盖中间件 wrangler 配置中的 `WORKER_VERSION_ID` 变量。
+请注意，我们使用逐步部署作为在不影响当前运行版本的情况下部署新版本的解决方案。
 
-The steps to deploy without causing downtime to the already deployed ones are as follows:
+在不导致已部署版本停机的情况下进行部署的步骤如下：
 
-1. First you'll need to upload a new version of the server worker `wrangler versions upload --config ./path-to/serverWrangler.jsonc`
-2. Then you'll need to extract the new version id of the server from the previous command's output. The value you need is displayed as `Worker Version ID: <ID>` in the console output. This value is referred to as `NEW_SERVER_VERSION_ID` in step 8.
-3. Before uploading the middleware, you'll need to replace the `WORKER_VERSION_ID` variable in the middleware wrangler configuration with the new server version id from the previous step.
-4. You then need to upload a new version of the middleware worker `wrangler versions upload --config ./path-to/middlewareWrangler.jsonc`. Retrieve the version id, you'll need it in step 9 (`NEW_MIDDLEWARE_ID`).
-5. And extract the new version id of the middleware from the previous command's output. The value you need is displayed as `Worker Version ID: <ID>` in the console output.
-6. Use `wrangler deployments status --config ./path-to/server-wrangler.jsonc` to get the currently deployed version id of the server
-7. Extract the version id of the server from the previous command's output. This value is referred to as `CURRENT_SERVER_ID` in step 8.
-8. You then use gradual deployment to deploy the server uploaded at step 1 to 0% `wrangler versions deploy <CURRENT_SERVER_ID>@100% <NEW_SERVER_VERSION_ID>@0% -y --config ./path-to/server-wrangler.jsonc`
-9. You then deploy the middleware at 100% `wrangler versions deploy <NEW_MIDDLEWARE_ID>@100% -y --config ./path-to/middlewareWrangler.jsonc`. At this stage you are already serving the new version of the website in production.
-10. To finish it off you deploy the server at 100% `wrangler versions deploy <NEW_SERVER_VERSION_ID>@100% -y --config ./path-to/server-wrangler.jsonc`.
+1. 首先您需要上传服务器 worker 的新版本 `wrangler versions upload --config ./path-to/serverWrangler.jsonc`
+2. 然后您需要从上一步命令的输出中提取服务器的新版本 id。控制台输出中显示的值是 `Worker Version ID: <ID>`。此值在第 8 步中称为 `NEW_SERVER_VERSION_ID`。
+3. 在上传中间件之前，您需要将中间件 wrangler 配置中的 `WORKER_VERSION_ID` 变量替换为上一步中的新服务器版本 id。
+4. 然后您需要上传中间件 worker 的新版本 `wrangler versions upload --config ./path-to/middlewareWrangler.jsonc`。检索版本 id，您将在第 9 步中需要它（`NEW_MIDDLEWARE_ID`）。
+5. 并从上一条命令的输出中提取中间件的新版本 id。控制台输出中显示的值是 `Worker Version ID: <ID>`。
+6. 使用 `wrangler deployments status --config ./path-to/server-wrangler.jsonc` 获取当前部署的服务器版本 id
+7. 从上一步命令的输出中提取服务器的版本 id。此值在第 8 步中称为 `CURRENT_SERVER_ID`。
+8. 然后您使用逐步部署将第 1 步上传的服务器部署到 0% `wrangler versions deploy <CURRENT_SERVER_ID>@100% <NEW_SERVER_VERSION_ID>@0% -y --config ./path-to/server-wrangler.jsonc`
+9. 然后您部署 100% 的中间件 `wrangler versions deploy <NEW_MIDDLEWARE_ID>@100% -y --config ./path-to/middlewareWrangler.jsonc`。在此阶段，您已经在生产中提供网站的新版本。
+10. 最后，您部署 100% 的服务器 `wrangler versions deploy <NEW_SERVER_VERSION_ID>@100% -y --config ./path-to/server-wrangler.jsonc`。
 
-You can find actual implementations of such a deployment in the GitBook repo using GitHub actions [here](https://github.com/GitbookIO/gitbook/blob/main/.github/composite/deploy-cloudflare/action.yaml).
+您可以在 [这里](https://github.com/GitbookIO/gitbook/blob/main/.github/composite/deploy-cloudflare/action.yaml) 找到 GitBook 仓库中使用 GitHub Actions 的此类部署的实际实现。
 
-#### Version Affinity Explained
+#### 版本亲和性解释
 
-Version affinity ensures that requests are routed to workers running compatible versions:
+版本亲和性确保请求被路由到运行兼容版本的 worker：
 
-- The middleware sets `Cloudflare-Workers-Version-Overrides` header
-- This forces the request to go to the correct server worker version.
-- Prevents version mismatches during deployments
+- 中间件设置 `Cloudflare-Workers-Version-Overrides` 头
+- 这强制请求进入正确的服务器 worker 版本。
+- 防止部署期间的版本不匹配

@@ -1,14 +1,14 @@
-#### Custom build command
+#### 自定义构建命令
 
-OpenNext runs the `build` script in your `package.json` by default. However, you can specify a custom build command if required.
+OpenNext 默认运行 `package.json` 中的 `build` 脚本。但是，如果需要，您可以指定自定义构建命令。
 
 ```bash
-# CLI
+# 命令行
 open-next build --build-command "pnpm custom:build"
 ```
 
 ```ts
-// JS
+// JavaScript
 import { build } from "open-next/build.js";
 
 await build({
@@ -16,17 +16,17 @@ await build({
 });
 ```
 
-#### Custom app and build output paths
+#### 自定义应用和构建输出路径
 
-OpenNext runs the `build` script from your current command folder by default. When running OpenNext from a monorepo with decentralised application and build output paths, you can specify a custom `appPath` and/or `buildOutputPath`. This will allow you to execute your command from the root of the monorepo.
+OpenNext 默认从当前命令文件夹运行 `build` 脚本。当在具有分散应用和构建输出路径的 monorepo 中运行 OpenNext 时，您可以指定自定义 `appPath` 和/或 `buildOutputPath`。这将允许您从 monorepo 的根目录执行命令。
 
 ```bash
-# CLI
+# 命令行
 open-next build --build-command "pnpm custom:build" --app-path "./apps/example-app" --build-output-path "./dist/apps/example-app"
 ```
 
 ```ts
-// JS
+// JavaScript
 import { build } from "open-next/build.js";
 
 await build({
@@ -36,17 +36,17 @@ await build({
 });
 ```
 
-#### Minify server function
+#### 压缩服务器函数
 
-Enabling this option will minimize all `.js` and `.json` files in the server function bundle using the [node-minify](https://github.com/srod/node-minify) library. This can reduce the size of the server function bundle by about 40%, depending on the size of your app.
+启用此选项将使用 [node-minify](https://github.com/srod/node-minify) 库最小化服务器函数包中的所有 `.js` 和 `.json` 文件。根据您的应用大小，这可以将服务器函数包的大小减少约 40%。
 
 ```bash
-# CLI
+# 命令行
 open-next build --minify
 ```
 
 ```ts
-// JS
+// JavaScript
 import { build } from "open-next/build.js";
 
 await build({
@@ -54,61 +54,61 @@ await build({
 });
 ```
 
-This feature is currently **experimental** and needs to be opted into. It can significantly decrease the server function's cold start time. Once it is thoroughly tested and its stability is confirmed, it will be enabled by default.
+此功能目前是 **实验性** 的，需要主动选择启用。它可以显著减少服务器函数的冷启动时间。一旦经过充分测试并确认其稳定性，它将默认启用。
 
-#### **Experimental** Streaming support
+#### **实验性** 流式支持
 
-Enabling this option will enable streaming support for the server function. This is experimental and needs to be opted into. It can significantly decrease the server function's time to first byte.
+启用此选项将为服务器函数启用流式支持。这是实验性的，需要主动选择启用。它可以显著减少服务器函数的首字节时间。
 
-**Do not use this in production**. See [this](/v2/inner_workings/streaming) for more information.
+**不要在生产环境中使用此功能**。参见 [此处](/v2/inner_workings/streaming) 获取更多信息。
 
 ```bash
 open-next build --streaming
 ```
 
-#### **Experimental** disable dynamodb cache
+#### **实验性** 禁用 dynamodb 缓存
 
-Enabling this option will disable the dynamodb cache. This is experimental and needs to be opted into. This means that `next/cache` revalidation will not work.
+启用此选项将禁用 dynamodb 缓存。这是实验性的，需要主动选择启用。这意味着 `next/cache` 重新验证将不起作用。
 
 ```bash
 open-next build --dangerously-disable-dynamodb-cache
 ```
 
-#### **Experimental** disable incremental cache
+#### **实验性** 禁用增量缓存
 
-Disabling incremental cache will cause the entire page to be revalidated on each request. This will cause ISR and SSG pages to be in an inconsistent state. Specify this option if you are using SSR pages only. This will also disable the dynamodb cache.
+禁用增量缓存将导致整个页面在每次请求时重新验证。这将导致 ISR 和 SSG 页面处于不一致状态。仅当您只使用 SSR 页面时才指定此选项。这也将禁用 dynamodb 缓存。
 
 ```bash
 open-next build --dangerously-disable-incremental-cache
 ```
 
-#### Reusing same bucket for asset and cache
+#### 重用同一个存储桶用于资源和缓存
 
-Typically, asset files are uploaded to the root of the bucket. However, you might want to store them in a subfolder of the bucket, for instance, when:
+通常，资源文件会上传到存储桶的根目录。但是，您可能希望将它们存储在存储桶的子文件夹中，例如，当：
 
-- using a pre-existing bucket; or
-- storing both assets and cache files in the same bucket.
+- 使用预先存在的存储桶；或
+- 将资源和缓存文件存储在同一个存储桶中。
 
-If you choose to upload asset files to a subfolder (ie. "assets"), be sure to:
+如果您选择将资源文件上传到子文件夹（即 "assets"），请确保：
 
-- Set the `BUCKET_KEY_PREFIX` environment variable for the image optimization function to `assets`.
-- Set the "origin path" for the CloudFront S3 origin to `assets`.
+- 将图像优化函数的 `BUCKET_KEY_PREFIX` 环境变量设置为 `assets`。
+- 将 CloudFront S3 源的 "origin path" 设置为 `assets`。
 
-Similarly, if you decide to upload cache files to a subfolder (ie. "cache"), be sure to:
+类似地，如果您决定将缓存文件上传到子文件夹（即 "cache"），请确保：
 
-- Set the `CACHE_BUCKET_KEY_PREFIX` environment variable for the server function to `cache`.
+- 将服务器函数的 `CACHE_BUCKET_KEY_PREFIX` 环境变量设置为 `cache`。
 
-#### Debug mode
+#### 调试模式
 
-OpenNext can be executed in debug mode for bug tracking purposes.
+OpenNext 可以在调试模式下执行以用于错误跟踪目的。
 
 ```bash
-# CLI
+# 命令行
 OPEN_NEXT_DEBUG=true npx open-next@latest build
 ```
 
 ```ts
-// JS
+// JavaScript
 import { build } from "open-next/build.js";
 
 await build({
@@ -116,13 +116,13 @@ await build({
 });
 ```
 
-This does a few things:
+这会执行以下几件事：
 
-1. Lambda handler functions in the build output will not be minified.
-1. Lambda handler functions in the build output has sourcemap enabled inline.
-1. Lambda handler functions will automatically `console.log` the request event object along with other debugging information.
+1. 构建输出中的 Lambda 处理函数将不会被最小化。
+1. 构建输出中的 Lambda 处理函数已启用内联 sourcemap。
+1. Lambda 处理函数将自动 `console.log` 请求事件对象以及其他调试信息。
 
-It is recommended to **turn off debug mode when building for production** because:
+建议 **在生产构建时关闭调试模式**，因为：
 
-1. Un-minified function code is 2-3X larger than minified code. This will result in longer Lambda cold start times.
-1. Logging the event object on each request can result in a lot of logs being written to AWS CloudWatch. This will result in increased AWS costs.
+1. 未最小化的函数代码比最小化代码大 2-3 倍。这将导致 Lambda 冷启动时间更长。
+1. 记录每个请求的事件对象会导致大量日志写入 AWS CloudWatch。这将导致 AWS 成本增加。
