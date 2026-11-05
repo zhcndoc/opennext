@@ -13,7 +13,7 @@ Serverless 环境对打包体积很敏感，因为它必须下载并解压内容
 
 要识别占用过多空间（且不适合 serverless）的模块：
 
-```bash
+```sh
 du -hs .open-next/server-function/node_modules/* | sort -rh
 ```
 

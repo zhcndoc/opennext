@@ -9,8 +9,7 @@ import { Callout } from "nextra/components";
 
 当您手动重新验证特定页面的 Next.js 缓存时，存储在 S3 上的 ISR 缓存文件将会更新。但是，仍然需要使 CloudFront 缓存失效：
 
-```ts
-// pages/api/revalidate.js
+```js filename="pages/api/revalidate.js"
 export default async function handler(req, res) {
   await res.revalidate("/foo");
   await invalidateCloudFrontPaths(["/foo"]);

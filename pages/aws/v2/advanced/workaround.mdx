@@ -2,7 +2,7 @@
 
 正如 [资产文件](./architecture#asset-files) 部分所述，你应用的 `public/` 文件夹中的文件是静态的，并上传到 S3 存储桶。对这些文件的请求由 S3 存储桶处理，如下所示：
 
-```
+```plain
 https://my-nextjs-app.com/favicon.ico
 https://my-nextjs-app.com/my-images/avatar.png
 ```
@@ -11,7 +11,7 @@ https://my-nextjs-app.com/my-images/avatar.png
 
 为了克服这个限制，我们为 `public/` 中的每个顶级文件和文件夹创建一个单独的缓存行为。例如，如果你的文件夹结构是：
 
-```
+```plain
 public/
   favicon.ico
   my-images/
@@ -25,7 +25,7 @@ public/
 
 需要注意的一点是，CloudFront 每个分发 [默认限制为 25 个行为](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/cloudfront-limits.html#limits-web-distributions)。如果你有很多顶级文件和文件夹，可能会达到这个限制。为了避免这种情况，考虑将部分或所有文件和文件夹移动到一个子目录中：
 
-```
+```plain
 public/
   files/
     favicon.ico
@@ -115,7 +115,7 @@ export function middleware(request: NextRequest) {
 
 为解决此问题，服务器函数检查请求是否来自页面路由器的完全静态 HTML 页面（即没有 `getStaticProps`），并将 `Cache Control` 标头设置为：
 
-```
+```plain
 public, max-age=0, s-maxage=31536000, must-revalidate
 ```
 
@@ -126,7 +126,7 @@ public, max-age=0, s-maxage=31536000, must-revalidate
 
 `NextServer` 似乎没有为 `stale-while-revalidate` 缓存标头设置合适的值。例如，标头可能如下所示：
 
-```
+```plain
 s-maxage=600 stale-while-revalidate
 ```
 
@@ -134,7 +134,7 @@ s-maxage=600 stale-while-revalidate
 
 为解决此问题，服务器函数检查响应是否包含 `stale-while-revalidate` 标头。如果找到，则将其值设置为 30 天：
 
-```
+```plain
 s-maxage=600 stale-while-revalidate=2592000
 ```
 
@@ -142,7 +142,7 @@ s-maxage=600 stale-while-revalidate=2592000
 
 Next.js 建议使用 `process.cwd()` 而不是 `__dirname` 来获取应用目录。例如，考虑你的应用中有一个包含 markdown 文件的 `posts` 文件夹：
 
-```
+```plain
 pages/
 posts/
   my-post.md
@@ -159,7 +159,7 @@ path.join(process.cwd(), "posts", "my-post.md");
 
 正如 [服务器函数](./architecture#server-lambda-function) 部分所述，在非 monorepo 设置中，`server-function` 包看起来像：
 
-```
+```plain
 .next/
 node_modules/
 posts/
@@ -171,7 +171,7 @@ index.mjs
 
 但是，当用户的应用位于 monorepo 内部时（即在 `/packages/web`），`server-function` 包看起来像：
 
-```
+```plain
 packages/
   web/
     .next/

@@ -36,6 +36,43 @@ Cloudflare 适配器提供了一个 `opennextjs-cloudflare` 命令行工具，�
 
 </Callout>
 
+<a id="populating-remote-bindings-when-workers-are-protected-by-cloudflare-access"></a>
+
+#### 通过 Cloudflare Access 保护 Worker 时填充远程绑定
+
+`populateCache remote`（也会由 `deploy` 和 `upload` 隐式调用）会临时部署一个名为 `open-next-cache-populate` 的辅助 Worker，地址为 `open-next-cache-populate.<account>.workers.dev`，并通过它写入远程 R2 存储桶。
+
+如果账户的 `workers.dev` 子域，或自定义域名上的父级路由，受到 [Cloudflare Access](https://developers.cloudflare.com/cloudflare-one/applications/) 保护，辅助 Worker 也会受到相同策略的保护，导致上传失败，并出现以下错误之一：
+
+```text
+Failed to send request to R2 worker: The operation was aborted due to timeout.
+```
+
+也可能由 Access 边缘节点返回 `403 Forbidden`。
+
+要让适配器完成身份验证：
+
+1. 打开现有的 Cloudflare Access 应用。该应用应已覆盖 `open-next-cache-populate.<account>.workers.dev`，通常是匹配 `*.<account>.workers.dev` 的通配符应用；并将下文描述的策略添加到此应用。
+
+   <Callout type="warning">
+     有报告指出，即使保留现有通配符应用，另行创建一个仅适用于 `open-next-cache-populate` 主机名的 Access 应用也会阻止上传（见
+     [#1171](https://github.com/opennextjs/opennextjs-cloudflare/issues/1171)）。建议将策略添加到已保护该主机名的现有应用中。
+   </Callout>
+
+2. 向该应用添加 **Service Auth** 策略：
+
+   - 将策略的 **Action** 设置为 “Service Auth”。
+   - 添加 **Include** 规则，选择 “Any Access Service Token” 或特定服务令牌。
+
+3. 在 Zero Trust → Access → Service Auth → Service Tokens 下创建服务令牌，然后将其凭据提供给运行 `opennextjs-cloudflare` 的环境：
+
+   ```sh
+   export CLOUDFLARE_ACCESS_CLIENT_ID=<id>
+   export CLOUDFLARE_ACCESS_CLIENT_SECRET=<secret>
+   ```
+
+   然后运行 `opennextjs-cloudflare populateCache remote`（或 `deploy` / `upload`）。在 CI 中，将这两个值设为机密变量，并提供给部署步骤。
+
 ### `preview` 命令
 
 它首先填充本地缓存，然后启动本地开发服务器（通过 `wrangler dev`），以便您可以在本地预览应用程序。

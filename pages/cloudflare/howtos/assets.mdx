@@ -12,8 +12,7 @@ Workers 静态资源可以拦截指向应用程序的请求（[`run_worker_first
 
 当 `run_worker_first` 设置为 `false` 时，请求在到达 Worker 之前被拦截，并且不会被计费：
 
-```jsonc
-// wrangler.jsonc
+```jsonc filename="wrangler.jsonc"
 {
   "name": "my-app",
   // ...
@@ -35,8 +34,7 @@ Workers 静态资源可以拦截指向应用程序的请求（[`run_worker_first
 
 当 `run_worker_first` 设置为 `true` 时，所有请求都将到达 Worker 并被计费：
 
-```jsonc
-// wrangler.jsonc
+```jsonc filename="wrangler.jsonc"
 {
   "name": "my-app",
   // ...

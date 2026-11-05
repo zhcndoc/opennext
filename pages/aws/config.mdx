@@ -13,7 +13,7 @@
 
 如果您有 `open-next.config.ts` 文件，请确保至少包含以下内容：
 
-```ts
+```ts filename="open-next.config.ts"
 export default {
   default: {},
 };
@@ -29,7 +29,7 @@ export default {
 
 默认情况下，Next.js 会添加 [`x-powered-by`](https://nextjs.org/docs/app/api-reference/config/next-config-js/poweredByHeader) 头。OpenNext 也会添加一个 `x-opennext` 头。要退出此功能，请打开 `next.config.js` 并在配置中禁用 poweredByHeader 属性：
 
-```ts
+```js filename="next.config.js"
 module.exports = {
   poweredByHeader: false,
 };

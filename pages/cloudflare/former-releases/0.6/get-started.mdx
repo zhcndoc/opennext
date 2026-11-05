@@ -43,7 +43,7 @@ npm install --save-dev wrangler@latest
 
 您可以在 Next.js 应用的根目录下自行创建一个名为 `wrangler.jsonc` 的文件，内容如下：
 
-```jsonc
+```jsonc filename="wrangler.jsonc"
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "main": ".open-next/worker.js",
@@ -85,7 +85,7 @@ npm install --save-dev wrangler@latest
 
 将一个 [`open-next.config.ts`](https://opennext.js.org/aws/config) 文件添加到您的 Next.js 应用的根目录：
 
-```ts
+```ts filename="open-next.config.ts"
 import { defineCloudflareConfig } from "@opennextjs/cloudflare";
 import kvIncrementalCache from "@opennextjs/cloudflare/overrides/incremental-cache/kv-incremental-cache";
 
@@ -102,7 +102,7 @@ export default defineCloudflareConfig({
 
 然后，将一个 [`.dev.vars`](https://developers.cloudflare.com/workers/testing/local-development/#local-only-environment-variables) 文件添加到您的 Next.js 应用的根目录：
 
-```text
+```plain filename=".dev.vars"
 NEXTJS_ENV=development
 ```
 
@@ -112,7 +112,7 @@ NEXTJS_ENV=development
 
 将以下内容添加到 `package.json` 文件的 scripts 字段中：
 
-```json
+```json filename="package.json"
 "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
 "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
 "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
@@ -158,8 +158,7 @@ NEXTJS_ENV=development
 
 这是一个调用该实用程序的 Next.js 配置文件示例：
 
-```ts
-// next.config.ts
+```ts filename="next.config.ts"
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {

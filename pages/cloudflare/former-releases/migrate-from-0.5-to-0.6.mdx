@@ -41,7 +41,9 @@ CLI 以前通过 `opennextjs-cloudflare` 调用，现在需要必填的命令：
 
 您需要更新 `package.json` 中的 `scripts`：
 
-```json
-"preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-"deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+```json filename="package.json"
+{
+  "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+  "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy"
+}
 ```

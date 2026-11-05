@@ -2,7 +2,7 @@
 
 要在本地运行 `OpenNext`：
 
-```bash
+```sh
 # 这是为了构建（如果您使用的名称与默认名称不同，则需要 config-path）
 node /path/to/opennextjs-aws/packages/open-next/dist/index.js build --config-path open-next.local.config.ts
 # 然后运行服务器
@@ -11,7 +11,7 @@ node .open-next/server-functions/default/index.mjs
 
 ### open-next.local.config.ts
 
-```typescript
+```ts filename="open-next.local.config.ts"
 // open-next.local.config.ts -
 // 一个好的做法是使用不同的名称，这样就不会
 // 与您现有的 open-next.config.ts 冲突，即 open-next.local.config.ts

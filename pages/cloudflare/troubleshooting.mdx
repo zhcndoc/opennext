@@ -23,7 +23,7 @@ import { Callout } from "nextra/components";
 
 某些 NPM 包定义了多个导出。例如：
 
-```
+```json filename="package.json"
 "exports": {
     "other": "./src/other.js",
     "node": "./src/node.js",
@@ -36,7 +36,7 @@ import { Callout } from "nextra/components";
 
 您可能希望修改 Wrangler 解析多个导出的方式，以便在导入包时使用 `node` 导出（如果存在）。您可以通过在 Next.js 应用根目录下的 `.env` 文件中定义以下变量来实现：
 
-```
+```plain filename=".env"
 WRANGLER_BUILD_CONDITIONS=""
 WRANGLER_BUILD_PLATFORM="node"
 ```
@@ -56,15 +56,15 @@ WRANGLER_BUILD_PLATFORM="node"
 
 全局客户端无法工作：
 
-```ts
-// src/lib/db.ts
+```ts filename="src/lib/db.ts"
 import postgres from "postgres";
 
 // `client` 是全局的。
 // 由于连接将在请求间共享，它在 worker 上会失败
 export const client = postgres(process.env.DATABASE_URL, { max: 5 });
+```
 
-// src/app/api/route.ts
+```ts filename="src/app/api/route.ts"
 import { client } from "@/db/db";
 
 export const dynamic = "force-dynamic";
@@ -76,8 +76,7 @@ export async function GET() {
 
 可以通过为每个传入请求创建客户端来修复此问题：
 
-```ts
-// src/app/api/route.ts
+```ts filename="src/app/api/route.ts"
 export const dynamic = "force-dynamic";
 
 export async function GET() {
@@ -129,10 +128,16 @@ X [ERROR] Could not resolve "<package name>"
 
 要修复此问题，请将 `wrangler.toml` 或 `wrangler.jsonc` 中的 `compatibility_date` 更新为 `2025-05-05` 或更高版本：
 
-```json
+```jsonc filename="wrangler.jsonc"
 {
-  "compatibility_date": "2025-05-05"
+  "compatibility_date": "2025-05-05",
 }
 ```
 
 有关更多详细信息，请参阅 [Cloudflare Workers 兼容性标志文档](https://developers.cloudflare.com/workers/configuration/compatibility-flags/#enable-finalizationregistry-and-weakref)。
+
+### `Failed to send request to R2 worker` 或 `Could not determine Cloudflare auth credentials after login`
+
+当临时的 `open-next-cache-populate.<account>.workers.dev` 辅助 Worker 受到 Cloudflare Access 应用保护时，`populateCache remote`（由 `deploy` 和 `upload` 隐式调用）会出现这些错误。
+
+请参阅[通过 Cloudflare Access 保护 Worker 时填充远程绑定](/cloudflare/cli#populating-remote-bindings-when-workers-are-protected-by-cloudflare-access)了解设置步骤。

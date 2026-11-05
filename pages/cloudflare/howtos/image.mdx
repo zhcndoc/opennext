@@ -10,8 +10,7 @@ Cloudflare 适配器使用 [Cloudflare Images](https://developers.cloudflare.com
 
 必须定义 `IMAGES` 绑定才能启用图像优化：
 
-```jsonc
-// wrangler.jsonc
+```jsonc filename="wrangler.jsonc"
 {
   "images": {
     "binding": "IMAGES",
@@ -37,8 +36,7 @@ Cloudflare 适配器使用 [Cloudflare Images](https://developers.cloudflare.com
 
 在应用程序根目录下创建 `image-loader.ts`：
 
-```ts
-// image-loader.ts
+```ts filename="image-loader.ts"
 import type { ImageLoaderProps } from "next/image";
 
 const normalizeSrc = (src: string) => {
@@ -67,8 +65,7 @@ export default function cloudflareLoader({ src, width, quality }: ImageLoaderPro
 
 然后您需要更新应用程序配置以使用此加载器：
 
-```ts
-// next.config.ts
+```ts filename="next.config.ts"
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {

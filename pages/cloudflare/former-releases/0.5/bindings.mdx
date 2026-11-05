@@ -44,7 +44,7 @@ export async function GET(request) {
 
 为了确保上述 `getCloudflareContext().env` 中的 `env` 对象具有准确的 TypeScript 类型，请运行以下 Wrangler 命令以 [生成与您的 Worker 配置匹配的类型](https://developers.cloudflare.com/workers/languages/typescript/#generate-types-that-match-your-workers-configuration-experimental)：
 
-```
+```sh
 npx wrangler types --experimental-include-runtime
 ```
 
@@ -52,7 +52,7 @@ npx wrangler types --experimental-include-runtime
 
 如果您希望将该文件提交到 git，您可以提供一个自定义路径。例如，此处 `runtime.d.ts` 文件将保存到项目的根目录：
 
-```bash
+```sh
 npx wrangler types --experimental-include-runtime="./runtime.d.ts"
 ```
 

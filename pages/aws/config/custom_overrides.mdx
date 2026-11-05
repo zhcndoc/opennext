@@ -4,7 +4,7 @@ import { Callout } from "nextra/components";
 
 <Callout>
 如果您使用 edge runtime（无论是在函数中还是通过使用外部中间件），请小心，我们会对 `open-next.config.ts` 进行 2 次编译，一次用于 node，一次用于 edge runtime。如果您使用了一些自定义覆盖，您可能想要添加
-```ts
+```ts filename="open-next.config.ts"
 edgeExternals: ['./customWrapper', './anyOtherOverrideUsed']
 ```
 到您的 `open-next.config.ts` 以避免 edge runtime 尝试编译与 edge runtime 不兼容的覆盖。
@@ -17,8 +17,7 @@ edgeExternals: ['./customWrapper', './anyOtherOverrideUsed']
 
 在开发期间您仍然需要使用回退值，因为开发服务器不使用这个。
 
-```ts
-// customConverter.ts
+```ts filename="customConverter.ts"
 import converter from "@opennextjs/aws/overrides/converters/aws-apigw-v2.js";
 import type { Converter } from "@opennextjs/aws/types/overrides.js";
 import { Config } from "sst/node/Config";
@@ -50,8 +49,7 @@ export default {
 } as Converter;
 ```
 
-```ts
-// open-next.config.ts
+```ts filename="open-next.config.ts"
 import type { OpenNextConfig } from "@opennextjs/aws/types/open-next.js";
 
 const config = {
@@ -69,8 +67,7 @@ const config = {
 
 ### 定义一个全局变量以便在中间件中使用 node
 
-```ts
-// customWrapper.ts
+```ts filename="customWrapper.ts"
 import defaultWrapper from "@opennextjs/aws/overrides/wrappers/aws-lambda.js";
 
 // 在这里你可以定义一些全局变量
@@ -87,8 +84,7 @@ globalThis.myApi = async () => {
 export default defaultWrapper;
 ```
 
-```ts
-// open-next.config.ts
+```ts filename="open-next.config.ts"
 import type { OpenNextConfig } from "@opennextjs/aws/types/open-next.js";
 const config = {
   default: {
@@ -102,8 +98,7 @@ export default config;
 
 但由于 Next 开发服务器运行在假的 edge runtime 中，且全局变量仅在部署时定义，您必须在中间件中模拟该全局变量。
 
-```ts
-// middleware.ts
+```ts filename="middleware.ts"
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
@@ -135,8 +130,7 @@ export function middleware(request: NextRequest) {
 
 ### 在包装器中使用 middy.js
 
-```ts
-// customWrapper.ts
+```ts filename="customWrapper.ts"
 import streamingWrapper from "@opennextjs/aws/overrides/wrappers/aws-lambda.js";
 import type { WrapperHandler } from "@opennextjs/aws/types/overrides.js";
 import middy from "@middy/core";
@@ -154,8 +148,7 @@ export default {
 };
 ```
 
-```ts
-// open-next.config.ts
+```ts filename="open-next.config.ts"
 import type { OpenNextConfig } from "@opennextjs/aws/types/open-next.js";
 const config = {
   default: {
@@ -173,8 +166,7 @@ export default config;
 
 **警告**：这个示例没有经过适当测试。这只是您可以做什么的一个示例。在生产环境中使用之前，您应该对其进行适当测试。此外，预加载太多路由可能不是一个好主意。
 
-```ts
-// customWrapper.ts
+```ts filename="customWrapper.ts"
 import type { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from "aws-lambda";
 import { Writable } from "node:stream";
 
@@ -251,8 +243,7 @@ export default {
 };
 ```
 
-```ts
-// open-next.config.ts
+```ts filename="open-next.config.ts"
 import type { OpenNextConfig } from "@opennextjs/aws/types/open-next.js";
 const config = {
   default: {
@@ -267,7 +258,7 @@ const config = {
 
 您可以从我们的 [`fs-dev`](https://github.com/opennextjs/opennextjs-aws/blob/main/packages/open-next/src/overrides/incrementalCache/fs-dev.ts) 覆盖中获得灵感，它使用文件系统来存储增量缓存。您需要一个包含以下内容的 `open-next.config.ts`：
 
-```ts
+```ts filename="open-next.config.ts"
 import type { OpenNextConfig } from "@opennextjs/aws/types/open-next.ts";
 const config = {
   default: {
@@ -287,7 +278,7 @@ export default config;
 
 默认情况下，它将使用 SQS 队列来重新验证过时的路由。您可以[在这里](/aws/config/overrides/queue)阅读更多相关信息。要创建您自己的自定义覆盖，您可以通过查看我们的 [包含的](https://github.com/opennextjs/opennextjs-aws/tree/main/packages/open-next/src/overrides/queue) 实现来获得灵感。您需要一个包含以下内容的 `open-next.config.ts`：
 
-```ts
+```ts filename="open-next.config.ts"
 import type { OpenNextConfig } from "@opennextjs/aws/types/open-next.ts";
 const config = {
   default: {
@@ -307,7 +298,7 @@ export default config;
 
 要覆盖 tag cache，你可以参考使用文件系统的 [`fs-dev`](https://github.com/opennextjs/opennextjs-aws/blob/main/packages/open-next/src/overrides/tagCache/fs-dev.ts) 覆盖获取灵感。你可以 [这里](/aws/config/overrides/tag_cache) 阅读更多关于此覆盖的信息。你需要一个包含以下内容的 `open-next.config.ts`：
 
-```ts
+```ts filename="open-next.config.ts"
 import type { OpenNextConfig } from "@opennextjs/aws/types/open-next.ts";
 const config = {
   default: {
@@ -327,7 +318,7 @@ export default config;
 
 如果你有一个 `external` 中间件，此覆盖仅由 OpenNext 内部用于解析请求的源。你可以参考我们要包含的 [`pattern-env`](https://github.com/opennextjs/opennextjs-aws/blob/main/packages/open-next/src/overrides/originResolver/pattern-env.ts) 覆盖获取灵感。你需要一个包含以下内容的 `open-next.config.ts`：
 
-```ts
+```ts filename="open-next.config.ts"
 import type { OpenNextConfig } from "@opennextjs/aws/types/open-next.js";
 const config = {
   default: {},
@@ -348,7 +339,7 @@ export default config;
 
 此覆盖用于图像优化服务器，从自定义源加载图像。你可以 [这里](https://github.com/opennextjs/opennextjs-aws/blob/main/packages/open-next/src/overrides/imageLoader/fs-dev.ts) 查看我们使用文件系统的实现。你需要一个包含以下内容的 `open-next.config.ts`：
 
-```ts
+```ts filename="open-next.config.ts"
 import type { OpenNextConfig } from "@opennextjs/aws/types/open-next.js";
 const config = {
   default: {},
@@ -366,7 +357,7 @@ export default config;
 
 要为 warmer invoke 设置自定义覆盖，你可以参考我们的 [`aws-lambda`](https://github.com/opennextjs/opennextjs-aws/blob/main/packages/open-next/src/overrides/warmer/aws-lambda.ts) 覆盖获取灵感。你需要一个包含以下内容的 `open-next.config.ts`：
 
-```ts
+```ts filename="open-next.config.ts"
 import type { OpenNextConfig } from "@opennextjs/aws/types/open-next.js";
 const config = {
   default: {},
@@ -384,7 +375,7 @@ export default config;
 
 要为 CDN Invalidation 设置自定义覆盖，你可以参考我们的 [`cloudfront`](https://github.com/opennextjs/opennextjs-aws/tree/main/packages/open-next/src/overrides/cdnInvalidation/cloudfront.ts) 覆盖获取灵感。你需要一个包含以下内容的 `open-next.config.ts`：
 
-```ts
+```ts filename="open-next.config.ts"
 import type { OpenNextConfig } from "@opennextjs/aws/types/open-next.js";
 const config = {
   default: {
@@ -403,7 +394,7 @@ export default config;
 
 OpenNext 使用此项将重写的请求代理到外部服务。你可以 [这里](/aws/config/overrides/proxy_external_request) 阅读更多关于它的信息。要为 External Request Proxy 设置自定义覆盖，你可以参考我们的 [`fetch`](https://github.com/opennextjs/opennextjs-aws/blob/main/packages/open-next/src/overrides/proxyExternalRequest/fetch.ts) 覆盖获取灵感。你需要一个包含以下内容的 `open-next.config.ts`：
 
-```ts
+```ts filename="open-next.config.ts"
 import type { OpenNextConfig } from "@opennextjs/aws/types/open-next.js";
 const config = {
   default: {
@@ -422,7 +413,7 @@ export default config;
 
 OpenNext 使用此项来解析静态资源。你可以 [这里](/aws/config/overrides/asset_resolver) 阅读更多关于它的信息。要为 Asset Resolver 设置自定义覆盖，你需要一个包含以下内容的 `open-next.config.ts`：
 
-```ts
+```ts filename="open-next.config.ts"
 import type { OpenNextConfig } from "@opennextjs/aws/types/open-next.js";
 const config = {
   default: {},

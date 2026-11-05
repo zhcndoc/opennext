@@ -20,7 +20,7 @@ Cloudflare 的 ISR 适配器使用 [Workers KV](https://developers.cloudflare.co
 
 ##### 1. 创建 KV 命名空间
 
-```
+```sh
 npx wrangler@latest kv namespace create <YOUR_NAMESPACE_NAME>
 ```
 
@@ -28,8 +28,7 @@ npx wrangler@latest kv namespace create <YOUR_NAMESPACE_NAME>
 
 您的应用 worker 中使用的绑定名称是 `NEXT_CACHE_WORKERS_KV`。服务绑定应该是对您 worker 的自引用，其中 `<WORKER_NAME>` 是您的 wrangler 配置文件中的名称。
 
-```jsonc
-// wrangler.jsonc
+```jsonc filename="wrangler.jsonc"
 {
   // ...
   "kv_namespaces": [
@@ -57,8 +56,7 @@ npx wrangler@latest kv namespace create <YOUR_NAMESPACE_NAME>
   `@opennextjs/cloudflare` 提供的内存队列不完全适合生产部署，您可以自行承担风险使用它！
 </Callout>
 
-```ts
-// open-next.config.ts
+```ts filename="open-next.config.ts"
 import { defineCloudflareConfig } from "@opennextjs/cloudflare";
 import kvIncrementalCache from "@opennextjs/cloudflare/kv-cache";
 import memoryQueue from "@opennextjs/cloudflare/memory-queue";
@@ -87,8 +85,7 @@ export default defineCloudflareConfig({
 
 您的应用 worker 中使用的绑定名称是 `NEXT_CACHE_D1`。服务绑定应该是对您 worker 的自引用，其中 `<WORKER_NAME>` 是您的 wrangler 配置文件中的名称。
 
-```jsonc
-// wrangler.jsonc
+```jsonc filename="wrangler.jsonc"
 {
   // ...
   "d1_databases": [
@@ -126,8 +123,7 @@ wrangler d1 execute NEXT_CACHE_D1 --command "CREATE TABLE IF NOT EXISTS revalida
 
 在项目的 OpenNext 配置中，启用 KV 缓存并设置队列。队列将在需要时向页面发送重新验证请求，但不会去重请求。
 
-```ts
-// open-next.config.ts
+```ts filename="open-next.config.ts"
 import { defineCloudflareConfig } from "@opennextjs/cloudflare";
 import kvIncrementalCache from "@opennextjs/cloudflare/kv-cache";
 import d1TagCache from "@opennextjs/cloudflare/d1-tag-cache";

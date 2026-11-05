@@ -6,7 +6,7 @@ OpenNext 内部使用 3 个不同的 esbuild 插件，根据某些条件（如 n
 
 这是一个非常简单的使用示例：
 
-```typescript
+```ts
 openNextPlugin({
     // 要替换代码的目标文件
     target: /plugins\/default\.js/g,
@@ -42,7 +42,7 @@ openNextPlugin({
 
 这是一个非常简单的使用示例：
 
-```typescript
+```ts
 openNextResolvePlugin({
   overrides: {
     wrapper: "node",
@@ -57,7 +57,7 @@ openNextResolvePlugin({
 
 这是一个非常简单的使用示例：
 
-```typescript
+```ts
 openNextEdgePlugin({
   // .next 目录的路径
   nextDir: "next",

@@ -8,7 +8,7 @@ import { Callout } from "nextra/components";
 
 默认情况下，中间件位于服务器内部，但您可以通过在 `open-next.config.ts` 文件中将 `middleware.external` 设置为 `true` 将其移出。
 
-```ts
+```ts filename="open-next.config.ts"
 {
   middleware: {
     external: true;

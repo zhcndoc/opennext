@@ -24,7 +24,7 @@ Next.js 在构建时预热缓存。构建时的值由 [Workers Assets](https://d
 
 #### 1. 创建 KV 命名空间
 
-```
+```sh
 npx wrangler@latest kv namespace create <YOUR_NAMESPACE_NAME>
 ```
 
@@ -32,8 +32,7 @@ npx wrangler@latest kv namespace create <YOUR_NAMESPACE_NAME>
 
 您的应用 worker 中使用的绑定名称是 `NEXT_CACHE_WORKERS_KV`。
 
-```jsonc
-// wrangler.json
+```jsonc filename="wrangler.jsonc"
 {
   // ...
   "kv_namespaces": [

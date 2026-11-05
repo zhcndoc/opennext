@@ -80,7 +80,7 @@ Netlify 会自动检测到您正在使用 Next.js，并为您的站点配置最�
 - 设置一个值为 `--shamefully-hoist` 的 `PNPM_FLAGS` [环境变量](https://docs.netlify.com/environment-variables/get-started/#create-environment-variables)。这会将 `--shamefully-hoist` 参数附加到 Netlify 运行的 `pnpm install` 命令中。
 - 通过在项目根目录添加一个包含以下内容的 `.npmrc` 文件来 [启用公共提升](https://pnpm.io/npmrc#public-hoist-pattern)：
 
-  ```bash
+  ```sh
   public-hoist-pattern[]=*
   ```
 

@@ -3,6 +3,10 @@ import { Tabs } from "nextra/components";
 
 ## 缓存
 
+<Callout type="info">
+  本页内容仅涉及 SSG/ISR 和数据缓存；SSR 路由无需配置缓存即可正常运行。
+</Callout>
+
 Next.js 提供了多种方法，通过 [缓存](https://nextjs.org/docs/app/building-your-application/data-fetching/fetching-caching-and-revalidating#caching-data) 路由和网络请求来提高应用程序的性能。应用程序将尝试在构建时尽可能多地预渲染和缓存数据，以减少向用户提供响应时所需的工作量。
 
 缓存数据使用重新验证进行更新，可以是定期更新或按需更新：
@@ -26,10 +30,6 @@ Next.js 提供了多种方法，通过 [缓存](https://nextjs.org/docs/app/buil
 
 本指南提供了常见用例的指南，然后详细介绍了所有配置选项。
 
-<Callout type="info">
-  本页所有内容仅涉及 SSG/ISR 和数据缓存，SSR 路由无需任何缓存配置即可开箱即用。
-</Callout>
-
 ### 指南
 
 #### 使用重新验证的小型站点
@@ -43,7 +43,7 @@ Next.js 提供了多种方法，通过 [缓存](https://nextjs.org/docs/app/buil
 <Tabs items={["wrangler.jsonc", "open-next.config.ts"]}>
 <Tabs.Tab>
 
-```jsonc
+```jsonc filename="wrangler.jsonc"
 {
   "name": "<WORKER_NAME>",
   // ...
@@ -94,7 +94,7 @@ Next.js 提供了多种方法，通过 [缓存](https://nextjs.org/docs/app/buil
 </Tabs.Tab>
 <Tabs.Tab>
 
-```ts
+```ts filename="open-next.config.ts"
 import { defineCloudflareConfig } from "@opennextjs/cloudflare";
 import r2IncrementalCache from "@opennextjs/cloudflare/overrides/incremental-cache/r2-incremental-cache";
 import d1NextTagCache from "@opennextjs/cloudflare/overrides/tag-cache/d1-next-tag-cache";
@@ -126,7 +126,7 @@ export default defineCloudflareConfig({
 <Tabs items={["wrangler.jsonc", "open-next.config.ts"]}>
 <Tabs.Tab>
 
-```jsonc
+```jsonc filename="wrangler.jsonc"
 {
   "name": "<WORKER_NAME>",
   // ...
@@ -181,7 +181,7 @@ export default defineCloudflareConfig({
 </Tabs.Tab>
 <Tabs.Tab>
 
-```ts
+```ts filename="open-next.config.ts"
 import { defineCloudflareConfig } from "@opennextjs/cloudflare";
 import r2IncrementalCache from "@opennextjs/cloudflare/overrides/incremental-cache/r2-incremental-cache";
 import { withRegionalCache } from "@opennextjs/cloudflare/overrides/incremental-cache/regional-cache";
@@ -227,7 +227,7 @@ export default defineCloudflareConfig({
 <Tabs items={["open-next.config.ts"]}>
 <Tabs.Tab>
 
-```ts
+```ts filename="open-next.config.ts"
 import { defineCloudflareConfig } from "@opennextjs/cloudflare";
 import staticAssetsIncrementalCache from "@opennextjs/cloudflare/overrides/incremental-cache/static-assets-incremental-cache";
 
@@ -256,7 +256,7 @@ export default defineCloudflareConfig({
 
 Next.js 还会生成在构建之间不会更改的_不可变_文件。这些文件也将通过静态资源提供。为了匹配 [Next.js 中不可变资产的默认缓存行为](https://nextjs.org/docs/app/guides/self-hosting#automatic-caching)，避免不必要的重新验证请求，请将以下头添加到 [`public/_headers`](https://developers.cloudflare.com/workers/static-assets/headers/#custom-headers) 文件：
 
-```txt
+```plain filename="public/_headers"
 /_next/static/*
   Cache-Control: public,max-age=31536000,immutable
 ```
@@ -284,8 +284,7 @@ npx wrangler@latest r2 bucket create <YOUR_BUCKET_NAME>
 
 R2 存储桶使用的前缀可以通过 `NEXT_INC_CACHE_R2_PREFIX` 环境变量进行配置，默认为 `incremental-cache`。
 
-```jsonc
-// wrangler.jsonc
+```jsonc filename="wrangler.jsonc"
 {
   // ...
   "name": "<WORKER_NAME>",
@@ -320,8 +319,7 @@ R2 存储桶使用的前缀可以通过 `NEXT_INC_CACHE_R2_PREFIX` 环境变量�
 - `shouldLazilyUpdateOnCacheHit`：指示缓存惰性更新，意味着当从缓存请求数据时，会向 R2 存储桶发送后台请求以获取最新条目。这对于 `long-lived` 模式默认启用。
 - `bypassTagCacheOnCacheHit`：指示缓存在区域缓存命中时不检查标签缓存。这有助于减少响应时间。使用此选项时，您需要确保缓存被正确清除， either by enabling the [automatic cache purge](#automatic-cache-purge) or purging the cache manually. 默认为 `false`。
 
-```ts
-// open-next.config.ts
+```ts filename="open-next.config.ts"
 import { defineCloudflareConfig } from "@opennextjs/cloudflare";
 import r2IncrementalCache from "@opennextjs/cloudflare/overrides/incremental-cache/r2-incremental-cache";
 import { withRegionalCache } from "@opennextjs/cloudflare/overrides/incremental-cache/regional-cache";
@@ -363,8 +361,7 @@ npx wrangler@latest kv namespace create <YOUR_NAMESPACE_NAME>
 
 缓存键使用的前缀可以通过 `NEXT_INC_CACHE_KV_PREFIX` 环境变量进行配置，默认为 `incremental-cache`。
 
-```jsonc
-// wrangler.jsonc
+```jsonc filename="wrangler.jsonc"
 {
   // ...
   "name": "<WORKER_NAME>",
@@ -387,8 +384,7 @@ npx wrangler@latest kv namespace create <YOUR_NAMESPACE_NAME>
 
 在您项目的 OpenNext 配置中，启用 KV 缓存。
 
-```ts
-// open-next.config.ts
+```ts filename="open-next.config.ts"
 import { defineCloudflareConfig } from "@opennextjs/cloudflare";
 import kvIncrementalCache from "@opennextjs/cloudflare/overrides/incremental-cache/kv-incremental-cache";
 // ...
@@ -411,8 +407,7 @@ export default defineCloudflareConfig({
 
 在您项目的 OpenNext 配置中，启用静态资源缓存。
 
-```ts
-// open-next.config.ts
+```ts filename="open-next.config.ts"
 import { defineCloudflareConfig } from "@opennextjs/cloudflare";
 import staticAssetsIncrementalCache from "@opennextjs/cloudflare/overrides/incremental-cache/static-assets-incremental-cache";
 
@@ -436,8 +431,7 @@ export default defineCloudflareConfig({
 Durable Object 队列将在需要时向页面发送重新验证请求，并提供对请求去重的支持。
 默认情况下，最多将有 10 个 Durable Object 队列实例，它们每个可以并行处理最多 5 个请求，最多支持 50 个并发 ISR 重新验证。
 
-```ts
-// open-next.config.ts
+```ts filename="open-next.config.ts"
 import { defineCloudflareConfig } from "@opennextjs/cloudflare";
 // ...
 import r2IncrementalCache from "@opennextjs/cloudflare/overrides/incremental-cache/r2-incremental-cache";
@@ -452,21 +446,23 @@ export default defineCloudflareConfig({
 
 您还需要在 `wrangler.jsonc` 文件中添加一些绑定。
 
-```jsonc
-"durable_objects": {
+```jsonc filename="wrangler.jsonc"
+{
+  "durable_objects": {
     "bindings": [
       {
         "name": "NEXT_CACHE_DO_QUEUE",
-        "class_name": "DOQueueHandler"
-      }
-    ]
+        "class_name": "DOQueueHandler",
+      },
+    ],
   },
   "migrations": [
     {
       "tag": "v1",
-      "new_sqlite_classes": ["DOQueueHandler"]
-    }
+      "new_sqlite_classes": ["DOQueueHandler"],
+    },
   ],
+}
 ```
 
 您可以使用环境变量自定义队列的行为：
@@ -490,8 +486,7 @@ export default defineCloudflareConfig({
 
 在某些情况下，您可能会遇到 Durable Object 队列可以为单个页面或路由管理的限制。在这种情况下，您可以利用 queueCache 来减少发送到队列的陈旧请求数量。这是通过在将请求分派到队列之前通过 Cache API 添加和验证缓存条目来实现的。如果缓存条目已存在，则请求不会发送到队列，因为它将被视为已在处理中。
 
-```ts
-// open-next.config.ts
+```ts filename="open-next.config.ts"
 import { defineCloudflareConfig } from "@opennextjs/cloudflare";
 // ...
 import r2IncrementalCache from "@opennextjs/cloudflare/overrides/incremental-cache/r2-incremental-cache";
@@ -538,8 +533,7 @@ export default defineCloudflareConfig({
 
 您的应用程序 worker 中使用的绑定名称是 `NEXT_TAG_CACHE_D1`。`WORKER_SELF_REFERENCE` 服务绑定应该是对您的 worker 的自引用，其中 `<WORKER_NAME>` 是您的 wrangler 配置文件中的名称。
 
-```jsonc
-// wrangler.jsonc
+```jsonc filename="wrangler.jsonc"
 {
   // ...
   "d1_databases": [
@@ -566,8 +560,7 @@ D1 标签缓存需要一个 `revalidations` 表来跟踪按需重新验证时间
 
 在您项目的 OpenNext 配置中，启用 R2 缓存并设置队列（见上文）。队列将在需要时向页面发送重新验证请求，但它不会对请求去重。
 
-```ts
-// open-next.config.ts
+```ts filename="open-next.config.ts"
 import { defineCloudflareConfig } from "@opennextjs/cloudflare";
 import r2IncrementalCache from "@opennextjs/cloudflare/overrides/incremental-cache/r2-incremental-cache";
 import doQueue from "@opennextjs/cloudflare/overrides/queue/do-queue";
@@ -593,8 +586,7 @@ export default defineCloudflareConfig({
 
 服务绑定应该是对您的 worker 的自引用，其中 `<WORKER_NAME>` 是您的 wrangler 配置文件中的名称。
 
-```jsonc
-// wrangler.jsonc
+```jsonc filename="wrangler.jsonc"
 {
   // ...
   "durable_objects": {
@@ -628,8 +620,7 @@ export default defineCloudflareConfig({
 
 在您项目的 OpenNext 配置中，启用 R2 缓存并设置队列。
 
-```ts
-// open-next.config.ts
+```ts filename="open-next.config.ts"
 import { defineCloudflareConfig } from "@opennextjs/cloudflare";
 import r2IncrementalCache from "@opennextjs/cloudflare/overrides/incremental-cache/r2-incremental-cache";
 import doQueue from "@opennextjs/cloudflare/overrides/queue/do-queue";
@@ -664,8 +655,7 @@ doShardedTagCache 接受以下选项：
 
 其主要目的是从标签缓存中过滤掉软标签（即那些由 `revalidatePath` 使用的标签），这些标签与您的应用无关。如果您的某个依赖项使用硬标签（即您在应用中定义的标签），它也可用于过滤掉硬标签。
 
-```ts
-// open-next.config.ts
+```ts filename="open-next.config.ts"
 import { defineCloudflareConfig } from "@opennextjs/cloudflare";
 import r2IncrementalCache from "@opennextjs/cloudflare/overrides/incremental-cache/r2-incremental-cache";
 import doQueue from "@opennextjs/cloudflare/overrides/queue/do-queue";
@@ -708,7 +698,7 @@ export default defineCloudflareConfig({
 
 以下是将缓存清除组件集成到您的 `open-next.config.ts` 中的示例配置：
 
-```ts
+```ts filename="open-next.config.ts"
 import { defineCloudflareConfig } from "@opennextjs/cloudflare";
 import r2IncrementalCache from "@opennextjs/cloudflare/overrides/incremental-cache/r2-incremental-cache";
 import { withRegionalCache } from "@opennextjs/cloudflare/overrides/incremental-cache/regional-cache";
@@ -730,7 +720,7 @@ export default defineCloudflareConfig({
 
 如果您想使用 durable object 选项，您需要在 `wrangler.jsonc` 文件中添加以下绑定：
 
-```jsonc
+```jsonc filename="wrangler.jsonc"
 {
   "durable_objects": {
     "bindings": [

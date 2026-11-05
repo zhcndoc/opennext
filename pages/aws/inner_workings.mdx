@@ -8,7 +8,7 @@ OpenNext 运行你 `package.json` 文件中的 `build` 脚本。根据应用中�
 
 构建输出随后被转换为可以部署到 AWS 的格式。转换后的输出生成在你 Next.js 应用内的 `.open-next` 文件夹中。`assets/` 中的文件已准备好上传到 AWS S3。函数代码被封装在 Lambda 处理程序中，准备好部署到 AWS Lambda 或 Lambda@Edge。
 
-```bash
+```sh
 my-next-app/
   .open-next/
     cache/                         -> 要上传的 ISR 缓存文件 - 不能直接提供

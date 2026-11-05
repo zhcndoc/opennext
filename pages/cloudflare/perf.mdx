@@ -62,9 +62,7 @@ import { Callout } from "nextra/components";
 
 当代码未最小化时，代码性能分析结果更易阅读，您可以使用以下设置生成未最小化的代码
 
-**next.config.ts**
-
-```ts
+```ts filename="next.config.ts"
 const nextConfig = {
   // ...
   experimental: {
@@ -81,7 +79,7 @@ const nextConfig = {
 
 构建应用程序时使用 `--noMinify` 选项：
 
-```bash
+```sh
 opennextjs-cloudflare build --noMinify
 ```
 
@@ -89,7 +87,7 @@ opennextjs-cloudflare build --noMinify
 
 您应该首先通过运行以下命令启动应用程序的本地版本
 
-```bash
+```sh
 opennextjs-cloudflare preview
 ```
 

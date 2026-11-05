@@ -18,7 +18,7 @@
 你可以通过向 `loader` 属性提供自定义加载器函数来自定义加载器。
 它应该返回
 
-```typescript
+```ts
 type ImageLoader = BaseOverride & {
   load: (url: string) => Promise<{
     body?: Readable;

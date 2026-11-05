@@ -20,7 +20,7 @@ import { Callout } from "nextra/components";
 
 #### 1. 创建 KV 命名空间
 
-```
+```sh
 npx wrangler@latest kv namespace create <YOUR_NAMESPACE_NAME>
 ```
 
@@ -28,7 +28,7 @@ npx wrangler@latest kv namespace create <YOUR_NAMESPACE_NAME>
 
 你的应用 worker 中使用的绑定名称默认为 `NEXT_CACHE_WORKERS_KV`。这是可配置的，可以通过设置 `__OPENNEXT_KV_BINDING_NAME` 构建时环境变量来更改。
 
-```
+```toml filename="wrangler.toml"
 [[kv_namespaces]]
 binding = "NEXT_CACHE_WORKERS_KV"
 id = "<YOUR_NAMESPACE_ID>"

@@ -16,7 +16,7 @@ import { Callout } from "nextra/components";
 
 要创建一个新的 Next.js 应用程序，预配置为使用 `@opennextjs/cloudflare` 在 Cloudflare 上运行，请运行：
 
-```bash
+```sh
 npm create cloudflare@latest -- my-next-app --framework=next --platform=workers
 ```
 
@@ -26,8 +26,7 @@ npm create cloudflare@latest -- my-next-app --framework=next --platform=workers
 
 要在运行 `next dev` 时使用 `getCloudflareContext` API 访问 Cloudflare 资源，您需要更新 Next.js 配置以调用 `initOpenNextCloudflareForDev`，如下例所示：
 
-```ts
-// next.config.ts
+```ts filename="next.config.ts"
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {

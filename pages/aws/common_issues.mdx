@@ -4,7 +4,7 @@
 
 这将向控制台输出 **大量** 额外日志。这还会禁用 esbuild 中的压缩，并向输出添加源地图。这可能导致代码大小达到生产构建的 2-3 倍。**不要在生产环境中启用此功能**
 
-```bash
+```sh
 OPEN_NEXT_DEBUG=true npx open-next@latest build
 ```
 
@@ -16,7 +16,7 @@ OPEN_NEXT_DEBUG=true npx open-next@latest build
 
 Next 可能会错误地将某些依赖项包含在 bundle 中。要移除它们，你可以在 `next.config.js` 中使用此配置：
 
-```javascript
+```js filename="next.config.js"
 outputFileTracingExcludes: { // 或在 Next < 15 上使用 experimental.outputFileTracingExcludes
   "*": ["node_modules/the-unwanted-package"],
 },
@@ -39,7 +39,7 @@ Source maps 可能会大幅增加 bundle 大小，将它们从 standalone 输出
 
 你可以类似地排除 sourcemaps：
 
-```javascript
+```js filename="next.config.js"
 outputFileTracingExcludes: {
   "*": [
     './**/*.js.map',
@@ -96,9 +96,7 @@ Sentry 文档推荐的配置在 `instrumentation.ts` 中使用动态导入，这
 
 这是一个可以解决错误的可用 Sentry 配置：
 
-`instrumentation.ts`
-
-```typescript
+```ts filename="instrumentation.ts"
 import * as Sentry from "@sentry/nextjs";
 import { initSentry } from "../sentry.server.config";
 
@@ -109,9 +107,7 @@ export async function register() {
 }
 ```
 
-`sentry.server.config.ts`
-
-```typescript
+```ts filename="sentry.server.config.ts"
 import * as Sentry from "@sentry/nextjs";
 
 export const initSentry = (runtime: "nodejs" | "edge") => {
@@ -141,7 +137,7 @@ export const initSentry = (runtime: "nodejs" | "edge") => {
 有时你的服务器函数 bundle 中可能会缺少文件。例如可能是 `sentry.server.config.ts`。它可以是任何文件或目录，也接受通配符。在 Next 中有一个选项可以包含未被 tracing 拾取的文件。
 它叫做 `outputFileTracingIncludes`。以下是在 `next.config.ts` 中如何使用它的示例：
 
-```ts
+```ts filename="next.config.ts"
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
@@ -162,8 +158,7 @@ export default nextConfig;
 它也适用于 OpenNext 中的函数分割。如果你的键对应于特定路由（即：`api/test`），它将仅包含在该路由的函数 bundle 中。
 然而，使用 `*` 作为键将其包含在每个函数 bundle 中。这是一个带有函数分割的示例：
 
-```ts
-// open-next.config.ts
+```ts filename="open-next.config.ts"
 import type { OpenNextConfig } from "@opennextjs/aws/types/open-next";
 const config = {
   default: {},
@@ -178,8 +173,9 @@ const config = {
     },
   },
 } satisfies OpenNextConfig;
+```
 
-// next.config.ts
+```ts filename="next.config.ts"
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {

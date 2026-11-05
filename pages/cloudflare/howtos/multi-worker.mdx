@@ -30,7 +30,7 @@ OpenNext 允许您将应用程序拆分为多个 worker 中更小、更轻的部
 
 这里我们假设配置如下：
 
-```ts
+```ts filename="open-next.config.ts"
 import { defineCloudflareConfig } from "@opennextjs/cloudflare";
 import r2IncrementalCache from "@opennextjs/cloudflare/overrides/incremental-cache/r2-incremental-cache";
 import { withRegionalCache } from "@opennextjs/cloudflare/overrides/incremental-cache/regional-cache";
@@ -65,11 +65,11 @@ export default defineCloudflareConfig({
 
 为了使此功能正常工作，您需要 2 个自定义 worker：
 
-```js
-// middleware.js
+```js filename="middleware.js"
 import { WorkerEntrypoint } from "cloudflare:workers";
+```
 
-// ./.open-next/cloudflare/init.js
+```js filename="/.open-next/cloudflare/init.js"
 import { runWithCloudflareRequestContext } from "./.open-next/cloudflare/init.js";
 
 import { handler as middlewareHandler } from "./.open-next/middleware/handler.mjs";
@@ -107,9 +107,7 @@ export default class extends WorkerEntrypoint {
 }
 ```
 
-```js
-// server.js
-
+```js filename="server.js"
 // 替换为您实际的构建输出目录，通常为：
 // ./.open-next/cloudflare/init.js
 import { runWithCloudflareRequestContext } from "./.open-next/cloudflare/init.js";
@@ -128,7 +126,7 @@ export default {
 
 ### Wrangler 配置
 
-```jsonc
+```jsonc filename="wrangler.jsonc"
 // 中间件 wrangler 文件
 {
   "main": "middleware.js",
@@ -184,7 +182,7 @@ export default {
 }
 ```
 
-```jsonc
+```jsonc filename="wrangler.jsonc"
 // 服务器 wrangler 文件
 {
   "main": "server.js",

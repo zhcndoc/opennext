@@ -6,7 +6,7 @@
 
 2. 更新你的 `apps/next-site/next.config.js` 添加 `output: 'standalone'`，并且你想要添加 `experimental.outputFileTracingRoot`，它看起来应该像这样：
 
-```javascript
+```js filename="next.config.js"
 //@ts-check
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -39,15 +39,15 @@ module.exports = composePlugins(...plugins)(nextConfig);
 
 3. 在你的应用根目录内创建 `open-next.config.ts`，它看起来应该像这样：
 
-```javascript
-import type { OpenNextConfig } from '@opennextjs/aws/types/open-next';
+```ts filename="open-next.config.ts"
+import type { OpenNextConfig } from "@opennextjs/aws/types/open-next";
 
 const config = {
   default: {},
-  buildCommand: 'exit 0', // 在我的示例中，我们设置 Nx 任务分发来处理构建顺序。
-  buildOutputPath: '.',
-  appPath: '.',
-  packageJsonPath: '../../', // 同样，指向你仓库根目录的路径（package.json 所在的位置）
+  buildCommand: "exit 0", // 在我的示例中，我们设置 Nx 任务分发来处理构建顺序。
+  buildOutputPath: ".",
+  appPath: ".",
+  packageJsonPath: "../../", // 同样，指向你仓库根目录的路径（package.json 所在的位置）
 } satisfies OpenNextConfig;
 
 export default config;
@@ -133,7 +133,7 @@ export default config;
 - 让我们使用 `pnpm add sst@ion` 添加 sst 包，以及 SST 与 AWS 协作所需的包 `pnpm add --save-dev aws-cdk-lib constructs @types/aws-lambda`
 - 然后我们想在 `apps/next-site` 中手动创建一个 `sst.config.ts` 文件，如下所示：
 
-```typescript
+```ts filename="sst.config.ts"
 /// <reference path="./.sst/platform/config.d.ts" />
 
 export default $config({
@@ -154,7 +154,7 @@ export default $config({
 
 - 现在，你可能看到一些类型错误，因为 SST 尚未初始化，但我们可以通过运行来解决这个问题
 
-```bash
+```sh
 $ cd apps/next-site && sst install
 ```
 
@@ -251,7 +251,7 @@ $ cd apps/next-site && sst install
 
 现在我们可以运行（或者如果你想要一个自定义阶段，你可以简单地执行 `nx deploy next-site --stage this-is-my-stage`，它将直接传递给 sst 命令）。
 
-```bash
+```sh
 $ nx deploy next-site --configuration dev # 使用 dev 配置（它将阶段设置为 development）
 # nx deploy next-site -c dev # 或
 # nx deploy next-site --stage my-stage # 自定义阶段

@@ -20,7 +20,7 @@ OpenNext 不会创建底层基础设施。你可以使用首选工具为应用�
 
 这些是文件名中包含哈希组件的文件。哈希文件位于 `.open-next/assets/_next` 文件夹中，例如 `.open-next/assets/_next/static/css/0275f6d90e7ad339.css`。当文件内容被修改时，文件名中的哈希值保证会更改。因此，哈希文件应在 CDN 级别和浏览器级别都进行缓存。将哈希文件上传到 S3 时，推荐的缓存控制设置是
 
-```
+```plain
 public,max-age=31536000,immutable
 ```
 
@@ -28,7 +28,7 @@ public,max-age=31536000,immutable
 
 `.open-next/assets` 文件夹中的其他文件是从应用的 `public/` 文件夹复制的，例如 `.open-next/assets/favicon.ico`。当内容被修改时，非哈希文件的文件名可能保持不变。非哈希文件应在 CDN 级别缓存，但不在浏览器级别缓存。当非哈希文件的内容被修改时，部署时应使 CDN 缓存失效。将非哈希文件上传到 S3 时，推荐的缓存控制设置是
 
-```
+```plain
 public,max-age=0,s-maxage=31536000,must-revalidate
 ```
 
@@ -79,7 +79,7 @@ public,max-age=0,s-maxage=31536000,must-revalidate
 
 此函数处理来自 Next.js 应用的所有其他类型的请求，包括服务器端渲染 (SSR) 请求和 API 请求。OpenNext 以 **standalone** 模式构建 Next.js 应用。standalone 模式生成一个 `.next` 文件夹，其中包含处理请求的 **NextServer** 类，以及一个 `node_modules` 文件夹，其中包含运行 `NextServer` 所需的**所有依赖项**。结构如下：
 
-```
+```plain
   .next/                -> NextServer
   node_modules/         -> 依赖项
 ```
@@ -97,7 +97,7 @@ public,max-age=0,s-maxage=31536000,must-revalidate
 
 在 monorepo 的情况下，构建输出看起来略有不同。例如，如果应用位于 `packages/web`，则构建输出如下所示：
 
-```
+```plain
   packages/
     web/
       .next/            -> NextServer

@@ -7,7 +7,7 @@
 虽然 [`nodejs_compat`](https://developers.cloudflare.com/workers/configuration/compatibility-flags/#nodejs-compatibility-flag) 标志使 `workerd` 大部分兼容 Node.js，
 但仍存在细微差异。一些包会为不同的运行时发布代码以应对这些差异。例如，`postgres` 在其 [`package.json`](https://github.com/porsager/postgres/blob/ad0ed4476e09f41f147859cb5a42971d2b99e9c7/package.json#L8-L13) 中有 [条件导出](https://nodejs.org/api/packages.html#conditional-exports)：
 
-```json
+```json filename="package.json"
 "exports": {
   "types": "./types/index.d.ts",
   "bun": "./src/index.js",
@@ -24,8 +24,7 @@
 
 为此，请将这些包添加到您的 `next.config.ts` 的 `serverExternalPackages` 键中：
 
-```ts
-// node.config.ts
+```ts filename="next.config.ts"
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {

@@ -8,7 +8,7 @@ import { Callout } from "nextra/components";
   如果你在流式传输方面遇到问题，请在 [discord](https://discord.com/channels/1283128968140161065/1286094576788177059) 上发送消息并联系 AWS 支持团队，让他们知道这个问题。
 </Callout>
 
-```ts
+```ts filename="open-next.config.ts"
 import type { OpenNextConfig } from "@opennextjs/aws/types/open-next.js";
 const config = {
   default: {
@@ -27,7 +27,7 @@ export default config;
 
 ## 拆分服务器
 
-```ts
+```ts filename="open-next.config.ts"
 import type { OpenNextConfig } from "@opennextjs/aws/types/open-next.js";
 const config = {
   // 这是默认服务器，类似于 open-next v2 中的 server-function
@@ -57,7 +57,7 @@ export default config;
   默认情况下，我们使用 S3、DynamoDB 和 SQS 来处理 ISR/SSG 和 fetch 缓存。我们使用 AWS sdk v3 与它们交互。这可能会导致冷启动时间增加很多。有一个内置选项可以使用 [aws4fetch](https://github.com/mhart/aws4fetch) 代替 AWS sdk，最多可以减少 300ms 的冷启动时间。需要 `OpenNext v3.0.3+`。以下是启用它的方法：
 </Callout>
 
-```ts
+```ts filename="open-next.config.ts"
 import type { OpenNextConfig } from "@opennextjs/aws/types/open-next.js";
 const config = {
   default: {
@@ -74,7 +74,7 @@ export default config;
 
 ## 在 Lambda@Edge 中运行
 
-```ts
+```ts filename="open-next.config.ts"
 import type { OpenNextConfig } from "@opennextjs/aws/types/open-next.js";
 const config = {
   default: {
@@ -97,7 +97,7 @@ export default config;
 
 </Callout>
 
-```ts
+```ts filename="open-next.config.ts"
 import type { OpenNextConfig } from "@opennextjs/aws/types/open-next.js";
 const config = {
   // 在这种情况下，默认服务器旨在作为经典 Node 服务器运行
@@ -132,7 +132,7 @@ export default config;
 
 Edge runtime 函数具有更少的冷启动时间，但你每个函数只能部署一个路由。它们也没有将 middleware 捆绑在函数中，因此如果你需要在 edge 函数前面使用它，则需要使用外部 middleware。
 
-```ts
+```ts filename="open-next.config.ts"
 import type { OpenNextConfig } from "@opennextjs/aws/types/open-next.js";
 const config = {
   default: {},
@@ -155,7 +155,7 @@ export default config;
 使用默认 middleware 配置时，它是为 lambda@edge 部署捆绑的。
 以下是操作方法：
 
-```ts
+```ts filename="open-next.config.ts"
 import type { OpenNextConfig } from "@opennextjs/aws/types/open-next.js";
 const config = {
   default: {},

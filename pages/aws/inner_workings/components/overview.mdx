@@ -30,7 +30,7 @@ import { Callout } from "nextra/components";
 
 每个自定义覆盖（非 `string`）共享 `BaseOverride` 类型，并需要这样包装：
 
-```typescript
+```ts
 type BaseOverride = {
   name: string;
 };
@@ -43,7 +43,7 @@ type LazyLoadedOverride<T extends BaseOverride> = () => Promise<T>;
 
 包装器是后端的主要入口点。这是包装器的类型：
 
-```typescript
+```ts
 type WrapperHandler<
   E extends BaseEventOrResult = InternalEvent,
   R extends BaseEventOrResult = InternalResult,
@@ -77,7 +77,7 @@ export type Wrapper<
 
 转换器用于转换事件和结果。这是转换器的类型：
 
-```typescript
+```ts
 export type Converter<
   E extends BaseEventOrResult = InternalEvent,
   R extends BaseEventOrResult = InternalResult,

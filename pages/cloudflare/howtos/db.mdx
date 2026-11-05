@@ -15,8 +15,7 @@
 
 不要这样做：
 
-```ts
-//lib/db.ts
+```ts filename="lib/db.ts"
 import { drizzle } from "drizzle-orm/node-postgres";
 import * as schema from "./schema/pg";
 import { Pool } from "pg";
@@ -30,8 +29,7 @@ export const db = drizzle({ client: pool, schema });
 
 您应该这样做：
 
-```ts
-//lib/db.ts
+```ts filename="lib/db.ts"
 import { drizzle } from "drizzle-orm/node-postgres";
 // 您可以使用 react 中的 cache 在同一请求期间缓存客户端
 // 这不是强制性的，仅对服务器组件有效
@@ -51,7 +49,7 @@ export const getDb = cache(() => {
 
 #### D1 示例
 
-```ts
+```ts filename="lib/db.ts"
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { drizzle } from "drizzle-orm/d1";
 import { cache } from "react";
@@ -71,7 +69,7 @@ export const getDbAsync = cache(async () => {
 
 #### Hyperdrive 示例
 
-```ts
+```ts filename="lib/db.ts"
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { cache } from "react";
@@ -112,7 +110,7 @@ export const getDbAsync = cache(async () => {
 
 在 OpenNext 中使用 Prisma 时，不要为生成的客户端提供输出目录。
 
-```prisma
+```prisma filename="schema.prisma"
 generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["driverAdapters"]
@@ -125,7 +123,7 @@ generator client {
 
 因为 Prisma 有一些针对 Cloudflare Workers 的特定导出，您需要将以下内容添加到您的 `next.config.ts` 文件中：
 
-```ts
+```ts filename="next.config.ts"
 const nextConfig: NextConfig = {
   serverExternalPackages: ["@prisma/client", ".prisma/client"],
 };
@@ -141,8 +139,7 @@ const nextConfig: NextConfig = {
 
 不要这样做：
 
-```ts
-//lib/db.ts
+```ts filename="lib/db.ts"
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { PrismaClient } from "@prisma/client";
 import { PrismaD1 } from "@prisma/adapter-d1";
@@ -154,8 +151,7 @@ export const db = new PrismaClient();
 
 您应该这样做：
 
-```ts
-//lib/db.ts
+```ts filename="lib/db.ts"
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 // 您可以使用 react 中的 cache 在同一请求期间缓存客户端
 // 这不是强制性的，仅对服务器组件有效
@@ -184,7 +180,7 @@ export const getDbAsync = async () => {
 
 您也可以将 Prisma 与 PostgreSQL 一起使用。设置与上面的 D1 设置类似，但您需要使用 `PrismaPostgres` 适配器而不是 `PrismaD1` 适配器。
 
-```ts
+```ts filename="lib/db.ts"
 import { cache } from "react";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
@@ -203,8 +199,7 @@ export const getDb = cache(() => {
 
 您也可以将 Prisma 与 Hyperdrive 一起使用。设置与上面的 PostgreSQL 设置类似。
 
-```ts
-//lib/db.ts
+```ts filename="lib/db.ts"
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 // 您可以使用 react 中的 cache 在同一请求期间缓存客户端
 // 这不是强制性的，仅对服务器组件有效

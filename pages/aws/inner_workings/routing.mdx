@@ -22,7 +22,9 @@ OpenNext 中的 Next 中间件运行方式与 Next.js 中不同。在 Next.js �
 
 在最新的 Next 15（也适用于最新的 OpenNext）上，你现在可以在 `next.config.ts` 中添加一个 `experimental` 设置，以启用 `nodejs` 作为中间件的运行时：
 
-```ts
+```ts filename="next.config.ts"
+import type { NextConfig } from "next";
+
 const nextConfig: NextConfig = {
   experimental: {
     nodeMiddleware: true,

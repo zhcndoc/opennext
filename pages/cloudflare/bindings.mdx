@@ -42,7 +42,7 @@ export async function GET(request) {
 
 为了确保上述 `getCloudflareContext().env` 中的 `env` 对象具有准确的 TypeScript 类型，请运行以下 Wrangler 命令来 [生成与您的 Worker 配置匹配的类型](https://developers.cloudflare.com/workers/languages/typescript/#generate-types-that-match-your-workers-configuration-experimental)：
 
-```
+```sh
 npx wrangler types --env-interface CloudflareEnv
 ```
 
@@ -67,7 +67,7 @@ npx wrangler types --env-interface CloudflareEnv
 <Callout type="info">
   远程绑定 API 已在 wrangler `4.36.0` 中稳定，因此如果您使用的是更早版本的 wrangler 为了使用远程绑定，您需要在 `next.config.ts` 文件中启用它：
 
-```diff
+```diff filename="next.config.ts"
 - initOpenNextCloudflareForDev();
 + initOpenNextCloudflareForDev({
 +  experimental: { remoteBindings: true }

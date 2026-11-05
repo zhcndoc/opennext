@@ -10,9 +10,7 @@ Cloudflare 适配器生成的 worker 仅导出 [一个 fetch 处理程序](https
 
 以下自定义 worker 复用了生成的 fetch 处理程序并添加了一个计划任务处理程序：
 
-```ts
-// custom-worker.ts
-
+```ts filename="custom-worker.ts"
 // @ts-ignore `.open-next/worker.ts` 在构建时生成
 import { default as handler } from "./.open-next/worker.js";
 
@@ -34,8 +32,7 @@ export { DOQueueHandler, DOShardedTagCache } from "./.open-next/worker.js";
 
 ### 更新 wrangler 配置中的入口点
 
-```diff
-// wrangler.jsonc
+```diff filename="wrangler.jsonc"
 {
 -  "main": "./.open-next/worker.js"
 +  "main": "./path/to/custom-worker.ts",

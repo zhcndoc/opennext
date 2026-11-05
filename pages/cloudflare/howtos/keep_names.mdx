@@ -4,7 +4,7 @@ import { Callout } from "nextra/components";
 
 在使用 OpenNext 适配器时，Wrangler 会使用 [esbuild](https://esbuild.github.io/) 处理 worker 的代码，并且默认启用 [`keep-names`](https://esbuild.github.io/api/#keep-names) 选项。虽然这通常有利于调试，但它可能会导致某些将脚本转换为字符串的 Next.js 库（例如 [next-themes](https://www.npmjs.com/package/next-themes)）出现问题。这是因为 `esbuild` 会在模块顶部引入一个 `__name` 函数，该函数可能会无意中出现在生成的脚本字符串中。当这些字符串在运行时被求值时，`__name` 函数可能因此未定义，从而导致开发者控制台中记录错误：
 
-```
+```plain
 Uncaught ReferenceError: __name is not defined
 ```
 
@@ -16,7 +16,7 @@ Uncaught ReferenceError: __name is not defined
 
 要修复此问题，您只需在 [`wrangler.jsonc` 文件](https://developers.cloudflare.com/workers/wrangler/configuration) 中将 `keep_names` 选项设置为 `false`，如下例所示：
 
-```jsonc
+```jsonc filename="wrangler.jsonc"
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "main": ".open-next/worker.js",

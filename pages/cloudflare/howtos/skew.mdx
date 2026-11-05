@@ -14,8 +14,7 @@ Cloudflare 适配器基于 [预览 URL](https://developers.cloudflare.com/worker
 
 将 `cloudflare.skewProtection.enabled` 设置为 `true` 以启用倾斜保护：
 
-```ts
-// open-next.config.ts
+```ts filename="open-next.config.ts"
 export default {
   // ...
   cloudflare: {
@@ -36,8 +35,7 @@ export default {
 
 Worker 需要提供服务正确版本的应用资产。为此，它需要在传入请求与资产匹配之前执行。在你的 wrangler 配置中将 [`run_worker_first`](https://developers.cloudflare.com/workers/static-assets/binding/#run_worker_first) 设置为 `true` 以启用此行为：
 
-```jsonc
-// wrangler.jsonc
+```jsonc filename="wrangler.jsonc"
 {
   "name": "my-app",
   // ...
@@ -69,11 +67,11 @@ Worker 需要提供服务正确版本的应用资产。为此，它需要在传�
 
 cloudflare 适配器导出一个 `getDeploymentId()` 函数，可用于生成唯一的部署 ID。
 
-```ts
-// next.config.ts
+```ts filename="next.config.ts"
+import type { NextConfig } from "next";
 import { getDeploymentId } from "@opennextjs/cloudflare";
 
-const nextConfig = {
+const nextConfig: NextConfig = {
   // ...
   deploymentId: getDeploymentId(),
 };

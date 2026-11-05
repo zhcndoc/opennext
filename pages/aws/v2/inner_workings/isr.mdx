@@ -53,14 +53,14 @@ import { Callout } from "nextra/components";
 
 - 每次对缓存的 `get` 请求将导致至少 1 个 `GetObject`
 
-```
+```plain
   GetObject 成本 - 8,640 请求 * $0.0004 每 1,000 请求  = $0.003456
   总成本 - 每条路由每月 $0.003456
 ```
 
 - 每次对缓存的 `set` 请求将导致 1 个 S3 中的 `PutObject`
 
-```
+```plain
   PutObject 成本 - 8,640 请求 * $0.005 每 1,000 请求 = $0.0432
   总成本 - 每条路由每月 $0.0432
 ```
@@ -73,7 +73,7 @@ import { Callout } from "nextra/components";
 
 - 每次 `revalidateTag` 请求将导致 1 个 DynamoDB 中的 `Query` 和每个与标签关联的路径的 `PutItem`，它们在 `BatchWriteItem` 请求中以 25 个为一组进行分组。
 
-```
+```plain
   假设你每 5 分钟进行 1 次重新验证
   Query 成本 - 8,640 请求 * $0.25 每 1,000,000 读 = $0.00216
   BatchWriteItem 成本 - 86,400 请求 * $0.25 每 1,000,000 写 = $0.0216
@@ -82,14 +82,14 @@ import { Callout } from "nextra/components";
 
 - 每次 `get` 请求将导致 1 个 DynamoDB 中的 `Query`
 
-```
+```plain
   Query 成本 - 8,640 请求 * $0.25 每 1,000,000 读 = $0.00216
   总成本 - 每条路由每月 $0.00216
 ```
 
 - 每次 `set` 请求将导致 1 个 DynamoDB 中的 `Query` 和每个与路径关联且不存在于 DynamoDB 中的标签的 `PutItem`，它们在 `BatchWriteItem` 请求中以 25 个为一组进行分组。
 
-```
+```plain
   Query 成本 - 8,640 请求 * $0.25 每 1,000,000 读 = $0.00216
   总成本 - 每条路由每月 $0.00216
 ```

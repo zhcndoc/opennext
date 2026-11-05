@@ -2,13 +2,11 @@
 
 OpenNext 默认运行 `package.json` 中的 `build` 脚本。但是，如果需要，您可以指定自定义构建命令。
 
-```bash
-# 命令行
+```sh
 open-next build --build-command "pnpm custom:build"
 ```
 
-```ts
-// JavaScript
+```js
 import { build } from "open-next/build.js";
 
 await build({
@@ -20,13 +18,11 @@ await build({
 
 OpenNext 默认从当前命令文件夹运行 `build` 脚本。当在具有分散应用和构建输出路径的 monorepo 中运行 OpenNext 时，您可以指定自定义 `appPath` 和/或 `buildOutputPath`。这将允许您从 monorepo 的根目录执行命令。
 
-```bash
-# 命令行
+```sh
 open-next build --build-command "pnpm custom:build" --app-path "./apps/example-app" --build-output-path "./dist/apps/example-app"
 ```
 
-```ts
-// JavaScript
+```js
 import { build } from "open-next/build.js";
 
 await build({
@@ -40,13 +36,11 @@ await build({
 
 启用此选项将使用 [node-minify](https://github.com/srod/node-minify) 库最小化服务器函数包中的所有 `.js` 和 `.json` 文件。根据您的应用大小，这可以将服务器函数包的大小减少约 40%。
 
-```bash
-# 命令行
+```sh
 open-next build --minify
 ```
 
-```ts
-// JavaScript
+```js
 import { build } from "open-next/build.js";
 
 await build({
@@ -62,7 +56,7 @@ await build({
 
 **不要在生产环境中使用此功能**。参见 [此处](/v2/inner_workings/streaming) 获取更多信息。
 
-```bash
+```sh
 open-next build --streaming
 ```
 
@@ -70,7 +64,7 @@ open-next build --streaming
 
 启用此选项将禁用 dynamodb 缓存。这是实验性的，需要主动选择启用。这意味着 `next/cache` 重新验证将不起作用。
 
-```bash
+```sh
 open-next build --dangerously-disable-dynamodb-cache
 ```
 
@@ -78,7 +72,7 @@ open-next build --dangerously-disable-dynamodb-cache
 
 禁用增量缓存将导致整个页面在每次请求时重新验证。这将导致 ISR 和 SSG 页面处于不一致状态。仅当您只使用 SSR 页面时才指定此选项。这也将禁用 dynamodb 缓存。
 
-```bash
+```sh
 open-next build --dangerously-disable-incremental-cache
 ```
 
@@ -102,13 +96,11 @@ open-next build --dangerously-disable-incremental-cache
 
 OpenNext 可以在调试模式下执行以用于错误跟踪目的。
 
-```bash
-# 命令行
+```sh
 OPEN_NEXT_DEBUG=true npx open-next@latest build
 ```
 
-```ts
-// JavaScript
+```js
 import { build } from "open-next/build.js";
 
 await build({

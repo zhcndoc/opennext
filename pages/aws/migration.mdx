@@ -32,7 +32,7 @@ OpenNext V3 将所有构建参数替换为 [自定义配置文件](/aws/config#c
 
 您应该从 `next.config.js` 文件中移除一些内容，否则您将遇到构建错误：
 
-```js
+```js filename="next.config.js"
 module.exports = {
   // ...
   target: "serverless", // 移除此项

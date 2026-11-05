@@ -11,7 +11,7 @@ import WindowsSupport from "../../shared/WindowsSupport.mdx";
 
 要创建一个新的 Next.js 应用，并预配置为使用 `@opennextjs/cloudflare` 在 Cloudflare 上运行，请运行：
 
-```
+```sh
 npm create cloudflare@latest -- my-next-app --framework=next --platform=workers
 ```
 
@@ -67,7 +67,7 @@ OpenNext Cloudflare 适配器通过获取 Next.js 构建输出并对其进行转
 
 Cloudflare Worker 的大小限制在 Workers 免费计划上为 3 MiB，在 Workers 付费计划上为 10 MiB。构建 Worker 后，`wrangler` 将显示原始大小和压缩大小：
 
-```
+```plain
 Total Upload: 13833.20 KiB / gzip: 2295.89 KiB
 ```
 
